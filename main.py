@@ -1,0 +1,162 @@
+import sqlite3
+import asyncio
+import os
+import time
+import discord
+from discord.ext import commands
+from discord.utils import get
+from dotenv import load_dotenv
+
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix="$", intents=intents, case_insensitive=True)
+
+load_dotenv()
+
+token = os.getenv("DISCORD_TOKEN")
+
+async def load():
+    for filename in os.listdir('./cogs'):
+        if filename.endswith('.py'):
+            await bot.load_extension(f'cogs.{filename[:-3]}')
+
+async def main():
+    await load()
+    await bot.start(token)
+
+
+# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
+conn = sqlite3.connect('player_info.db')
+cursor = conn.cursor()
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_info(
+        user_id INTEGER PRIMARY KEY,
+        nation_name TEXT,
+        turns_accumulated INTEGER,
+        gov_type TEXT,
+        tax_rate INTEGER,
+        conscription TEXT,
+        freedom TEXT,
+        police_policy TEXT,
+        fire_policy TEXT,
+        hospital_policy TEXT,
+        war_status TEXT,
+        happiness INTEGER
+        )
+    ''')
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_stats(
+        name TEXT PRIMARY KEY,
+        nation_score INTEGER,
+        gdp INTEGER,
+        adult INTEGER,
+        balance INTEGER
+        )
+    ''')
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_mil(
+        name_nation TEXT PRIMARY KEY,
+        troops INTEGER,
+        planes INTEGER,
+        weapon INTEGER,
+        tanks INTEGER,
+        artillery INTEGER,
+        anti_air INTEGER,
+        barracks INTEGER,
+        tank_factory INTEGER,
+        plane_factory INTEGER,
+        artillery_factory INTEGER,
+        anti_air_factory INTEGER
+        )
+    ''')
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS infra(
+        name TEXT PRIMARY KEY,
+        basic_house INTEGER,
+        small_flat INTEGER,
+        apt_complex INTEGER,
+        skyscraper INTEGER,
+        lumber_mill INTEGER,
+        coal_mine INTEGER,
+        iron_mine INTEGER,
+        lead_mine INTEGER,
+        bauxite_mine INTEGER,
+        oil_derrick INTEGER,
+        uranium_mine INTEGER,
+        farm INTEGER,
+        aluminium_factory INTEGER,
+        steel_factory INTEGER,
+        oil_refinery INTEGER,
+        ammo_factory INTEGER,
+        concrete_factory INTEGER,
+        militaryfactory INTEGER
+        )
+    ''')
+
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS resources(
+        name TEXT PRIMARY KEY,
+        wood INTEGER,
+        coal INTEGER,
+        iron INTEGER,
+        lead INTEGER,
+        bauxite INTEGER,
+        oil INTEGER,
+        uranium INTEGER,
+        food INTEGER,
+        steel INTEGER,
+        aluminium INTEGER,
+        gasoline INTEGER,
+        ammo INTEGER,
+        concrete INTEGER
+        )
+    ''')
+
+
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user.name}")
+
+
+@bot.command()
+async def ping(ctx):
+    lat = int(bot.latency * 1000)
+    await ctx.send(f'Pong! {lat}ms')
+
+
+@bot.command()   # Help command and command list made specifically for devs
+async def devhelp(ctx, cmd: str = ""):
+    if dev_check(ctx.author.id):
+        global debug
+        cmd = cmd.lower()
+        match cmd:
+            case "debug_mode" | "debugmode":
+                embed = discord.Embed(colour=0xdc8a78, title="Dev Help | Debug Mode", type='rich',
+                                      description=f'Syntax: `$debug_mode`{new_line}{new_line}'
+                                                  f'Status: {debug}{new_line}{new_line}'
+                                                  f'Switches the global variable \'debug\' from on to off and vice versa. {new_line}'
+                                                  f'While on, this can do many things, but for now it only disables the error handler and prints the error to the console.{new_line}'
+                                                  f'Debug mode is switched to off on boot.')
+                await ctx.send(embed=embed)
+            case "debug" | "debug_status" | "debugstatus" | "dstatus":
+                embed = discord.Embed(colour=0xdc8a78, title="Dev Help | Debug Status", type='rich',
+                                      description=f'Syntax: `$debug_status`{new_line}{new_line}'
+                                                  f'Status: {debug}{new_line}{new_line}'
+                                                  f'Shows whether debug mode is on or off')
+                await ctx.send(embed=embed)
+            case _:
+                embed = discord.Embed(colour=0xdc8a78, title="Help | General", type='rich')  # General Tab
+                embed.add_field(name="Debug", value="debug_mode - Turns debug mode on and off.\n"
+                                                    "debug_status - Shows if debug mode is on or off.",
+                                inline=False)
+                await ctx.send(embed=embed)
+    else:
+        print(f'{ctx.author} attempted to enable debug')
+        await ctx.send(f'Permission denied: You are not a developer.')
+
+
+asyncio.run(main())

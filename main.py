@@ -7,6 +7,7 @@ from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
 
+new_line = '\n'
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="$", intents=intents, case_insensitive=True)
 
@@ -127,8 +128,10 @@ async def ping(ctx):
     lat = int(bot.latency * 1000)
     await ctx.send(f'Pong! {lat}ms')
 
+def dev_check(usid):
+    return usid == 837257162223910912 or usid == 669517694751604738
 
-@bot.command()   # Help command and command list made specifically for devs
+@bot.command()  # Help command and command list made specifically for devs
 async def devhelp(ctx, cmd: str = ""):
     if dev_check(ctx.author.id):
         global debug

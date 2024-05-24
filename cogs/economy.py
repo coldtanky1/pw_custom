@@ -185,7 +185,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_police_stations * 7000)
 
                         case _:
-                            return
+                            pass
 
                     match fire_policy:
                         case "Careless Firefighters":
@@ -201,7 +201,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_fire_stations * 7000)
 
                         case _:
-                            return
+                            pass
 
                     match hospital_policy:
                         case "Enhanced Healthcare":
@@ -221,7 +221,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_hospitals * 0)
                         
                         case _:
-                            return
+                            pass
 
 
                     if war_status == "In Peace":
@@ -414,7 +414,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_police_stations * 7000)
 
                         case _:
-                            return
+                            pass
 
                     match fire_policy:
                         case "Careless Firefighters":
@@ -430,7 +430,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_fire_stations * 7000)
 
                         case _:
-                            return
+                            pass
 
                     match hospital_policy:
                         case "Enhanced Healthcare":
@@ -450,7 +450,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_hospitals * 0)
                         
                         case _:
-                            return
+                            pass
 
                     if war_status == "In Peace":
 
@@ -644,7 +644,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_police_stations * 7000)
 
                         case _:
-                            return
+                            pass
 
                     match fire_policy:
                         case "Careless Firefighters":
@@ -660,7 +660,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_fire_stations * 7000)
 
                         case _:
-                            return
+                            pass
 
                     match hospital_policy:
                         case "Enhanced Healthcare":
@@ -680,7 +680,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_hospitals * 0)
                         
                         case _:
-                            return
+                            pass
 
                     if war_status == "In Peace":
 
@@ -873,7 +873,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_police_stations * 7000)
 
                         case _:
-                            return
+                            pass
 
                     match fire_policy:
                         case "Careless Firefighters":
@@ -889,7 +889,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_fire_stations * 7000)
 
                         case _:
-                            return
+                            pass
 
                     match hospital_policy:
                         case "Enhanced Healthcare":
@@ -909,7 +909,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_hospitals * 0)
                         
                         case _:
-                            return
+                            pass
 
                     if war_status == "In Peace":
 
@@ -1102,7 +1102,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_police_stations * 7000)
 
                         case _:
-                            return
+                            pass
 
                     match fire_policy:
                         case "Careless Firefighters":
@@ -1118,7 +1118,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_fire_stations * 7000)
 
                         case _:
-                            return
+                            pass
 
                     match hospital_policy:
                         case "Enhanced Healthcare":
@@ -1138,7 +1138,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_hospitals * 0)
                         
                         case _:
-                            return
+                            pass
 
                     if war_status == "In Peace":
 
@@ -1331,7 +1331,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_police_stations * 7000)
 
                         case _:
-                            return
+                            pass
 
                     match fire_policy:
                         case "Careless Firefighters":
@@ -1347,7 +1347,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_fire_stations * 7000)
 
                         case _:
-                            return
+                            pass
 
                     match hospital_policy:
                         case "Enhanced Healthcare":
@@ -1367,7 +1367,7 @@ class Economy(commands.Cog):
                             policy_upkeep += round(req_hospitals * 0)
                         
                         case _:
-                            return
+                            pass
 
                     if war_status == "In Peace":
 

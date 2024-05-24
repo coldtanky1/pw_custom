@@ -17,42 +17,18 @@ the ice cube revolution is here, from google spreadsheets to all new discord bot
 - asyncio
 - `pip install asyncio`
 
+# IMPORTANT NEWS 
+- The Ice Cube 2.0 bot developement will be completely abandoned in favor of the more polished PW Custom.
 
-# Changelog VER 01
-- Added new SQL table for resources.
-- Added "res" command to display resource production.
-- Added "res" command to help menu.
 
-# Changelog VER 02
-- Added "update" command to update your nation.
-- Added "reserve" command to view your nation's reserves.
-- Added "update" and "reserve" commands to the help menu.
-- Added "construct" command but it isn't complete.
+# Changelog VER 01 (for the PW Custom)
+- Removed "game_fuctions" entirely (it was useless).
+- Added "gov" which serves as politics.
+- Added "economy" which displays your nation's economy.
+- Added "im" AKA Internation Market to buy and sell materials.
+- Added "info" to display information about production/consumption of materials.
+- Re-added "demolish" to demolish unwanted buildings. (Turns out I accidentally yeeted the command when migrating to cogs.).
 
-# Changelog VER 03
-- Completed the "construct" command.
-- If you have 0 or negative resources, you won't be able to produce.
-- Added "recruit" command to recruit soldiers into your military.
-- Added "construct" and "recruit" commands into the help menu.
-- Updated "user_stats" table to include balance (idk why i didnt do this to begin with).
-- Added command cooldown to "update".
-
-# Changelog VER 04
-- Added cogs, code is now much easier to read.
-- Added "allocate" command to allocate military factories for military equipment.
-- Added "barracks" and "militaryfactory" to construct command.
-- Added "deallocate" command to deallocate military factories for military equipment.
-- Updated the "update" command to update production of military equipment.
-- Added "allocate" and "deallocate" commands to help menu.
-
-# Changelog VER 05
-- Added "game_functions" folder which will contain all the game's functions.
-- Added "PopGrowth" to "game_functions".
-- Added "trade" command.
-- Added "allocate" and "deallocate" commands to help (for real this time).
-- Added "trade" command to help.
-
-# Changelog VER 06
-- Removed "PopGrowth" from "game_functions".
-- Added events to "update.py"
-- Housing checks and food checks for population are now seperate.
+# Dev notes:
+although i've also added a war command, its not even near done and still needs loads of work.
+if you like the project and wanna contribute, please do, every little counts and would lift some of the work of my shoulders and rev's shoulders (hes gonna come back woohoo).

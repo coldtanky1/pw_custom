@@ -20,15 +20,15 @@ class Politics(commands.Cog):
     async def gov(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
             
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             gov_emb = discord.Embed(title="Government Overview", type='rich',
-                                    description=f'Displays an overview of {nation_name}\'s government.', color=discord.Color.blue())
+                                    description=f'Displays an overview of {name}\'s government.', color=discord.Color.blue())
             gov_emb.add_field(name='Key: C = Current', value='', inline=False)
             gov_emb.add_field(name=f'🏦 C: {gov_type}', value=f'Government Selection: `$gov-ide`', inline=False)
             gov_emb.add_field(name=f'💵 C: {tax_rate}', value=f'Tax Rate Selection: `$gov-tax <amount>`', inline=False)
@@ -50,12 +50,12 @@ class Politics(commands.Cog):
     async def gov_ide(self, ctx):
         user_id = ctx.author.id
         
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             embed = discord.Embed(title="Government Ideology", type='rich',
                                 description="Displays government ideologies.", color=discord.Color.blue())
@@ -91,12 +91,12 @@ class Politics(commands.Cog):
     async def ide_dem(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if gov_type == "Democracy":
                 await ctx.send("You already have Democracy as your ideology.")
@@ -120,12 +120,12 @@ class Politics(commands.Cog):
     async def ide_mon(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if gov_type == "Monarchy":
                 await ctx.send("You already have Monarchy as your ideology.")
@@ -149,12 +149,12 @@ class Politics(commands.Cog):
     async def ide_com(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if gov_type == "Communism":
                 await ctx.send("You already have Communism as your ideology.")
@@ -178,12 +178,12 @@ class Politics(commands.Cog):
     async def ide_fas(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if gov_type == "Fascism":
                 await ctx.send("You already have Fascism as your ideology.")
@@ -207,12 +207,12 @@ class Politics(commands.Cog):
     async def ide_soc(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if gov_type == "Socialism":
                 await ctx.send("You already have Socialism as your ideology.")
@@ -236,12 +236,12 @@ class Politics(commands.Cog):
     async def ide_ana(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if gov_type == "Anarchy":
                 await ctx.send("You already have Anarchy as your ideology.")
@@ -266,12 +266,12 @@ class Politics(commands.Cog):
     async def gov_con(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             embed = discord.Embed(title="Conscription", type='rich',
                                 description="Displays conscription laws.", color=discord.Color.red())
@@ -295,12 +295,12 @@ class Politics(commands.Cog):
     async def con_vol(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if conscription == "Volunteer":
                 await ctx.send("You already have Volunteer as your conscription law.")
@@ -309,7 +309,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET conscription = ? WHERE user_id = ?', ("Volunteer", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 0 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness + 0 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Conscription", type='rich',
@@ -327,12 +327,12 @@ class Politics(commands.Cog):
     async def con_con(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if conscription == "Conscription":
                 await ctx.send("You already have Conscription as your conscription law.")
@@ -341,7 +341,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET conscription = ? WHERE user_id = ?', ("Conscription", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 15 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness - 15 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Conscription", type='rich',
@@ -359,12 +359,12 @@ class Politics(commands.Cog):
     async def con_ful(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if conscription == "Full Conscription":
                 await ctx.send("You already have Full Conscription as your conscription law.")
@@ -373,7 +373,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET conscription = ? WHERE user_id = ?', ("Full Conscription", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 40 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness - 40 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Conscription", type='rich',
@@ -392,12 +392,12 @@ class Politics(commands.Cog):
     async def gov_fre(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             embed = discord.Embed(title="Freedom", type='rich',
                                 description="Displays your freedom laws.", color=discord.Color.green())
@@ -422,12 +422,12 @@ class Politics(commands.Cog):
     async def fre_fre(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if freedom == "Free Speech":
                 await ctx.send("You already have Free Speech as your freedom law.")
@@ -436,7 +436,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET freedom = ? WHERE user_id = ?', ("Free Speech", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 20 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness + 20 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Freedom", type='rich',
@@ -454,12 +454,12 @@ class Politics(commands.Cog):
     async def fre_mod(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if freedom == "Moderate Freedom":
                 await ctx.send("You already have Moderate Freedom as your freedom law.")
@@ -468,7 +468,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET freedom = ? WHERE user_id = ?', ("Moderate Freedom", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 10 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness + 10 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Freedom", type='rich',
@@ -486,12 +486,12 @@ class Politics(commands.Cog):
     async def fre_no(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if freedom == "No Freedom":
                 await ctx.send("You already have No Freedom as your freedom law.")
@@ -500,7 +500,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET freedom = ? WHERE user_id = ?', ("No Freedom", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 20 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness - 20 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Freedom", type='rich',
@@ -519,12 +519,12 @@ class Politics(commands.Cog):
     async def gov_pol(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             embed = discord.Embed(title="Police Policy", type='rich',
                                 description="Displays your police policy.", color=discord.Color.dark_blue())
@@ -550,12 +550,12 @@ class Politics(commands.Cog):
     async def pol_chi(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if police_policy == "Chill Police":
                 await ctx.send("You already have Chill Police as your police policy.")
@@ -564,7 +564,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET police_policy = ? WHERE user_id = ?', ("Chill Police", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 15 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness + 15 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Police Policy", type='rich',
@@ -582,12 +582,12 @@ class Politics(commands.Cog):
     async def pol_nor(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if police_policy == "Normal Police":
                 await ctx.send("You already have Normal Police as your police policy.")
@@ -596,7 +596,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET police_policy = ? WHERE user_id = ?', ("Normal Police", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 0 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness + 0 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Police Policy", type='rich',
@@ -614,12 +614,12 @@ class Politics(commands.Cog):
     async def pol_ser(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if police_policy == "Serious Police":
                 await ctx.send("You already have Serious Police as your police policy.")
@@ -628,7 +628,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET police_policy = ? WHERE user_id = ?', ("Serious Police", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 10 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness - 10 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Police Policy", type='rich',
@@ -650,12 +650,12 @@ class Politics(commands.Cog):
             await ctx.send("Invalid amount, try a positive number.")
             return
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if gov_type == "Democracy":
                 if amount < 300:
@@ -684,12 +684,12 @@ class Politics(commands.Cog):
     async def gov_fir(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             embed = discord.Embed(title="Firefighter Policy", type='rich',
                                 description="Displays your firefighter policy.", color=discord.Color.dark_red())
@@ -712,12 +712,12 @@ class Politics(commands.Cog):
     async def fir_car(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if fire_policy == "Careless Firefighters":
                 await ctx.send("You already have Careless Firefighters as your firefighter policy.")
@@ -726,7 +726,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET fire_policy = ? WHERE user_id = ?', ("Careless Firefighters", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 20 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness - 20 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Firefigther Policy", type='rich',
@@ -744,12 +744,12 @@ class Politics(commands.Cog):
     async def fir_nor(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if fire_policy == "Normal Firefighters":
                 await ctx.send("You already have Normal Firefighters as your firefighter policy.")
@@ -758,7 +758,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET fire_policy = ? WHERE user_id = ?', ("Normal Firefighters", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 0 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness + 0 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Firefigther Policy", type='rich',
@@ -776,12 +776,12 @@ class Politics(commands.Cog):
     async def fir_spe(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if fire_policy == "Speedy Firefighters":
                 await ctx.send("You already have Speedy Firefighters as your firefighter policy.")
@@ -790,7 +790,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET fire_policy = ? WHERE user_id = ?', ("Speedy Firefighters", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 20 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness + 20 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Firefigther Policy", type='rich',
@@ -808,12 +808,12 @@ class Politics(commands.Cog):
     async def gov_hea(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
                                 description="Displays your healtcare policy.", color=discord.Color.dark_red())
@@ -839,12 +839,12 @@ class Politics(commands.Cog):
     async def hea_enh(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if hospital_policy == "Enhanced Healthcare":
                 await ctx.send("You already have Enhanced Healthcare as your healthcare policy.")
@@ -853,7 +853,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET hospital_policy = ? WHERE user_id = ?', ("Enhanced Healthcare", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 20 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness + 20 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
@@ -871,12 +871,12 @@ class Politics(commands.Cog):
     async def hea_nor(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if hospital_policy == "Normal Healthcare":
                 await ctx.send("You already have Normal Healthcare as your healthcare policy.")
@@ -885,7 +885,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET hospital_policy = ? WHERE user_id = ?', ("Normal Healthcare", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 0 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness + 0 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
@@ -903,12 +903,12 @@ class Politics(commands.Cog):
     async def hea_no(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if hospital_policy == "No Healthcare":
                 await ctx.send("You already have No Healthcare as your healthcare policy.")
@@ -917,7 +917,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET hospital_policy = ? WHERE user_id = ?', ("No Healthcare", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 40 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness - 40 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
@@ -935,12 +935,12 @@ class Politics(commands.Cog):
     async def hea_pri(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             if hospital_policy == "Private Healthcare":
                 await ctx.send("You already have Private Healthcare as your healthcare policy.")
@@ -949,7 +949,7 @@ class Politics(commands.Cog):
             cursor.execute('UPDATE user_info SET hospital_policy = ? WHERE user_id = ?', ("Private Healthcare", user_id))
             conn.commit()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 15 WHERE nation_name = ?', (nation_name,))
+            cursor.execute('UPDATE user_info SET happiness = happiness - 15 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',

@@ -1,0 +1,56 @@
+<!-- templates/modify.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modify</title>
+</head>
+<body>
+    <h1>Modify Page</h1>
+    <p>Nation Name: {{ nation_name }}</p>
+    <p>Selected Table: {{ selection }}</p>
+    <h2>Data for the selected person:</h2>
+    <ul>
+        {% for table_name, table_data in data.items() %}
+            {% if selection == table_name %}
+                <h2>{{ table_name }}</h2>
+                {% for row in table_data %}
+                    <li>
+                        <ul>
+                        {% for column, value in row.items() %}
+                            <li><strong>{{ column }}:</strong> {{ value }}</li>
+                        {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    </ul>
+    <h2>Modify Data</h2>
+    <form action="{{ url_for('update') }}" method="post">
+        <input type="hidden" name="nation_name" value="{{ nation_name }}">
+        <input type="hidden" name="table" value="{{ selection }}">
+        <label for="column">Column:</label>
+        <select id="column" name="column">
+            {% for table_name, table_data in data.items() %}
+                {% if selection == table_name %}
+                    {% for row in table_data %}
+                        {% for column, value in row.items() %}
+                            <option value="{{ column }}">{{ column }}</option>
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </select><br><br>
+        <label for="operation">Operation:</label>
+        <select id="operation" name="operation">
+            <option value="add">Add</option>
+            <option value="subtract">Subtract</option>
+        </select><br><br>
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" required><br><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

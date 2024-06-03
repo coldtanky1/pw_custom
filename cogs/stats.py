@@ -24,37 +24,37 @@ class Stats(commands.Cog):
         else:
             user_id = user.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if user_id != ctx.author.id:
-            # fetch user nation_name
+            # fetch user name
             cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
             user_result = cursor.fetchone()
 
             if user_result: # If "user" is provided
-                user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = user_result
+                user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = user_result
 
                 # fetch user stats
-                cursor.execute('SELECT * FROM user_stats WHERE name = ?', (nation_name,))
+                cursor.execute('SELECT * FROM user_stats WHERE name = ?', (name,))
                 user_stats_result = cursor.fetchone()
 
                 # fetch user's production infra
                 cursor.execute(
                     'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
-                    (nation_name,))
+                    (name,))
                 user_infra_result = cursor.fetchone()
 
                 # fetch user's mil stats
                 cursor.execute(
-                    'SELECT name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name_nation = ?',
-                    (nation_name,))
+                    'SELECT name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
+                    (name,))
                 user_mil_result = cursor.fetchone()
 
                 if user_stats_result and user_infra_result and user_mil_result:
                     name, nation_score, gdp, adult, balance = user_stats_result
-                    name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = user_mil_result
+                    name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = user_mil_result
                     name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = user_infra_result
 
                     workers = round(adult//1.2)
@@ -101,27 +101,27 @@ class Stats(commands.Cog):
 
 
         elif result: # If "user" is NOT provided
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             # fetch user stats
-            cursor.execute('SELECT * FROM user_stats WHERE name = ?', (nation_name,))
+            cursor.execute('SELECT * FROM user_stats WHERE name = ?', (name,))
             stats_result = cursor.fetchone()
 
             # fetch user's production infra
             cursor.execute(
                 'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
-                (nation_name,))
+                (name,))
             infra_result = cursor.fetchone()
 
             # fetch user's mil stats
             cursor.execute(
-                'SELECT name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name_nation = ?',
-                (nation_name,))
+                'SELECT name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
+                (name,))
             mil_result = cursor.fetchone()
 
             if stats_result and mil_result and infra_result:
                 name, nation_score, gdp, adult, balance = stats_result
-                name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
                 name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
 
                 workers = round(adult//1.2)
@@ -169,24 +169,24 @@ class Stats(commands.Cog):
     async def mstats(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             # fetch user's mil stats
             cursor.execute(
-                'SELECT name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name_nation = ?',
-                (nation_name,))
+                'SELECT name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
+                (name,))
             mil_result = cursor.fetchone()
 
             if mil_result:
-                name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
 
                 embed = discord.Embed(
-                    title=f"⚔ {name_nation}'s Military Stats",
+                    title=f"⚔ {name}'s Military Stats",
                     description='',
                     color=0xe64553
                 )

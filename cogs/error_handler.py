@@ -3,7 +3,7 @@ from discord.ext import commands
 from discord.utils import get
 
 
-debug = False
+debug = True
 new_line = '\n'
 
 def dev_check(usid):

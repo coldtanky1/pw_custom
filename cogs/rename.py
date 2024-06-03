@@ -30,29 +30,29 @@ class Rename(commands.Cog):
             await ctx.send(embed=embed)
             return
 
-        cursor.execute('SELECT nation_name FROM user_info WHERE user_id = ?', (user_id,))
+        cursor.execute('SELECT name FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
-        nation_name = result[0]
+        name = result[0]
 
         cursor.execute('SELECT 1 FROM user_info WHERE user_id = ?', (user_id,))
         existing_record = cursor.fetchone()
 
         if existing_record:
             # updates the user_info table
-            cursor.execute('UPDATE user_info SET nation_name = ? WHERE user_id = ?', (new_name, user_id))
+            cursor.execute('UPDATE user_info SET name = ? WHERE user_id = ?', (new_name, user_id))
             conn.commit()
             # updates the user_stats table
-            cursor.execute('UPDATE user_stats SET name = ? WHERE name = ?', (new_name, nation_name))
+            cursor.execute('UPDATE user_stats SET name = ? WHERE name = ?', (new_name, name))
             conn.commit()
             # updates the user_mil table
-            cursor.execute('UPDATE user_mil SET name_nation = ? WHERE name_nation = ?', (new_name, nation_name))
+            cursor.execute('UPDATE user_mil SET name = ? WHERE name = ?', (new_name, name))
             conn.commit()
             # updates the infra table
-            cursor.execute('UPDATE infra SET name = ? WHERE name = ?', (new_name, nation_name))
+            cursor.execute('UPDATE infra SET name = ? WHERE name = ?', (new_name, name))
             conn.commit()
             # updates the resources table
-            cursor.execute('UPDATE resources SET name = ? WHERE name = ?', (new_name, nation_name))
+            cursor.execute('UPDATE resources SET name = ? WHERE name = ?', (new_name, name))
             conn.commit()
 
             embed = discord.Embed(

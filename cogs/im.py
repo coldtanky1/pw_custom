@@ -49,21 +49,21 @@ class IM(commands.Cog):
     async def im(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             # fetch user's resources
             cursor.execute(
                 'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (nation_name,))
+                (name,))
             res_result = cursor.fetchone()
 
             # fetch user stats
-            cursor.execute('SELECT * FROM user_stats WHERE name = ?', (nation_name,))
+            cursor.execute('SELECT * FROM user_stats WHERE name = ?', (name,))
             stats_result = cursor.fetchone()
 
             if res_result and stats_result:
@@ -111,7 +111,7 @@ class IM(commands.Cog):
         user_id = ctx.author.id
         material = material.lower()
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -120,16 +120,16 @@ class IM(commands.Cog):
             return
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             # fetch user's resources
             cursor.execute(
                 'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (nation_name,))
+                (name,))
             res_result = cursor.fetchone()
 
             # fetch user stats
-            cursor.execute('SELECT * FROM user_stats WHERE name = ?', (nation_name,))
+            cursor.execute('SELECT * FROM user_stats WHERE name = ?', (name,))
             stats_result = cursor.fetchone()
 
             if res_result and stats_result:
@@ -164,11 +164,11 @@ class IM(commands.Cog):
                                 order_msg = await ctx.send(embed=ordering)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET wood = wood + ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET wood = wood + ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
@@ -206,11 +206,11 @@ class IM(commands.Cog):
                                 order_msg = await ctx.send(embed=ordering)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET coal = coal + ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET coal = coal + ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
@@ -248,11 +248,11 @@ class IM(commands.Cog):
                                 order_msg = await ctx.send(embed=ordering)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET iron = iron + ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET iron = iron + ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
@@ -290,11 +290,11 @@ class IM(commands.Cog):
                                 order_msg = await ctx.send(embed=ordering)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET lead = lead + ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET lead = lead + ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
@@ -332,11 +332,11 @@ class IM(commands.Cog):
                                 order_msg = await ctx.send(embed=ordering)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET bauxite = bauxite + ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET bauxite = bauxite + ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
@@ -374,11 +374,11 @@ class IM(commands.Cog):
                                 order_msg = await ctx.send(embed=ordering)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET oil = oil + ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET oil = oil + ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
@@ -416,11 +416,11 @@ class IM(commands.Cog):
                                 order_msg = await ctx.send(embed=ordering)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET uranium = uranium + ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET uranium = uranium + ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
@@ -458,11 +458,11 @@ class IM(commands.Cog):
                                 order_msg = await ctx.send(embed=ordering)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET food = food + ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET food = food + ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
@@ -500,11 +500,11 @@ class IM(commands.Cog):
                                 order_msg = await ctx.send(embed=ordering)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET steel = steel + ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET steel = steel + ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
@@ -542,11 +542,11 @@ class IM(commands.Cog):
                                 order_msg = await ctx.send(embed=ordering)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET aluminium = aluminium + ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET aluminium = aluminium + ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
@@ -584,11 +584,11 @@ class IM(commands.Cog):
                                 order_msg = await ctx.send(embed=ordering)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET gasoline = gasoline + ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET gasoline = gasoline + ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
@@ -626,11 +626,11 @@ class IM(commands.Cog):
                                 order_msg = await ctx.send(embed=ordering)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET ammo = ammo + ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET ammo = ammo + ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
@@ -668,11 +668,11 @@ class IM(commands.Cog):
                                 order_msg = await ctx.send(embed=ordering)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET concrete = concrete + ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET concrete = concrete + ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
@@ -700,7 +700,7 @@ class IM(commands.Cog):
         user_id = ctx.author.id
         material = material.lower()
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -709,16 +709,16 @@ class IM(commands.Cog):
             return
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             # fetch user's resources
             cursor.execute(
                 'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (nation_name,))
+                (name,))
             res_result = cursor.fetchone()
 
             # fetch user stats
-            cursor.execute('SELECT * FROM user_stats WHERE name = ?', (nation_name,))
+            cursor.execute('SELECT * FROM user_stats WHERE name = ?', (name,))
             stats_result = cursor.fetchone()
 
             if res_result and stats_result:
@@ -753,11 +753,11 @@ class IM(commands.Cog):
                                 sell_msg = await ctx.send(embed=selling)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET wood = wood - ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET wood = wood - ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
@@ -795,11 +795,11 @@ class IM(commands.Cog):
                                 sell_msg = await ctx.send(embed=selling)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET coal = coal - ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET coal = coal - ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
@@ -837,11 +837,11 @@ class IM(commands.Cog):
                                 sell_msg = await ctx.send(embed=selling)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET iron = iron - ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET iron = iron - ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
@@ -879,11 +879,11 @@ class IM(commands.Cog):
                                 sell_msg = await ctx.send(embed=selling)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET lead = lead - ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET lead = lead - ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
@@ -921,11 +921,11 @@ class IM(commands.Cog):
                                 sell_msg = await ctx.send(embed=selling)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET bauxite = bauxite - ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET bauxite = bauxite - ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
@@ -963,11 +963,11 @@ class IM(commands.Cog):
                                 sell_msg = await ctx.send(embed=selling)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET oil = oil - ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET oil = oil - ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
@@ -1005,11 +1005,11 @@ class IM(commands.Cog):
                                 sell_msg = await ctx.send(embed=selling)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET uranium = uranium - ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET uranium = uranium - ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
@@ -1047,11 +1047,11 @@ class IM(commands.Cog):
                                 sell_msg = await ctx.send(embed=selling)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET food = food - ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET food = food - ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
@@ -1089,11 +1089,11 @@ class IM(commands.Cog):
                                 sell_msg = await ctx.send(embed=selling)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET steel = steel - ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET steel = steel - ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
@@ -1131,11 +1131,11 @@ class IM(commands.Cog):
                                 sell_msg = await ctx.send(embed=selling)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET aluminium = aluminium - ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET aluminium = aluminium - ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
@@ -1173,11 +1173,11 @@ class IM(commands.Cog):
                                 sell_msg = await ctx.send(embed=selling)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET gasoline = gasoline - ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET gasoline = gasoline - ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
@@ -1215,11 +1215,11 @@ class IM(commands.Cog):
                                 sell_msg = await ctx.send(embed=selling)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET ammo = ammo - ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET ammo = ammo - ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
@@ -1257,11 +1257,11 @@ class IM(commands.Cog):
                                 sell_msg = await ctx.send(embed=selling)
                                 
                                 # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, nation_name))
+                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
                                 conn.commit()
 
                                 # Update user's resource
-                                cursor.execute('UPDATE resources SET concrete = concrete - ? WHERE name = ?', (amount, nation_name))
+                                cursor.execute('UPDATE resources SET concrete = concrete - ? WHERE name = ?', (amount, name))
                                 conn.commit()
 
                                 order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())

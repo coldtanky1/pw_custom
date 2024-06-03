@@ -6,6 +6,8 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
+import subprocess
+import re
 
 new_line = '\n'
 intents = discord.Intents.all()
@@ -20,10 +22,10 @@ async def load():
         if filename.endswith('.py'):
             await bot.load_extension(f'cogs.{filename[:-3]}')
 
+# Load the bot
 async def main():
     await load()
     await bot.start(token)
-
 
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
 conn = sqlite3.connect('player_info.db')
@@ -32,7 +34,7 @@ cursor = conn.cursor()
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS user_info(
         user_id INTEGER PRIMARY KEY,
-        nation_name TEXT,
+        name TEXT,
         turns_accumulated INTEGER,
         gov_type TEXT,
         tax_rate INTEGER,
@@ -58,7 +60,7 @@ cursor.execute('''
 
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS user_mil(
-        name_nation TEXT PRIMARY KEY,
+        name TEXT PRIMARY KEY,
         troops INTEGER,
         planes INTEGER,
         weapon INTEGER,
@@ -121,7 +123,6 @@ cursor.execute('''
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user.name}")
-
 
 @bot.command()
 async def ping(ctx):

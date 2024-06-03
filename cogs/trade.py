@@ -22,17 +22,17 @@ class Trade(commands.Cog):
         receiver_id = target_user.id
         material = material.lower()
 
-        # fetch sender nation_name
-        cursor.execute('SELECT nation_name FROM user_info WHERE user_id = ?', (sender_id,))
+        # fetch sender name
+        cursor.execute('SELECT name FROM user_info WHERE user_id = ?', (sender_id,))
         sender_result = cursor.fetchone()
 
-        # fetch target user nation_name
-        cursor.execute('SELECT nation_name FROM user_info WHERE user_id = ?', (receiver_id,))
+        # fetch target user name
+        cursor.execute('SELECT name FROM user_info WHERE user_id = ?', (receiver_id,))
         target_result = cursor.fetchone()
 
         if sender_result and target_result:
-            sender_nation_name = sender_result[0]
-            target_nation_name = target_result[0]
+            sender_name = sender_result[0]
+            target_name = target_result[0]
 
             # Check if the user is not the sender
             if receiver_id != sender_id:
@@ -42,32 +42,32 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch sender's mil stats
                         cursor.execute(
-                            'SELECT * FROM user_mil WHERE name_nation = ?',
-                            (sender_nation_name,))
+                            'SELECT * FROM user_mil WHERE name = ?',
+                            (sender_name,))
                         sender_mil_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         # fetch target user's mil stats
                         cursor.execute(
-                            'SELECT * FROM user_mil WHERE name_nation = ?',
-                            (target_nation_name,))
+                            'SELECT * FROM user_mil WHERE name = ?',
+                            (target_name,))
                         target_mil_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result and target_mil_result and sender_mil_result:
                             name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = sender_res_result
                             name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = target_res_result
-                            name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = sender_mil_result
-                            name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
+                            name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = sender_mil_result
+                            name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
 
                             # Check if user has enough of resource specified.
                             if amount > wood:
@@ -75,11 +75,11 @@ class Trade(commands.Cog):
                                 return
 
                             # Update sender's resources
-                            cursor.execute('UPDATE resources SET wood = wood - ? WHERE name = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE resources SET wood = wood - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's resources
-                            cursor.execute('UPDATE resources SET wood = wood + ? WHERE name = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE resources SET wood = wood + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -87,13 +87,13 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result:
@@ -106,11 +106,11 @@ class Trade(commands.Cog):
                                 return
 
                             # Update sender's resources
-                            cursor.execute('UPDATE resources SET coal = coal - ? WHERE name = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE resources SET coal = coal - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's resources
-                            cursor.execute('UPDATE resources SET coal = coal + ? WHERE name = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE resources SET coal = coal + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -118,13 +118,13 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result:
@@ -137,11 +137,11 @@ class Trade(commands.Cog):
                                 return
 
                             # Update sender's resources
-                            cursor.execute('UPDATE resources SET iron = iron - ? WHERE name = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE resources SET iron = iron - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's resources
-                            cursor.execute('UPDATE resources SET iron = iron + ? WHERE name = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE resources SET iron = iron + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -149,13 +149,13 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result:
@@ -168,11 +168,11 @@ class Trade(commands.Cog):
                                 return
 
                             # Update sender's resources
-                            cursor.execute('UPDATE resources SET lead = lead - ? WHERE name = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE resources SET lead = lead - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's resources
-                            cursor.execute('UPDATE resources SET lead = lead + ? WHERE name = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE resources SET lead = lead + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -180,13 +180,13 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result:
@@ -199,11 +199,11 @@ class Trade(commands.Cog):
                                 return
 
                             # Update sender's resources
-                            cursor.execute('UPDATE resources SET bauxite = bauxite - ? WHERE name = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE resources SET bauxite = bauxite - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's resources
-                            cursor.execute('UPDATE resources SET bauxite = bauxite + ? WHERE name = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE resources SET bauxite = bauxite + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -211,13 +211,13 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result:
@@ -230,11 +230,11 @@ class Trade(commands.Cog):
                                 return
 
                             # Update sender's resources
-                            cursor.execute('UPDATE resources SET oil = oil - ? WHERE name = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE resources SET oil = oil - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's resources
-                            cursor.execute('UPDATE resources SET oil = oil + ? WHERE name = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE resources SET oil = oil + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -242,13 +242,13 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result:
@@ -261,11 +261,11 @@ class Trade(commands.Cog):
                                 return
 
                             # Update sender's resources
-                            cursor.execute('UPDATE resources SET uranium = uranium - ? WHERE name = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE resources SET uranium = uranium - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's resources
-                            cursor.execute('UPDATE resources SET uranium = uranium + ? WHERE name = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE resources SET uranium = uranium + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -273,13 +273,13 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result:
@@ -292,11 +292,11 @@ class Trade(commands.Cog):
                                 return
 
                             # Update sender's resources
-                            cursor.execute('UPDATE resources SET food = food - ? WHERE name = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE resources SET food = food - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's resources
-                            cursor.execute('UPDATE resources SET food = food + ? WHERE name = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE resources SET food = food + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -304,13 +304,13 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result:
@@ -323,11 +323,11 @@ class Trade(commands.Cog):
                                 return
 
                             # Update sender's resources
-                            cursor.execute('UPDATE resources SET steel = steel - ? WHERE name = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE resources SET steel = steel - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's resources
-                            cursor.execute('UPDATE resources SET steel = steel + ? WHERE name = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE resources SET steel = steel + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -335,13 +335,13 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result:
@@ -354,11 +354,11 @@ class Trade(commands.Cog):
                                 return
 
                             # Update sender's resources
-                            cursor.execute('UPDATE resources SET aluminium = aluminium - ? WHERE name = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE resources SET aluminium = aluminium - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's resources
-                            cursor.execute('UPDATE resources SET aluminium = aluminium + ? WHERE name = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE resources SET aluminium = aluminium + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -366,13 +366,13 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result:
@@ -385,11 +385,11 @@ class Trade(commands.Cog):
                                 return
 
                             # Update sender's resources
-                            cursor.execute('UPDATE resources SET gasoline = gasoline - ? WHERE name = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE resources SET gasoline = gasoline - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's resources
-                            cursor.execute('UPDATE resources SET gasoline = gasoline + ? WHERE name = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE resources SET gasoline = gasoline + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -397,13 +397,13 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result:
@@ -416,11 +416,11 @@ class Trade(commands.Cog):
                                 return
 
                             # Update sender's resources
-                            cursor.execute('UPDATE resources SET ammo = ammo - ? WHERE name = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE resources SET ammo = ammo - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's resources
-                            cursor.execute('UPDATE resources SET ammo = ammo + ? WHERE name = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE resources SET ammo = ammo + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -428,13 +428,13 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result:
@@ -447,11 +447,11 @@ class Trade(commands.Cog):
                                 return
 
                             # Update sender's resources
-                            cursor.execute('UPDATE resources SET concrete = concrete - ? WHERE name = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE resources SET concrete = concrete - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's resources
-                            cursor.execute('UPDATE resources SET concrete = concrete + ? WHERE name = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE resources SET concrete = concrete + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -465,43 +465,43 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch sender's mil stats
                         cursor.execute(
-                            'SELECT * FROM user_mil WHERE name_nation = ?',
-                            (sender_nation_name,))
+                            'SELECT * FROM user_mil WHERE name = ?',
+                            (sender_name,))
                         sender_mil_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         # fetch target user's mil stats
                         cursor.execute(
-                            'SELECT * FROM user_mil WHERE name_nation = ?',
-                            (target_nation_name,))
+                            'SELECT * FROM user_mil WHERE name = ?',
+                            (target_name,))
                         target_mil_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result and target_mil_result and sender_mil_result:
                             name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = sender_res_result
                             name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = target_res_result
-                            name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = sender_mil_result
-                            name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
+                            name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = sender_mil_result
+                            name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
 
                             if amount > troops:
                                 await ctx.send("You do not have enough troops.")
                                 return
 
                             # Update sender's troop count
-                            cursor.execute('UPDATE user_mil SET troops = troops - ? WHERE name_nation = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE user_mil SET troops = troops - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's troop count
-                            cursor.execute('UPDATE user_mil SET troops = troops + ? WHERE name_nation = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE user_mil SET troops = troops + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -515,43 +515,43 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch sender's mil stats
                         cursor.execute(
-                            'SELECT * FROM user_mil WHERE name_nation = ?',
-                            (sender_nation_name,))
+                            'SELECT * FROM user_mil WHERE name = ?',
+                            (sender_name,))
                         sender_mil_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         # fetch target user's mil stats
                         cursor.execute(
-                            'SELECT * FROM user_mil WHERE name_nation = ?',
-                            (target_nation_name,))
+                            'SELECT * FROM user_mil WHERE name = ?',
+                            (target_name,))
                         target_mil_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result and target_mil_result and sender_mil_result:
                             name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = sender_res_result
                             name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = target_res_result
-                            name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = sender_mil_result
-                            name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
+                            name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = sender_mil_result
+                            name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
 
                             if amount > planes:
                                 await ctx.send("You do not have enough troops.")
                                 return
 
                             # Update sender's troop count
-                            cursor.execute('UPDATE user_mil SET planes = planes - ? WHERE name_nation = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE user_mil SET planes = planes - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's troop count
-                            cursor.execute('UPDATE user_mil SET planes = planes + ? WHERE name_nation = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE user_mil SET planes = planes + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -565,43 +565,43 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch sender's mil stats
                         cursor.execute(
-                            'SELECT * FROM user_mil WHERE name_nation = ?',
-                            (sender_nation_name,))
+                            'SELECT * FROM user_mil WHERE name = ?',
+                            (sender_name,))
                         sender_mil_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         # fetch target user's mil stats
                         cursor.execute(
-                            'SELECT * FROM user_mil WHERE name_nation = ?',
-                            (target_nation_name,))
+                            'SELECT * FROM user_mil WHERE name = ?',
+                            (target_name,))
                         target_mil_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result and target_mil_result and sender_mil_result:
                             name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = sender_res_result
                             name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = target_res_result
-                            name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = sender_mil_result
-                            name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
+                            name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = sender_mil_result
+                            name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
 
                             if amount > tanks:
                                 await ctx.send("You do not have enough troops.")
                                 return
 
                             # Update sender's troop count
-                            cursor.execute('UPDATE user_mil SET tanks = tanks - ? WHERE name_nation = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE user_mil SET tanks = tanks - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's troop count
-                            cursor.execute('UPDATE user_mil SET tanks = tanks + ? WHERE name_nation = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE user_mil SET tanks = tanks + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -615,43 +615,43 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch sender's mil stats
                         cursor.execute(
-                            'SELECT * FROM user_mil WHERE name_nation = ?',
-                            (sender_nation_name,))
+                            'SELECT * FROM user_mil WHERE name = ?',
+                            (sender_name,))
                         sender_mil_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         # fetch target user's mil stats
                         cursor.execute(
-                            'SELECT * FROM user_mil WHERE name_nation = ?',
-                            (target_nation_name,))
+                            'SELECT * FROM user_mil WHERE name = ?',
+                            (target_name,))
                         target_mil_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result and target_mil_result and sender_mil_result:
                             name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = sender_res_result
                             name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = target_res_result
-                            name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = sender_mil_result
-                            name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
+                            name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = sender_mil_result
+                            name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
 
                             if amount > artillery:
                                 await ctx.send("You do not have enough troops.")
                                 return
 
                             # Update sender's troop count
-                            cursor.execute('UPDATE user_mil SET artillery = artillery - ? WHERE name_nation = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE user_mil SET artillery = artillery - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's troop count
-                            cursor.execute('UPDATE user_mil SET artillery = artillery + ? WHERE name_nation = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE user_mil SET artillery = artillery + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")
@@ -665,43 +665,43 @@ class Trade(commands.Cog):
                         # fetch sender's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (sender_nation_name,))
+                            (sender_name,))
                         sender_res_result = cursor.fetchone()
 
                         # fetch sender's mil stats
                         cursor.execute(
-                            'SELECT * FROM user_mil WHERE name_nation = ?',
-                            (sender_nation_name,))
+                            'SELECT * FROM user_mil WHERE name = ?',
+                            (sender_name,))
                         sender_mil_result = cursor.fetchone()
 
                         # fetch target user's resources
                         cursor.execute(
                             'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                            (target_nation_name,))
+                            (target_name,))
                         target_res_result = cursor.fetchone()
 
                         # fetch target user's mil stats
                         cursor.execute(
-                            'SELECT * FROM user_mil WHERE name_nation = ?',
-                            (target_nation_name,))
+                            'SELECT * FROM user_mil WHERE name = ?',
+                            (target_name,))
                         target_mil_result = cursor.fetchone()
 
                         if sender_res_result and target_res_result and target_mil_result and sender_mil_result:
                             name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = sender_res_result
                             name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = target_res_result
-                            name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = sender_mil_result
-                            name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
+                            name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = sender_mil_result
+                            name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
 
                             if amount > anti_air:
                                 await ctx.send("You do not have enough troops.")
                                 return
 
                             # Update sender's troop count
-                            cursor.execute('UPDATE user_mil SET anti_air = anti_air - ? WHERE name_nation = ?', (amount, sender_nation_name))
+                            cursor.execute('UPDATE user_mil SET anti_air = anti_air - ? WHERE name = ?', (amount, sender_name))
                             conn.commit()
 
                             # Update target user's troop count
-                            cursor.execute('UPDATE user_mil SET anti_air = anti_air + ? WHERE name_nation = ?', (amount, target_nation_name))
+                            cursor.execute('UPDATE user_mil SET anti_air = anti_air + ? WHERE name = ?', (amount, target_name))
                             conn.commit()
 
                             await ctx.send("Trade completed!")

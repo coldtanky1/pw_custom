@@ -22,23 +22,23 @@ class Construct(commands.Cog):
             await ctx.send("Invalid building amount, try a positive number.")
             return
 
-        # fetch user nation_name
-        cursor.execute('SELECT nation_name FROM user_info WHERE user_id = ?', (user_id,))
+        # fetch user name
+        cursor.execute('SELECT name FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            nation_name = result[0]
+            name = result[0]
 
             # fetch user's resources
             cursor.execute(
                 'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (nation_name,))
+                (name,))
             res_result = cursor.fetchone()
 
             # fetch user's production infra
             cursor.execute(
                 'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
-                (nation_name,))
+                (name,))
             infra_result = cursor.fetchone()
 
             if infra_result:
@@ -82,9 +82,9 @@ class Construct(commands.Cog):
                                             wood = wood - ?,
                                             concrete = concrete - ?
                                             WHERE name = ?
-                                        ''', (basichouse_wood, basichouse_concrete, nation_name))
+                                        ''', (basichouse_wood, basichouse_concrete, name))
 
-                                        cursor.execute('UPDATE infra SET basic_house = basic_house + ? WHERE name = ?', (basichouse_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET basic_house = basic_house + ? WHERE name = ?', (basichouse_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -145,9 +145,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (smallflat_wood, smallflat_concrete, smallflat_steel, nation_name))
+                                        ''', (smallflat_wood, smallflat_concrete, smallflat_steel, name))
 
-                                        cursor.execute('UPDATE infra SET small_flat = small_flat + ? WHERE name = ?', (smallflat_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET small_flat = small_flat + ? WHERE name = ?', (smallflat_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -208,9 +208,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (aptcomplex_wood, aptcomplex_concrete, aptcomplex_steel, nation_name))
+                                        ''', (aptcomplex_wood, aptcomplex_concrete, aptcomplex_steel, name))
 
-                                        cursor.execute('UPDATE infra SET apt_complex = apt_complex + ? WHERE name = ?', (aptcomplex_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET apt_complex = apt_complex + ? WHERE name = ?', (aptcomplex_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -271,9 +271,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (skyscraper_wood, skyscraper_concrete, skyscraper_steel, nation_name))
+                                        ''', (skyscraper_wood, skyscraper_concrete, skyscraper_steel, name))
 
-                                        cursor.execute('UPDATE infra SET skyscraper = skyscraper + ? WHERE name = ?', (skyscraper_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET skyscraper = skyscraper + ? WHERE name = ?', (skyscraper_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -334,9 +334,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (lumber_wood, lumber_concrete, lumber_steel, nation_name))
+                                        ''', (lumber_wood, lumber_concrete, lumber_steel, name))
 
-                                        cursor.execute('UPDATE infra SET lumber_mill = lumber_mill + ? WHERE name = ?', (lumber_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET lumber_mill = lumber_mill + ? WHERE name = ?', (lumber_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -397,9 +397,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (coal_wood, coal_concrete, coal_steel, nation_name))
+                                        ''', (coal_wood, coal_concrete, coal_steel, name))
 
-                                        cursor.execute('UPDATE infra SET coal_mine = coal_mine + ? WHERE name = ?', (coal_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET coal_mine = coal_mine + ? WHERE name = ?', (coal_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -461,9 +461,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (iron_wood, iron_concrete, iron_steel, nation_name))
+                                        ''', (iron_wood, iron_concrete, iron_steel, name))
 
-                                        cursor.execute('UPDATE infra SET iron_mine = iron_mine + ? WHERE name = ?', (iron_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET iron_mine = iron_mine + ? WHERE name = ?', (iron_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -524,9 +524,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (lead_wood, lead_concrete, lead_steel, nation_name))
+                                        ''', (lead_wood, lead_concrete, lead_steel, name))
 
-                                        cursor.execute('UPDATE infra SET lead_mine = lead_mine + ? WHERE name = ?', (lead_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET lead_mine = lead_mine + ? WHERE name = ?', (lead_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -587,9 +587,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (bauxite_wood, bauxite_concrete, bauxite_steel, nation_name))
+                                        ''', (bauxite_wood, bauxite_concrete, bauxite_steel, name))
 
-                                        cursor.execute('UPDATE infra SET bauxite_mine = bauxite_mine + ? WHERE name = ?', (bauxite_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET bauxite_mine = bauxite_mine + ? WHERE name = ?', (bauxite_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -650,9 +650,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (oil_wood, oil_concrete, oil_steel, nation_name))
+                                        ''', (oil_wood, oil_concrete, oil_steel, name))
 
-                                        cursor.execute('UPDATE infra SET oil_derrick = oil_derrick + ? WHERE name = ?', (oil_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET oil_derrick = oil_derrick + ? WHERE name = ?', (oil_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -713,9 +713,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?,
                                             WHERE name = ?
-                                        ''', (uranium_wood, uranium_concrete, uranium_steel,nation_name))
+                                        ''', (uranium_wood, uranium_concrete, uranium_steel,name))
 
-                                        cursor.execute('UPDATE infra SET uranium_mine = uranium_mine + ? WHERE name = ?', (uranium_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET uranium_mine = uranium_mine + ? WHERE name = ?', (uranium_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -776,9 +776,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (farm_wood, farm_concrete, farm_steel,nation_name))
+                                        ''', (farm_wood, farm_concrete, farm_steel,name))
 
-                                        cursor.execute('UPDATE infra SET farm = farm + ? WHERE name = ?', (farm_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET farm = farm + ? WHERE name = ?', (farm_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -839,9 +839,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (aluminium_wood, aluminium_concrete, aluminium_steel, nation_name))
+                                        ''', (aluminium_wood, aluminium_concrete, aluminium_steel, name))
 
-                                        cursor.execute('UPDATE infra SET aluminium_factory = aluminium_factory + ? WHERE name = ?', (aluminium_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET aluminium_factory = aluminium_factory + ? WHERE name = ?', (aluminium_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -902,9 +902,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (steel_wood, steel_concrete, steel_steel, nation_name))
+                                        ''', (steel_wood, steel_concrete, steel_steel, name))
 
-                                        cursor.execute('UPDATE infra SET steel_factory = steel_factory + ? WHERE name = ?', (steel_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET steel_factory = steel_factory + ? WHERE name = ?', (steel_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -965,9 +965,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (gas_wood, gas_concrete, gas_steel, nation_name))
+                                        ''', (gas_wood, gas_concrete, gas_steel, name))
 
-                                        cursor.execute('UPDATE infra SET oil_refinery = oil_refinery + ? WHERE name = ?', (gas_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET oil_refinery = oil_refinery + ? WHERE name = ?', (gas_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -1028,9 +1028,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (ammo_wood, ammo_concrete, ammo_steel, nation_name))
+                                        ''', (ammo_wood, ammo_concrete, ammo_steel, name))
 
-                                        cursor.execute('UPDATE infra SET ammo_factory = ammo_factory + ? WHERE name = ?', (ammo_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET ammo_factory = ammo_factory + ? WHERE name = ?', (ammo_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -1091,9 +1091,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (concrete_wood, concrete_concrete, concrete_steel, nation_name))
+                                        ''', (concrete_wood, concrete_concrete, concrete_steel, name))
 
-                                        cursor.execute('UPDATE infra SET concrete_factory = concrete_factory + ? WHERE name = ?', (concrete_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET concrete_factory = concrete_factory + ? WHERE name = ?', (concrete_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -1151,9 +1151,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (barrack_concrete, barrack_steel, nation_name))
+                                        ''', (barrack_concrete, barrack_steel, name))
 
-                                        cursor.execute('UPDATE user_mil SET barrack = barrack + ? WHERE name = ?', (barrack_amt, nation_name))
+                                        cursor.execute('UPDATE user_mil SET barrack = barrack + ? WHERE name = ?', (barrack_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()
@@ -1211,9 +1211,9 @@ class Construct(commands.Cog):
                                             concrete = concrete - ?,
                                             steel = steel - ?
                                             WHERE name = ?
-                                        ''', (milfactory_concrete, milfactory_steel, nation_name))
+                                        ''', (milfactory_concrete, milfactory_steel, name))
 
-                                        cursor.execute('UPDATE infra SET militaryfactory = militaryfactory + ? WHERE name = ?', (milfactory_amt, nation_name))
+                                        cursor.execute('UPDATE infra SET militaryfactory = militaryfactory + ? WHERE name = ?', (milfactory_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()

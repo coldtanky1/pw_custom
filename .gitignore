@@ -156,7 +156,8 @@ cython_debug/
 player_info.db
 
 # Logs
-logs.log
+logging/
+logging/update.log
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

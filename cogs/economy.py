@@ -17,42 +17,42 @@ class Economy(commands.Cog):
     async def economy(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             # fetch user's resources
             cursor.execute(
                 'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (nation_name,))
+                (name,))
             res_result = cursor.fetchone()
 
             # fetch user's production infra
             cursor.execute(
                 'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
-                (nation_name,))
+                (name,))
             infra_result = cursor.fetchone()
 
             # fetch user's military stats
             cursor.execute(
-                'SELECT name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name_nation = ?',
-                (nation_name,))
+                'SELECT name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
+                (name,))
             mil_result = cursor.fetchone()
 
             # fetch user's population stats.
             cursor.execute(
                 'SELECT name, nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-                (nation_name,))
+                (name,))
             pop_result = cursor.fetchone()
 
 
             if infra_result and res_result:
                 name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
                 name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
-                name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
                 name, nation_score, gdp, adult, balance = pop_result
 
                 if gov_type == "Communism":
@@ -245,7 +245,7 @@ class Economy(commands.Cog):
                         net_income = round((tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep))
 
                         embed = discord.Embed(title="Economy", type='rich',
-                                            description=f"Displays {nation_name}'s economy.", color=discord.Color.green())
+                                            description=f"Displays {name}'s economy.", color=discord.Color.green())
                         embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
                                                             f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                             f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
@@ -275,7 +275,7 @@ class Economy(commands.Cog):
                         net_income = round((tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep))
 
                         embed = discord.Embed(title="Economy", type='rich',
-                                            description=f"Displays {nation_name}'s economy.", color=discord.Color.green())
+                                            description=f"Displays {name}'s economy.", color=discord.Color.green())
                         embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
                                                             f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                             f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
@@ -474,7 +474,7 @@ class Economy(commands.Cog):
                         net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
                         embed = discord.Embed(title="Economy", type='rich',
-                                            description=f"Displays {nation_name}'s economy.", color=discord.Color.green())
+                                            description=f"Displays {name}'s economy.", color=discord.Color.green())
                         embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
                                                             f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                             f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
@@ -504,7 +504,7 @@ class Economy(commands.Cog):
                         net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
                         embed = discord.Embed(title="Economy", type='rich',
-                                            description=f"Displays {nation_name}'s economy.", color=discord.Color.green())
+                                            description=f"Displays {name}'s economy.", color=discord.Color.green())
                         embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
                                                             f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                             f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
@@ -704,7 +704,7 @@ class Economy(commands.Cog):
                         net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
                         embed = discord.Embed(title="Economy", type='rich',
-                                            description=f"Displays {nation_name}'s economy.", color=discord.Color.green())
+                                            description=f"Displays {name}'s economy.", color=discord.Color.green())
                         embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
                                                             f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                             f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
@@ -734,7 +734,7 @@ class Economy(commands.Cog):
                         net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
                         embed = discord.Embed(title="Economy", type='rich',
-                                            description=f"Displays {nation_name}'s economy.", color=discord.Color.green())
+                                            description=f"Displays {name}'s economy.", color=discord.Color.green())
                         embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
                                                             f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                             f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
@@ -933,7 +933,7 @@ class Economy(commands.Cog):
                         net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
                         embed = discord.Embed(title="Economy", type='rich',
-                                            description=f"Displays {nation_name}'s economy.", color=discord.Color.green())
+                                            description=f"Displays {name}'s economy.", color=discord.Color.green())
                         embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
                                                             f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                             f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
@@ -963,7 +963,7 @@ class Economy(commands.Cog):
                         net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
                         embed = discord.Embed(title="Economy", type='rich',
-                                            description=f"Displays {nation_name}'s economy.", color=discord.Color.green())
+                                            description=f"Displays {name}'s economy.", color=discord.Color.green())
                         embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
                                                             f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                             f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
@@ -1162,7 +1162,7 @@ class Economy(commands.Cog):
                         net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
                         embed = discord.Embed(title="Economy", type='rich',
-                                            description=f"Displays {nation_name}'s economy.", color=discord.Color.green())
+                                            description=f"Displays {name}'s economy.", color=discord.Color.green())
                         embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
                                                             f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                             f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
@@ -1192,7 +1192,7 @@ class Economy(commands.Cog):
                         net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep) 
 
                         embed = discord.Embed(title="Economy", type='rich',
-                                            description=f"Displays {nation_name}'s economy.", color=discord.Color.green())
+                                            description=f"Displays {name}'s economy.", color=discord.Color.green())
                         embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
                                                             f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                             f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
@@ -1391,7 +1391,7 @@ class Economy(commands.Cog):
                         net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
                         embed = discord.Embed(title="Economy", type='rich',
-                                            description=f"Displays {nation_name}'s economy.", color=discord.Color.green())
+                                            description=f"Displays {name}'s economy.", color=discord.Color.green())
                         embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
                                                             f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                             f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
@@ -1421,7 +1421,7 @@ class Economy(commands.Cog):
                         net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
                         embed = discord.Embed(title="Economy", type='rich',
-                                            description=f"Displays {nation_name}'s economy.", color=discord.Color.green())
+                                            description=f"Displays {name}'s economy.", color=discord.Color.green())
                         embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
                                                             f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                             f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"

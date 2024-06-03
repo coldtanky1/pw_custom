@@ -10,39 +10,42 @@ new_line = '\n'
 conn = sqlite3.connect('player_info.db')
 cursor = conn.cursor()
 
-logging.basicConfig(filename='logs.log', level=logging.INFO,
+logging_folder = '/home/void/pw_custom/cogs/logging/update.log'
+
+logging.basicConfig(filename=logging_folder, level=logging.INFO,
                     format='%(asctime)s %(message)s')
 
 logger = logging.getLogger(__name__)
-        
+
+
 # Check housing.
 async def CheckHousing():
     try:
         cursor.execute('SELECT * FROM user_info')
         for row in cursor.fetchall():
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = row
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = row
 
             # Fetch user's production infra
             cursor.execute(
                 'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
-                (nation_name,))
+                (name,))
             infra_result = cursor.fetchone()
 
             # Fetch user's military stats
             cursor.execute(
-                'SELECT * FROM user_mil WHERE name_nation = ?',
-                (nation_name,))
+                'SELECT * FROM user_mil WHERE name = ?',
+                (name,))
             mil_result = cursor.fetchone()
 
             # Fetch user's population stats.
             cursor.execute(
                 'SELECT name, nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-                (nation_name,))
+                (name,))
             pop_result = cursor.fetchone()
 
             if infra_result and mil_result and pop_result:
                 name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
-                name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
                 name, nation_score, gdp, adult, balance = pop_result
 
                 # Check for housing.
@@ -55,14 +58,17 @@ async def CheckHousing():
                 total_housing = basic_house_housing + small_flat_housing + apt_complex_housing + skyscraper_housing
 
                 if (adult > total_housing): # If user does not have enough housing.
-                    cursor.execute('UPDATE user_info SET happiness = happiness - 15 WHERE nation_name = ?', (nation_name,))
-                    conn.commit()
+                    if happiness < 0:
+                        pass
+                    else:
+                        cursor.execute('UPDATE user_info SET happiness = happiness - 15 WHERE name = ?', (name,))
+                        conn.commit()
 
                     riot_chance = random.randint(1, 25)
                     not_housed = adult - total_housing
 
                     if riot_chance == 1:
-                        logger.info(f"HOUSING CHECK: Check for housing done. Riot detected for {nation_name}.\n")
+                        logger.info(f"HOUSING CHECK: Check for housing done. Riot detected for {name}.\n")
 
                         # Calculates the damages of properties.
                         basic_house_damage = round(basic_house * 0.02)
@@ -86,7 +92,7 @@ async def CheckHousing():
                         pop_death = round(adult//24)
 
                         # Update the population.
-                        cursor.execute('UPDATE user_stats SET adult = adult - ? WHERE name = ?', (pop_death, nation_name))
+                        cursor.execute('UPDATE user_stats SET adult = adult - ? WHERE name = ?', (pop_death, name))
                         conn.commit()
 
                         # Update the infrastructure.
@@ -97,15 +103,15 @@ async def CheckHousing():
                                         militaryfactory = militaryfactory - ? WHERE name = ?''',
                                         (basic_house_damage, small_flat_damage, apt_complex_damage, skyscraper_damage, lumber_mill_damage, coal_mine_damage, iron_mine_damage,
                                         lead_mine_damage, bauxite_mine_damage, oil_derrick_damage, uranium_mine_damage, farm_damage, aluminium_factory_damage,
-                                        steel_factory_damage, oil_refinery_damage, ammo_factory_damage, concrete_factory_damage, militaryfactory_damage, nation_name))
+                                        steel_factory_damage, oil_refinery_damage, ammo_factory_damage, concrete_factory_damage, militaryfactory_damage, name))
                         conn.commit()
 
-                        logger.info(f'HOUSING CHECK: Damages caused by riots done for {nation_name}.\n')
+                        logger.info(f'HOUSING CHECK: Damages caused by riots done for {name}.\n')
                     else:
-                        logger.info(f"HOUSING CHECK: {nation_name} did not pass the housing check. No riot for {nation_name}.\n")
+                        logger.info(f"HOUSING CHECK: {name} did not pass the housing check. No riot for {name}.\n")
 
                 else:
-                    logger.info(f'HOUSING CHECK: {nation_name} passed the housing check.\n')
+                    logger.info(f'HOUSING CHECK: {name} passed the housing check.\n')
 
             else:
                 logger.info(f"HOUSING CHECK ERROR: Error fetching stats of {user_id}.\n")
@@ -118,37 +124,37 @@ async def UpdateEconomy():
     try:
         cursor.execute('SELECT * FROM user_info')
         for row in cursor.fetchall():
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = row
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = row
 
             # fetch user's resources
             cursor.execute(
                 'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (nation_name,))
+                (name,))
             res_result = cursor.fetchone()
 
             # fetch user's production infra
             cursor.execute(
                 'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
-                (nation_name,))
+                (name,))
             infra_result = cursor.fetchone()
 
             # fetch user's military stats
             cursor.execute(
-                'SELECT * FROM user_mil WHERE name_nation = ?',
-                (nation_name,))
+                'SELECT * FROM user_mil WHERE name = ?',
+                (name,))
             mil_result = cursor.fetchone()
 
             # fetch user's population stats.
             cursor.execute(
                 'SELECT name, nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-                (nation_name,))
+                (name,))
             pop_result = cursor.fetchone()
 
             if infra_result:
                 name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
                 name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
                 name, nation_score, gdp, adult, balance = pop_result
-                name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
 
                 policy_upkeep = 0
                 match police_policy:
@@ -215,19 +221,19 @@ async def UpdateEconomy():
 
                             # Update the resources table
                             cursor.execute('UPDATE resources SET wood = wood + ?, coal = coal + ?, iron = iron + ?, lead = lead + ?, bauxite = bauxite + ?, oil = oil + ?, uranium = uranium + ?, food = food + ?, aluminium = aluminium + ?, steel = steel + ?, gasoline = gasoline + ?, ammo = ammo + ?, concrete = concrete + ? WHERE name = ?', 
-                            (prod_wood, prod_coal, final_prod_iron, final_prod_lead, final_prod_bauxite, final_prod_oil, prod_uranium, prod_farm, prod_aluminium, prod_steel, prod_gas, prod_ammo, prod_concrete, nation_name))
+                            (prod_wood, prod_coal, final_prod_iron, final_prod_lead, final_prod_bauxite, final_prod_oil, prod_uranium, prod_farm, prod_aluminium, prod_steel, prod_gas, prod_ammo, prod_concrete, name))
                             # Commit the changes to the database
                             conn.commit()
 
-                            logger.info(f"UPDATE RESOURCES: Updating resources done for {nation_name}. DOES NOT MEET DEMANDS.\n")
+                            logger.info(f"UPDATE RESOURCES: Updating resources done for {name}. DOES NOT MEET DEMANDS.\n")
                             
                         else:  # If the user does meet resource demands.
                             # Update the resources table
                             cursor.execute('UPDATE resources SET wood = wood + ?, coal = coal + ?, iron = iron + ?, lead = lead + ?, bauxite = bauxite + ?, oil = oil + ?, uranium = uranium + ?, food = food + ?, aluminium = aluminium + ?, steel = steel + ?, gasoline = gasoline + ?, ammo = ammo + ?, concrete = concrete + ? WHERE name = ?', 
-                            (prod_wood, prod_coal, final_prod_iron, final_prod_lead, final_prod_bauxite, final_prod_oil, prod_uranium, prod_farm, prod_aluminium, prod_steel, prod_gas, prod_ammo, prod_concrete, nation_name))
+                            (prod_wood, prod_coal, final_prod_iron, final_prod_lead, final_prod_bauxite, final_prod_oil, prod_uranium, prod_farm, prod_aluminium, prod_steel, prod_gas, prod_ammo, prod_concrete, name))
                             conn.commit()
 
-                            logger.info(f"UPDATE RESOURCES: Updating resources done for {nation_name}. DOES MEET DEMANDS.\n")
+                            logger.info(f"UPDATE RESOURCES: Updating resources done for {name}. DOES MEET DEMANDS.\n")
 
                     except Exception as e:
                         logger.info(f"UPDATE RESOURCES ERROR: {e}\n")
@@ -369,10 +375,10 @@ async def UpdateEconomy():
 
                             net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, nation_name))
+                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
                             conn.commit()
 
-                            logger.info(f"UPDATE ECONOMY: Updating economy done for {nation_name}.\n")
+                            logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
 
                         else:
                             troops_upkeep = troops * 5 * 1.5
@@ -394,10 +400,10 @@ async def UpdateEconomy():
 
                             net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, nation_name))
+                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
                             conn.commit()
 
-                            logger.info(f"UPDATE ECONOMY: Updating economy done for {nation_name}.\n")
+                            logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
 
                     case "Democracy":
                         prod_wood = lumber_mill * 2
@@ -535,10 +541,10 @@ async def UpdateEconomy():
 
                             net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, nation_name))
+                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
                             conn.commit()
 
-                            logger.info(f"UPDATE ECONOMY: Updating economy done for {nation_name}.\n")
+                            logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
                         else:
                             troops_upkeep = troops * 5 * 1.5
                             planes_upkeep = planes * 50 * 1.5
@@ -559,10 +565,10 @@ async def UpdateEconomy():
 
                             net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, nation_name))
+                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
                             conn.commit()
 
-                            logger.info(f"UPDATE ECONOMY: Updating economy done for {nation_name}.\n")
+                            logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
 
                     case "Monarchy":
                         prod_wood = lumber_mill * 2
@@ -700,10 +706,10 @@ async def UpdateEconomy():
 
                             net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, nation_name))
+                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
                             conn.commit()
 
-                            logger.info(f"UPDATE ECONOMY: Updating economy done for {nation_name}.\n")
+                            logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
                         else:
                             troops_upkeep = troops * 5 * 1.5
                             planes_upkeep = planes * 50 * 1.5
@@ -724,10 +730,10 @@ async def UpdateEconomy():
 
                             net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, nation_name))
+                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
                             conn.commit()
 
-                            logger.info(f"UPDATE ECONOMY: Updating economy done for {nation_name}.\n")
+                            logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
 
                     case "Fascism":
                         prod_wood = lumber_mill * 2
@@ -865,10 +871,10 @@ async def UpdateEconomy():
 
                             net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, nation_name))
+                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
                             conn.commit()
 
-                            logger.info(f"UPDATE ECONOMY: Updating economy done for {nation_name}.\n")
+                            logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
                         else:
                             troops_upkeep = troops * 5 * 0.5
                             planes_upkeep = planes * 50 * 0.5
@@ -889,10 +895,10 @@ async def UpdateEconomy():
 
                             net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, nation_name))
+                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
                             conn.commit()
 
-                            logger.info(f"UPDATE ECONOMY: Updating economy done for {nation_name}.\n")
+                            logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
 
                     case "Socialism":
                         prod_wood = lumber_mill * 2
@@ -1030,10 +1036,10 @@ async def UpdateEconomy():
 
                             net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, nation_name))
+                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
                             conn.commit()
 
-                            logger.info(f"UPDATE ECONOMY: Updating economy done for {nation_name}.\n")
+                            logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
                         else:
                             troops_upkeep = troops * 5 * 1.5
                             planes_upkeep = planes * 50 * 1.5
@@ -1054,10 +1060,10 @@ async def UpdateEconomy():
 
                             net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, nation_name))
+                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
                             conn.commit()
 
-                            logger.info(f"UPDATE ECONOMY: Updating economy done for {nation_name}.\n")
+                            logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
 
                     case "Anarchy":
                         prod_wood = lumber_mill * 2
@@ -1195,10 +1201,10 @@ async def UpdateEconomy():
 
                             net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, nation_name))
+                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
                             conn.commit()
 
-                            logger.info(f"UPDATE ECONOMY: Updating economy done for {nation_name}.\n")
+                            logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
                         else:
                             troops_upkeep = troops * 5 * 1.5
                             planes_upkeep = planes * 50 * 1.5
@@ -1219,13 +1225,13 @@ async def UpdateEconomy():
 
                             net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, nation_name))
+                            cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
                             conn.commit()
 
-                            logger.info(f"UPDATE ECONOMY: Updating economy done for {nation_name}.\n")
+                            logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
                     
                     case _:
-                        logger.info(f"UPDATE ECONOMY ERROR: No 'gov_type' found for {nation_name}.\n")
+                        logger.info(f"UPDATE ECONOMY ERROR: No 'gov_type' found for {name}.\n")
                         pass
 
             else:
@@ -1240,37 +1246,37 @@ async def FoodCheck():
     try:
         cursor.execute('SELECT * FROM user_info')
         for row in cursor.fetchall():
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = row
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = row
 
             # fetch user's resources
             cursor.execute(
                 'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (nation_name,))
+                (name,))
             res_result = cursor.fetchone()
 
             # fetch user's production infra
             cursor.execute(
                 'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
-                (nation_name,))
+                (name,))
             infra_result = cursor.fetchone()
 
             # fetch user's military stats
             cursor.execute(
-                'SELECT * FROM user_mil WHERE name_nation = ?',
-                (nation_name,))
+                'SELECT * FROM user_mil WHERE name = ?',
+                (name,))
             mil_result = cursor.fetchone()
 
             # fetch user's population stats.
             cursor.execute(
                 'SELECT name, nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-                (nation_name,))
+                (name,))
             pop_result = cursor.fetchone()
 
             if infra_result:
                 name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
                 name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
                 name, nation_score, gdp, adult, balance = pop_result
-                name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
 
                 pop_food_req = round(adult//50)
                 riot_chance = random.randint(1, 10)
@@ -1279,14 +1285,17 @@ async def FoodCheck():
                 if (pop_food_req > food):
 
                     if riot_chance == 1:
-                        cursor.execute('UPDATE user_info SET happiness = happiness - ? WHERE user_id = ?', (15, user_id))
-                        conn.commit()
+                        if happiness < 0:
+                            pass
+                        else:
+                            cursor.execute('UPDATE user_info SET happiness = happiness - ? WHERE user_id = ?', (15, user_id))
+                            conn.commit()
 
                         adult_deaths = round(adult//24)
 
                         # Update the pop values.
                         cursor.execute('UPDATE user_stats SET adult = adult - ? WHERE name = ?',
-                                        (adult_deaths, nation_name))
+                                        (adult_deaths, name))
                         conn.commit()
 
                         # Calculates the damages for infra.
@@ -1312,10 +1321,10 @@ async def FoodCheck():
                                         militaryfactory = militaryfactory - ? WHERE name = ?''',
                                         (lumber_mill_damage, coal_mine_damage, iron_mine_damage,
                                         lead_mine_damage, bauxite_mine_damage, oil_derrick_damage, uranium_mine_damage, farm_damage, aluminium_factory_damage,
-                                        steel_factory_damage, oil_refinery_damage, ammo_factory_damage, concrete_factory_damage, militaryfactory_damage, nation_name))
+                                        steel_factory_damage, oil_refinery_damage, ammo_factory_damage, concrete_factory_damage, militaryfactory_damage, name))
                         conn.commit()
 
-                        logger.info(f"FOOD CHECK: {nation_name} failed the food check. RIOT DETECTED.\n")
+                        logger.info(f"FOOD CHECK: {name} failed the food check. RIOT DETECTED.\n")
 
                     else:
                         cursor.execute('UPDATE user_info SET happiness = happiness - ? WHERE user_id = ?', (15, user_id))
@@ -1325,10 +1334,10 @@ async def FoodCheck():
 
                         # Update the pop values.
                         cursor.execute('UPDATE user_stats SET adult = adult - ? WHERE name = ?',
-                                        (adult_deaths, nation_name))
+                                        (adult_deaths, name))
                         conn.commit()
 
-                        logger.info(f"FOOD CHECK: {nation_name} failed the food check. NO RIOT DETECTED.\n")
+                        logger.info(f"FOOD CHECK: {name} failed the food check. NO RIOT DETECTED.\n")
 
                 else:
                     if hospital_policy == "Enhanced Healthcare":
@@ -1338,14 +1347,14 @@ async def FoodCheck():
 
                         # Update the pop values.
                         cursor.execute('UPDATE user_stats SET adult = adult + ? WHERE name = ?',
-                                        (adult_growth, nation_name))
+                                        (adult_growth, name))
                         conn.commit()
 
                         # Update food value.
-                        cursor.execute('UPDATE resources SET food = food - ? WHERE name = ?', (new_food, nation_name))
+                        cursor.execute('UPDATE resources SET food = food - ? WHERE name = ?', (new_food, name))
                         conn.commit()
 
-                        logger.info(f"FOOD CHECK: {nation_name} passed the food check.\n")
+                        logger.info(f"FOOD CHECK: {name} passed the food check.\n")
                     else:
                         # Update the population with the growth
                         adult_growth = round(adult//3)
@@ -1353,14 +1362,14 @@ async def FoodCheck():
 
                         # Update the pop values.
                         cursor.execute('UPDATE user_stats SET adult = adult + ? WHERE name = ?',
-                                        (adult_growth, nation_name))
+                                        (adult_growth, name))
                         conn.commit()
 
                         # Update food value.
-                        cursor.execute('UPDATE resources SET food = food - ? WHERE name = ?', (new_food, nation_name))
+                        cursor.execute('UPDATE resources SET food = food - ? WHERE name = ?', (new_food, name))
                         conn.commit()
 
-                        logger.info(f"FOOD CHECK: {nation_name} passed the food check.\n")
+                        logger.info(f"FOOD CHECK: {name} passed the food check.\n")
 
             else:
                 logger.info(f"UPDATE ECONOMY ERROR: Error fetching stats of {user_id}.\n")
@@ -1373,37 +1382,37 @@ async def UpdateMilitary():
     try:
         cursor.execute('SELECT * FROM user_info')
         for row in cursor.fetchall():
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = row
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = row
 
             # fetch user's resources
             cursor.execute(
                 'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (nation_name,))
+                (name,))
             res_result = cursor.fetchone()
 
             # fetch user's production infra
             cursor.execute(
                 'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
-                (nation_name,))
+                (name,))
             infra_result = cursor.fetchone()
 
             # fetch user's military stats
             cursor.execute(
-                'SELECT * FROM user_mil WHERE name_nation = ?',
-                (nation_name,))
+                'SELECT * FROM user_mil WHERE name = ?',
+                (name,))
             mil_result = cursor.fetchone()
 
             # fetch user's population stats.
             cursor.execute(
                 'SELECT name, nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-                (nation_name,))
+                (name,))
             pop_result = cursor.fetchone()
 
             if infra_result:
                 name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
                 name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
                 name, nation_score, gdp, adult, balance = pop_result
-                name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
 
                 # Update Military.
                 prod_aa = anti_air_factory * militaryfactory // 42
@@ -1430,45 +1439,45 @@ async def UpdateMilitary():
                     prod_aa = 0
 
                     # Update tank count.
-                    cursor.execute('UPDATE user_mil SET tanks = tanks + ? WHERE name_nation = ?', (prod_tank, nation_name))
+                    cursor.execute('UPDATE user_mil SET tanks = tanks + ? WHERE name = ?', (prod_tank, name))
                     conn.commit()
 
                     # Update plane count.
-                    cursor.execute('UPDATE user_mil SET planes = planes + ? WHERE name_nation = ?', (prod_plane, nation_name))
+                    cursor.execute('UPDATE user_mil SET planes = planes + ? WHERE name = ?', (prod_plane, name))
                     conn.commit()
             
                     # Update artillery count.
-                    cursor.execute('UPDATE user_mil SET artillery = artillery + ? WHERE name_nation = ?', (prod_arty, nation_name))
+                    cursor.execute('UPDATE user_mil SET artillery = artillery + ? WHERE name = ?', (prod_arty, name))
                     conn.commit()
                 
                     # Update Anti-Air.
-                    cursor.execute('UPDATE user_mil SET anti_air = anti_air + ? WHERE name_nation = ?', (prod_aa, nation_name))
+                    cursor.execute('UPDATE user_mil SET anti_air = anti_air + ? WHERE name = ?', (prod_aa, name))
                     conn.commit()
 
-                    logger.info(f"UPDATE MILITARY: {nation_name} does not have enough resources. Military has not been updated.\n")
+                    logger.info(f"UPDATE MILITARY: {name} does not have enough resources. Military has not been updated.\n")
                 
                 else:  # if the user DOES have enough resources.
                     # Update tank count.
-                    cursor.execute('UPDATE user_mil SET tanks = tanks + ? WHERE name_nation = ?', (prod_tank, nation_name))
+                    cursor.execute('UPDATE user_mil SET tanks = tanks + ? WHERE name = ?', (prod_tank, name))
                     conn.commit()
 
                     # Update plane count.
-                    cursor.execute('UPDATE user_mil SET planes = planes + ? WHERE name_nation = ?', (prod_plane, nation_name))
+                    cursor.execute('UPDATE user_mil SET planes = planes + ? WHERE name = ?', (prod_plane, name))
                     conn.commit()
             
                     # Update artillery count.
-                    cursor.execute('UPDATE user_mil SET artillery = artillery + ? WHERE name_nation = ?', (prod_arty, nation_name))
+                    cursor.execute('UPDATE user_mil SET artillery = artillery + ? WHERE name = ?', (prod_arty, name))
                     conn.commit()
                 
                     # Update Anti-Air.
-                    cursor.execute('UPDATE user_mil SET anti_air = anti_air + ? WHERE name_nation = ?', (prod_aa, nation_name))
+                    cursor.execute('UPDATE user_mil SET anti_air = anti_air + ? WHERE name = ?', (prod_aa, name))
                     conn.commit()
                 
                     # Update resources for military.
-                    cursor.execute('UPDATE resources SET steel = steel - ?, gasoline = gasoline - ? WHERE name = ?', (mil_steel_usage, mil_gas_usage, nation_name))
+                    cursor.execute('UPDATE resources SET steel = steel - ?, gasoline = gasoline - ? WHERE name = ?', (mil_steel_usage, mil_gas_usage, name))
                     conn.commit()
 
-                    logger.info(f"UPDATE MILITARY: {nation_name}'s military has been updated.\n")
+                    logger.info(f"UPDATE MILITARY: {name}'s military has been updated.\n")
 
             else:
                 logger.info(f"UPDATE ECONOMY ERROR: Error fetching stats of {user_id}.\n")

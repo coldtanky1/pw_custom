@@ -21,17 +21,17 @@ class Demolish(commands.Cog):
             await ctx.send("Invalid building amount, try a positive number.")
             return
 
-        # fetch user nation_name
-        cursor.execute('SELECT nation_name FROM user_info WHERE user_id = ?', (user_id,))
+        # fetch user name
+        cursor.execute('SELECT name FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            nation_name = result[0]
+            name = result[0]
 
             # fetch user's production infra
             cursor.execute(
                 'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
-                (nation_name,))
+                (name,))
             infra_result = cursor.fetchone()
 
             if infra_result:
@@ -44,7 +44,7 @@ class Demolish(commands.Cog):
                         demolish_emb = await ctx.send(embed=embed)
 
                         # Remove the buildings from user's infra.
-                        cursor.execute('UPDATE infra SET basic_house = basic_house - ? WHERE name = ?', (amount, nation_name))
+                        cursor.execute('UPDATE infra SET basic_house = basic_house - ? WHERE name = ?', (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -58,7 +58,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET small_flat = small_flat - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -73,7 +73,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET apt_complex = apt_complex - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -86,7 +86,7 @@ class Demolish(commands.Cog):
                         demolish_emb = await ctx.send(embed=embed)
 
                         # Remove the buildings from user's infra.
-                        cursor.execute('UPDATE infra SET skyscraper = skyscraper - ? WHERE name = ?', (amount, nation_name))
+                        cursor.execute('UPDATE infra SET skyscraper = skyscraper - ? WHERE name = ?', (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -100,7 +100,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET lumber_mill = lumber_mill - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -115,7 +115,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET coal_mine = coal_mine - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -130,7 +130,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET iron_mine = iron_mine - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -145,7 +145,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET lead_mine = lead_mine - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -160,7 +160,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET bauxite_mine = bauxite_mine - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -175,7 +175,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET oil_derrick = oil_derrick - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -190,7 +190,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET uranium_mine = uranium_mine - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -205,7 +205,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET farm = farm - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -220,7 +220,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET aluminium_factory = aluminium_factory - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -235,7 +235,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET steel_factory = steel_factory - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -248,7 +248,7 @@ class Demolish(commands.Cog):
                         demolish_emb = await ctx.send(embed=embed)
 
                         # Remove the buildings from user's infra.
-                        cursor.execute('UPDATE infra SET oil_refinery = oil_refinery - ? WHERE name = ?', (amount, nation_name))
+                        cursor.execute('UPDATE infra SET oil_refinery = oil_refinery - ? WHERE name = ?', (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -262,7 +262,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET ammo_factory = ammo_factory - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -277,7 +277,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET concrete_factory = concrete_factory - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',
@@ -292,7 +292,7 @@ class Demolish(commands.Cog):
 
                         # Remove the buildings from user's infra.
                         cursor.execute('UPDATE infra SET militaryfactory = militaryfactory - ? WHERE name = ?',
-                                       (amount, nation_name))
+                                       (amount, name))
                         conn.commit()
 
                         done_emb = discord.Embed(title="Demolish", type='rich',

@@ -24,23 +24,23 @@ class Military(commands.Cog):
             await ctx.send("Invalid amount, please try a positive number.")
             return
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
 
             # fetch user's resources
             cursor.execute(
                 'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (nation_name,))
+                (name,))
             res_result = cursor.fetchone()
 
             # fetch user's military stats
             cursor.execute(
-                'SELECT name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks FROM user_mil WHERE name_nation = ?',
-                (nation_name,))
+                'SELECT name, troops, planes, weapon, tanks, artillery, anti_air, barracks FROM user_mil WHERE name = ?',
+                (name,))
             mil_result = cursor.fetchone()
 
             if res_result:
@@ -65,10 +65,10 @@ class Military(commands.Cog):
 
                         await asyncio.sleep(time_turns)
 
-                        cursor.execute('UPDATE user_mil SET troops = troops + ? WHERE name_nation = ?', (amount, nation_name))
+                        cursor.execute('UPDATE user_mil SET troops = troops + ? WHERE name = ?', (amount, name))
                         conn.commit()
 
-                        cursor.execute('UDPATE user_stats SET adult = adult - ? WHERE name = ?', (amount, nation_name))
+                        cursor.execute('UDPATE user_stats SET adult = adult - ? WHERE name = ?', (amount, name))
                         conn.commit()
                 else:
                     inf_ammo = amount * 0.2
@@ -89,10 +89,10 @@ class Military(commands.Cog):
 
                         await asyncio.sleep(time_turns)
 
-                        cursor.execute('UPDATE user_mil SET troops = troops + ? WHERE name_nation = ?', (amount, nation_name))
+                        cursor.execute('UPDATE user_mil SET troops = troops + ? WHERE name = ?', (amount, name))
                         conn.commit()
 
-                        cursor.execute('UDPATE user_stats SET adult = adult - ? WHERE name = ?', (amount, nation_name))
+                        cursor.execute('UDPATE user_stats SET adult = adult - ? WHERE name = ?', (amount, name))
                         conn.commit()
             else:
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
@@ -116,33 +116,33 @@ class Military(commands.Cog):
             await ctx.send("Invalid amount, please try a positive number.")
             return
 
-        # fetch user nation_name
-        cursor.execute('SELECT nation_name FROM user_info WHERE user_id = ?', (user_id,))
+        # fetch user name
+        cursor.execute('SELECT name FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            nation_name = result[0]
+            name = result[0]
 
             # fetch user's resources
             cursor.execute(
                 'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (nation_name,))
+                (name,))
             res_result = cursor.fetchone()
 
             # fetch user's production infra
             cursor.execute(
                 'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
-                (nation_name,))
+                (name,))
             infra_result = cursor.fetchone()
 
             # fetch user's military stats
             cursor.execute(
-                'SELECT name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name_nation = ?',
-                (nation_name,))
+                'SELECT name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
+                (name,))
             mil_result = cursor.fetchone()
 
             if mil_result and res_result and infra_result:
-                name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
                 name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
                 infra_name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
 
@@ -163,19 +163,19 @@ class Military(commands.Cog):
                             usage_tank_gas = amount * 1.25
 
                             # Update military factory count.
-                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory - ? WHERE name = ?', (amount, nation_name))
+                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory - ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             # Update factory count.
-                            cursor.execute('UPDATE user_mil SET tank_factory = tank_factory + ? WHERE name_nation = ?', (amount, nation_name))
+                            cursor.execute('UPDATE user_mil SET tank_factory = tank_factory + ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             # Update resources.
-                            cursor.execute('UPDATE resources SET steel = steel - ?, gasoline = gasoline - ? WHERE name = ? ', (usage_tank_steel, usage_tank_gas, nation_name))
+                            cursor.execute('UPDATE resources SET steel = steel - ?, gasoline = gasoline - ? WHERE name = ? ', (usage_tank_steel, usage_tank_gas, name))
                             conn.commit()
 
                             # Update tank count.
-                            cursor.execute('UPDATE user_mil SET tanks = tanks + ? WHERE name_nation = ?', (prod_tank, nation_name))
+                            cursor.execute('UPDATE user_mil SET tanks = tanks + ? WHERE name = ?', (prod_tank, name))
                             conn.commit()
 
                             allo_done = discord.Embed(title='Allocation | Tank', type='rich',
@@ -197,19 +197,19 @@ class Military(commands.Cog):
                             usage_plane_gas = amount * 2
 
                             # Update military factory count.
-                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory - ? WHERE name = ?', (amount, nation_name))
+                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory - ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             # Update factory count.
-                            cursor.execute('UPDATE user_mil SET plane_factory = plane_factory + ? WHERE name_nation = ?', (amount, nation_name))
+                            cursor.execute('UPDATE user_mil SET plane_factory = plane_factory + ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             # Update resources.
-                            cursor.execute('UPDATE resources SET steel = steel - ?, gasoline = gasoline - ? WHERE name = ? ', (usage_plane_steel, usage_plane_gas, nation_name))
+                            cursor.execute('UPDATE resources SET steel = steel - ?, gasoline = gasoline - ? WHERE name = ? ', (usage_plane_steel, usage_plane_gas, name))
                             conn.commit()
 
                             # Update tank count.
-                            cursor.execute('UPDATE user_mil SET planes = planes + ? WHERE name_nation = ?', (prod_plane, nation_name))
+                            cursor.execute('UPDATE user_mil SET planes = planes + ? WHERE name = ?', (prod_plane, name))
                             conn.commit()
 
                             allo_done = discord.Embed(title='Allocation | Plane', type='rich',
@@ -231,19 +231,19 @@ class Military(commands.Cog):
                             usage_arty_gas = amount * 0.75
 
                             # Update military factory count.
-                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory - ? WHERE name = ?', (amount, nation_name))
+                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory - ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             # Update factory count.
-                            cursor.execute('UPDATE user_mil SET artillery_factory = artillery_factory + ? WHERE name_nation = ?', (amount, nation_name))
+                            cursor.execute('UPDATE user_mil SET artillery_factory = artillery_factory + ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             # Update resources.
-                            cursor.execute('UPDATE resources SET steel = steel - ?, gasoline = gasoline - ? WHERE name = ? ', (usage_arty_steel, usage_arty_gas, nation_name))
+                            cursor.execute('UPDATE resources SET steel = steel - ?, gasoline = gasoline - ? WHERE name = ? ', (usage_arty_steel, usage_arty_gas, name))
                             conn.commit()
 
                             # Update tank count.
-                            cursor.execute('UPDATE user_mil SET artillery = artillery + ? WHERE name_nation = ?', (prod_arty, nation_name))
+                            cursor.execute('UPDATE user_mil SET artillery = artillery + ? WHERE name = ?', (prod_arty, name))
                             conn.commit()
 
                             allo_done = discord.Embed(title='Allocation | Artillery', type='rich',
@@ -265,19 +265,19 @@ class Military(commands.Cog):
                             usage_aa_gas = amount * 1
 
                             # Update military factory count.
-                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory - ? WHERE name = ?', (amount, nation_name))
+                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory - ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             # Update factory count.
-                            cursor.execute('UPDATE user_mil SET anti_air_factory = anti_air_factory + ? WHERE name_nation = ?', (amount, nation_name))
+                            cursor.execute('UPDATE user_mil SET anti_air_factory = anti_air_factory + ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             # Update resources.
-                            cursor.execute('UPDATE resources SET steel = steel - ?, gasoline = gasoline - ? WHERE name = ? ', (usage_aa_steel, usage_aa_gas, nation_name))
+                            cursor.execute('UPDATE resources SET steel = steel - ?, gasoline = gasoline - ? WHERE name = ? ', (usage_aa_steel, usage_aa_gas, name))
                             conn.commit()
 
                             # Update tank count.
-                            cursor.execute('UPDATE user_mil SET anti_air = anti_air + ? WHERE name_nation = ?', (prod_aa, nation_name))
+                            cursor.execute('UPDATE user_mil SET anti_air = anti_air + ? WHERE name = ?', (prod_aa, name))
                             conn.commit()
 
                             allo_done = discord.Embed(title='Allocation | Anti-air', type='rich',
@@ -303,33 +303,33 @@ class Military(commands.Cog):
             await ctx.send("Invalid amount, please try a positive number.")
             return
 
-        # fetch user nation_name
-        cursor.execute('SELECT nation_name FROM user_info WHERE user_id = ?', (user_id,))
+        # fetch user name
+        cursor.execute('SELECT name FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            nation_name = result[0]
+            name = result[0]
 
             # fetch user's resources
             cursor.execute(
                 'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (nation_name,))
+                (name,))
             res_result = cursor.fetchone()
 
             # fetch user's production infra
             cursor.execute(
                 'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
-                (nation_name,))
+                (name,))
             infra_result = cursor.fetchone()
 
             # fetch user's military stats
             cursor.execute(
-                'SELECT name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name_nation = ?',
-                (nation_name,))
+                'SELECT name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
+                (name,))
             mil_result = cursor.fetchone()
 
             if mil_result and res_result and infra_result:
-                name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
                 name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
                 infra_name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
 
@@ -346,11 +346,11 @@ class Military(commands.Cog):
                             deallo_emb = await ctx.send(embed=deallocating)
 
                             # Update military factory count.
-                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory + ? WHERE name = ?', (amount, nation_name))
+                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory + ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             # Update factory count.
-                            cursor.execute('UPDATE user_mil SET tank_factory = tank_factory - ? WHERE name_nation = ?', (amount, nation_name))
+                            cursor.execute('UPDATE user_mil SET tank_factory = tank_factory - ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             deallo_done = discord.Embed(title='Deallocation | Tank', type='rich',
@@ -368,11 +368,11 @@ class Military(commands.Cog):
                             deallo_emb = await ctx.send(embed=deallocating)
 
                             # Update military factory count.
-                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory + ? WHERE name = ?', (amount, nation_name))
+                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory + ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             # Update factory count.
-                            cursor.execute('UPDATE user_mil SET plane_factory = plane_factory - ? WHERE name_nation = ?', (amount, nation_name))
+                            cursor.execute('UPDATE user_mil SET plane_factory = plane_factory - ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             deallo_done = discord.Embed(title='Deallocation | Plane', type='rich',
@@ -390,11 +390,11 @@ class Military(commands.Cog):
                             deallo_emb = await ctx.send(embed=deallocating)
 
                             # Update military factory count.
-                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory + ? WHERE name = ?', (amount, nation_name))
+                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory + ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             # Update factory count.
-                            cursor.execute('UPDATE user_mil SET artillery_factory = artillery_factory - ? WHERE name_nation = ?', (amount, nation_name))
+                            cursor.execute('UPDATE user_mil SET artillery_factory = artillery_factory - ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             deallo_done = discord.Embed(title='Deallocation | Artillery', type='rich',
@@ -412,11 +412,11 @@ class Military(commands.Cog):
                             deallo_emb = await ctx.send(embed=deallocating)
 
                             # Update military factory count.
-                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory + ? WHERE name = ?', (amount, nation_name))
+                            cursor.execute('UPDATE infra SET militaryfactory = militaryfactory + ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             # Update factory count.
-                            cursor.execute('UPDATE user_mil SET anti_air_factory = anti_air_factory - ? WHERE name_nation = ?', (amount, nation_name))
+                            cursor.execute('UPDATE user_mil SET anti_air_factory = anti_air_factory - ? WHERE name = ?', (amount, name))
                             conn.commit()
 
                             deallo_done = discord.Embed(title='Deallocation | Anti-air', type='rich',

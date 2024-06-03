@@ -60,7 +60,7 @@ class Create(commands.Cog):
         await emb.edit(embed=embed)
 
         # insert data into the table
-        cursor.execute('INSERT INTO user_info (user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+        cursor.execute('INSERT INTO user_info (user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
         (user_id, nat_name, 1, 'Democracy', 100, 'Volunteer', 'Moderate Freedom', 'Normal Police', 'Normal Firefighers', 'Normal Healthcare', "In Peace", 50))
         conn.commit()
 
@@ -73,7 +73,7 @@ class Create(commands.Cog):
 
         # add base mil stats to the user
         cursor.execute(
-            'INSERT INTO user_mil (name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO user_mil (name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             (nat_name, 10000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
         conn.commit()
 

@@ -28,6 +28,15 @@
         {% endfor %}
     </ul>
     <h2>Modify Data</h2>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
     <form action="{{ url_for('update') }}" method="post">
         <input type="hidden" name="nation_name" value="{{ nation_name }}">
         <input type="hidden" name="table" value="{{ selection }}">
@@ -51,6 +60,9 @@
         <label for="amount">Amount:</label>
         <input type="number" id="amount" name="amount" required><br><br>
         <input type="submit" value="Submit">
+    </form>
+    <form action="{{ url_for('index') }}" method="get">
+        <input type="submit" value="Go back to home page.">
     </form>
 </body>
 </html>

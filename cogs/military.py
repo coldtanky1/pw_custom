@@ -65,10 +65,10 @@ class Military(commands.Cog):
 
                         await asyncio.sleep(time_turns)
 
-                        cursor.execute('UPDATE user_mil SET troops = troops + ? WHERE name = ?', (amount, name))
+                        cursor.execute('UDPATE user_stats SET adult = adult - ? WHERE name = ?', (amount, name))
                         conn.commit()
 
-                        cursor.execute('UDPATE user_stats SET adult = adult - ? WHERE name = ?', (amount, name))
+                        cursor.execute('UPDATE user_mil SET troops = troops + ? WHERE name = ?', (amount, name))
                         conn.commit()
                 else:
                     inf_ammo = amount * 0.2
@@ -89,10 +89,10 @@ class Military(commands.Cog):
 
                         await asyncio.sleep(time_turns)
 
-                        cursor.execute('UPDATE user_mil SET troops = troops + ? WHERE name = ?', (amount, name))
+                        cursor.execute('UDPATE user_stats SET adult = adult - ? WHERE name = ?', (amount, name))
                         conn.commit()
 
-                        cursor.execute('UDPATE user_stats SET adult = adult - ? WHERE name = ?', (amount, name))
+                        cursor.execute('UPDATE user_mil SET troops = troops + ? WHERE name = ?', (amount, name))
                         conn.commit()
             else:
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',

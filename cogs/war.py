@@ -1,6 +1,6 @@
 import sqlite3
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 import asyncio
 
 
@@ -10,60 +10,43 @@ conn = sqlite3.connect('player_info.db')
 cursor = conn.cursor()
 
 
-armor_values = {
-    "troop_armor": 3,
-    "tank_armor": 100,
-    "plane_armor": 200,
-    "arty_armor": 3,
-    "aa_armor": 10
-}
-
 health_values = {
-    "troop_hp": 25,
-    "tank_hp": 2000,
-    "plane_hp": 1800,
-    "arty_hp": 10,
-    "aa_hp": 75
+    "troop_hp": 28,
+    "tank_hp": 2100,
+    "plane_hp": 2000,
+    "arty_hp": 13,
+    "aa_hp": 85
 }
 
-body_damage_values = {
-    "troop_bdmg": 4,
-    "tank_bdmg": 100,
-    "plane_bdmg": 300,
-    "arty_bdmg": 3000,
-    "aa_bdmg": 1500
+damage_values = {
+    "troop_dmg": 4,
+    "tank_dmg": 100,
+    "plane_dmg": 300,
+    "arty_dmg": 3000,
+    "aa_dmg": 1500
 }
-
-armor_damage_values = {
-    "troop_admg": 1,
-    "tank_admg": 300,
-    "plane_admg": 900,
-    "arty_admg": 300,
-    "aa_admg": 5000
-}
-
 
 class War(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
-    @commands.cooldown(1, 3600, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def war(self, ctx, user: discord.User):
         attker_id = ctx.author.id
         target_id = user.id
 
-        # fetch user nation_name
+        # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (attker_id,))
         attker_result = cursor.fetchone()
 
-        # fetch target user nation_name
+        # fetch target user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (target_id,))
         target_result = cursor.fetchone()
 
         if attker_result and target_result:
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = attker_result
-            user_id, nation_name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = target_result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = attker_result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = target_result
 
             attker_name = attker_result[1]
             target_name = target_result[1]
@@ -82,7 +65,7 @@ class War(commands.Cog):
 
                 # fetch attacker's mil stats
                 cursor.execute(
-                    'SELECT * FROM user_mil WHERE name_nation = ?',
+                    'SELECT * FROM user_mil WHERE name = ?',
                     (attker_name,))
                 attker_mil_result = cursor.fetchone()
 
@@ -94,15 +77,15 @@ class War(commands.Cog):
 
                 # fetch target user's mil stats
                 cursor.execute(
-                    'SELECT * FROM user_mil WHERE name_nation = ?',
+                    'SELECT * FROM user_mil WHERE name = ?',
                     (target_name,))
                 target_mil_result = cursor.fetchone()
 
                 if attker_res_result and target_res_result and target_mil_result and attker_mil_result:
                     name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = attker_res_result
                     name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = target_res_result
-                    name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = attker_mil_result
-                    name_nation, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
+                    name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = attker_mil_result
+                    name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
 
                     # The attacker's mil stats
                     attker_troops = attker_mil_result[1]
@@ -129,52 +112,92 @@ class War(commands.Cog):
                     attker_ground_tactic = ""
                     attker_air_tactic = ""
 
+                    # Ask for the ground tactics
                     try:
                         await target_user.send("What ground tactic would you like to use? (reply with a number)\n"
                                             "**1.** Trench Warfare\n"
-                                            "**2.** Creeping Barage\n"
+                                            "**2.** Creeping Barrage\n"
                                             "**3.** Superior Firepower\n"
                                             "**4.** Massed Assault\n"
                                             "**5.** Elastic Defense\n"
                                             "**6.** Armored Spearhead\n")
 
                         def check(message):
-                            return target_user != attker_user and message.author == target_user
-
+                            return message.author == target_user
+                        
                         msg = await self.bot.wait_for('message', timeout=60, check=check)
 
-                        if msg.content == '1':
-                            await target_user.send("Selected **Trench Warfare** as ground tactic.")
-                            target_ground_tactic = "Trench Warfare"
+                        match msg.content:
+                            case "1":
+                                await target_user.send("Selected **Trench Warfare** as ground tactic.")
+                                target_ground_tactic = "Trench Warfare"
+                            case "2":
+                                await target_user.send("Selected **Creeping Barrage** as ground tactic.")
+                                target_ground_tactic = "Creeping Barrage"
+                            case "3":
+                                await target_user.send("Selected **Superior Firepower** as ground tactic.")
+                                target_ground_tactic = "Superior Firepower"
+                            case "4":
+                                await target_user.send("Selected **Massed Assault** as ground tactic.")
+                                target_ground_tactic = "Massed Assault"
+                            case "5":
+                                await target_user.send("Selected **Elastic Defense** as ground tactic.")
+                                target_ground_tactic = "Elastic Defense"
+                            case "6":
+                                await target_user.send("Selected **Armored Spearhead** as ground tactic.")
+                                target_ground_tactic = "Armored Spearhead"
+                            case _:
+                                pass
 
-                        elif msg.content == '2':
-                            await target_user.send("Selected **Creeping Barage** as ground tactic.")
-                            target_ground_tactic = "Creeping Barage"
-
-                        elif msg.content == '3':
-                            await target_user.send("Selected **Superior Firepower** as ground tactic.")
-                            target_ground_tactic = "Superior Firepower"
-
-                        elif msg.content == '4':
-                            await target_user.send("Selected **Massed Assault** as ground tactic.")
-                            target_ground_tactic = "Massed Assault"
-
-                        elif msg.content == '5':
-                            await target_user.send("Selected **Elastic Defense** as ground tactic.")
-                            target_ground_tactic = "Elastic Defense"
-
-                        elif msg.content == '6':
-                            await target_user.send("Selected **Armored Spearhead** as ground tactic.")
-                            target_ground_tactic = "Armored Spearhead"
-
-                        else:
-                            await target_user.send("Invalid")
-                            pass
-                            
                     except asyncio.TimeoutError:
-                            return await target_user.send("You took too long to respond.")
+                        return await target_user.send("You took too long to respond.")
 
                     await asyncio.sleep(10)
+
+                    # Ask the attacker for tactic.
+                    try:
+                        await attker_user.send("What ground tactic would you like to use? (reply with a number)\n"
+                                            "**1.** Trench Warfare\n"
+                                            "**2.** Creeping Barrage\n"
+                                            "**3.** Superior Firepower\n"
+                                            "**4.** Massed Assault\n"
+                                            "**5.** Elastic Defense\n"
+                                            "**6.** Armored Spearhead\n")
+
+                        def check3(message):
+                            return message.author == attker_user
+
+                        msg = await self.bot.wait_for('message', timeout=60, check=check3)
+
+                        match msg.content:
+                            case "1":
+                                await attker_user.send("Selected **Trench Warfare** as ground tactic.")
+                                attker_ground_tactic = "Trench Warfare"
+                            case "2":
+                                await attker_user.send("Selected **Creeping Barrage** as ground tactic.")
+                                attker_ground_tactic = "Creeping Barrage"
+                            case "3":
+                                await attker_user.send("Selected **Superior Firepower** as ground tactic.")
+                                attker_ground_tactic = "Superior Firepower"
+                            case "4":
+                                await attker_user.send("Selected **Massed Assault** as ground tactic.")
+                                attker_ground_tactic = "Massed Assault"
+                            case "5":
+                                await attker_user.send("Selected **Elastic Defense** as ground tactic.")
+                                attker_ground_tactic = "Elastic Defense"
+                            case "6":
+                                await attker_user.send("Selected **Armored Spearhead** as ground tactic.")
+                                attker_ground_tactic = "Armored Spearhead"
+                            case _:
+                                pass
+
+                    except asyncio.TimeoutError:
+                        return await attker_user.send("You took too long to respond.")
+                    
+                    # Ask for the air tactics
+                    await asyncio.sleep(10)
+
+                    # Ask the defender for air tactic.
                     try:
                         await target_user.send("What air tactic would you like to use? (reply with a number)\n"
                                             "**1.** Scramble\n"
@@ -183,80 +206,31 @@ class War(commands.Cog):
                                             "**4.** Superior Firepower\n")
 
                         def check2(message):
-                            return target_user != attker_user and message.author == target_user
+                            return message.author == target_user
 
                         msg2 = await self.bot.wait_for('message', timeout=60, check=check2)
 
-                        if msg2.content == '1':
-                            await target_user.send("Selected **Scramble** as air tactic.")
-                            target_air_tactic = "Scramble"
-
-                        elif msg2.content == '2':
-                            await target_user.send("Selected **Close Air Support** as air tactic.")
-                            target_air_tactic = "Close Air Support"
-
-                        elif msg2.content == '3':
-                            await target_user.send("Selected **Formation Flying** as air tactic.")
-                            target_air_tactic = "Formation Flying"
-
-                        elif msg2.content == '4':
-                            await target_user.send("Selected **Superior Firepower** as air tactic.")
-                            target_air_tactic = "Superior Firepower"
-
-                        else:
-                            await target_user.send("Invalid")
-                            pass
+                        match msg2.content:
+                            case "1":
+                                await target_user.send("Selected **Scramble** as air tactic.")
+                                target_air_tactic = "Scramble"
+                            case "2":
+                                await target_user.send("Selected **Close Air Support** as air tactic.")
+                                target_air_tactic = "Close Air Support"
+                            case "3":
+                                await target_user.send("Selected **Formation Flying** as air tactic.")
+                                target_air_tactic = "Formation Flying"
+                            case "4":
+                                await target_user.send("Selected **Superior Firepower** as air tactic.")
+                                target_air_tactic = "Superior Firepower"
+                            case _:
+                                pass
 
                     except asyncio.TimeoutError:
                         return await target_user.send("You took too long to respond.")
-                    
-                    await asyncio.sleep(10)
-                    # Ask the attacker for tactic.
-                    try:
-                        await attker_user.send("What ground tactic would you like to use? (reply with a number)\n"
-                                            "**1.** Trench Warfare\n"
-                                            "**2.** Creeping Barage\n"
-                                            "**3.** Superior Firepower\n"
-                                            "**4.** Massed Assault\n"
-                                            "**5.** Elastic Defense\n"
-                                            "**6.** Armored Spearhead\n")
 
-                        def check3(message):
-                            return attker_user != target_user and message.author == attker_user
 
-                        msg = await self.bot.wait_for('message', timeout=60, check=check3)
-
-                        if msg.content == '1':
-                            await attker_user.send("Selected **Trench Warfare** as ground tactic.")
-                            attker_ground_tactic = "Trench Warfare"
-
-                        elif msg.content == '2':
-                            await attker_user.send("Selected **Creeping Barage** as ground tactic.")
-                            attker_ground_tactic = "Creeping Barage"
-
-                        elif msg.content == '3':
-                            await attker_user.send("Selected **Superior Firepower** as ground tactic.")
-                            attker_ground_tactic = "Superior Firepower"
-
-                        elif msg.content == '4':
-                            await attker_user.send("Selected **Massed Assault** as ground tactic.")
-                            attker_ground_tactic = "Massed Assault"
-
-                        elif msg.content == '5':
-                            await attker_user.send("Selected **Elastic Defense** as ground tactic.")
-                            attker_ground_tactic = "Elastic Defense"
-
-                        elif msg.content == '6':
-                            await attker_user.send("Selected **Armored Spearhead** as ground tactic.")
-                            attker_ground_tactic = "Armored Spearhead"
-
-                        else:
-                            await attker_user.send("Invalid")
-                            pass
-                            
-                    except asyncio.TimeoutError:
-                            return await attker_user.send("You took too long to respond.")
-
+                    # Ask for the air tactics
                     await asyncio.sleep(10)
                     try:
                         await attker_user.send("What air tactic would you like to use? (reply with a number)\n"
@@ -265,718 +239,260 @@ class War(commands.Cog):
                                             "**3.** Formation Flying\n"
                                             "**4.** Superior Firepower\n")
 
-                        def check4(message):
-                            return attker_user != target_user and message.author == attker_user
+                        def check2(message):
+                            return message.author == attker_user
 
-                        msg2 = await self.bot.wait_for('message', timeout=60, check=check4)
+                        msg2 = await self.bot.wait_for('message', timeout=60, check=check2)
 
-                        if msg2.content == '1':
-                            await attker_user.send("Selected **Scramble** as air tactic.")
-                            attker_air_tactic = "Scramble"
-
-                        elif msg2.content == '2':
-                            await attker_user.send("Selected **Close Air Support** as air tactic.")
-                            attker_air_tactic = "Close Air Support"
-
-                        elif msg2.content == '3':
-                            await attker_user.send("Selected **Formation Flying** as air tactic.")
-                            attker_air_tactic = "Formation Flying"
-
-                        elif msg2.content == '4':
-                            await attker_user.send("Selected **Superior Firepower** as air tactic.")
-                            attker_air_tactic = "Superior Firepower"
-
-                        else:
-                            await attker_user.send("Invalid")
-                            pass
+                        match msg2.content:
+                            case "1":
+                                await attker_user.send("Selected **Scramble** as air tactic.")
+                                attker_air_tactic = "Scramble"
+                            case "2":
+                                await attker_user.send("Selected **Close Air Support** as air tactic.")
+                                attker_air_tactic = "Close Air Support"
+                            case "3":
+                                await attker_user.send("Selected **Formation Flying** as air tactic.")
+                                attker_air_tactic = "Formation Flying"
+                            case "4":
+                                await attker_user.send("Selected **Superior Firepower** as air tactic.")
+                                attker_air_tactic = "Superior Firepower"
+                            case _:
+                                pass
 
                     except asyncio.TimeoutError:
                         return await attker_user.send("You took too long to respond.")
 
-                    # The health and armor points
-                    attker_troop_health = (attker_troops * health_values["troop_hp"])
-                    attker_veh_health = (attker_tanks * health_values["tank_hp"]) + (attker_artillery * health_values["arty_hp"]) + (attker_aa * health_values["aa_hp"])
-                    attker_troop_armor = (attker_troops * armor_values["troop_armor"])
-                    attker_veh_armor = (attker_tanks * armor_values["tank_armor"]) + (attker_artillery * armor_values["arty_armor"]) + (attker_aa * armor_values["aa_armor"])
 
-                    target_troop_health = (target_troops * health_values["troop_hp"])
-                    target_veh_health = (target_tanks * health_values["tank_hp"]) + (target_artillery * health_values["arty_hp"]) + (target_aa * health_values["aa_hp"])
-                    target_troop_armor = (target_troops * armor_values["troop_armor"])
-                    target_veh_armor = (target_tanks * armor_values["tank_armor"]) + (target_artillery * armor_values["arty_armor"]) + (target_aa * armor_values["aa_armor"])
+                    # Attacker stats
+                    attker_troops_hp = attker_troops * health_values["troop_hp"]
+                    attker_veh_hp = ((attker_tanks * health_values["tank_hp"]) + (attker_artillery * health_values["arty_hp"]) + 
+                                    (attker_aa * health_values["aa_hp"]))
+                    attker_total_hp = attker_troops_hp + attker_veh_hp
 
-                    # The body and armor damage points
-                    attker_troop_admg = (attker_troops * armor_damage_values["troop_admg"])
-                    attker_veh_admg = (attker_tanks * armor_damage_values["tank_admg"]) + (attker_artillery * armor_damage_values["arty_admg"]) + (attker_aa * armor_damage_values["aa_admg"])
-                    attker_troop_bdmg = (attker_troops * body_damage_values["troop_bdmg"])
-                    attker_veh_bdmg = (attker_tanks * body_damage_values["tank_bdmg"]) + (attker_artillery * body_damage_values["arty_bdmg"]) + (attker_aa * body_damage_values["aa_bdmg"])
+                    attker_troops_dmg = attker_troops * damage_values["troop_dmg"]
+                    attker_veh_dmg = ((attker_tanks * damage_values["tank_dmg"]) + (attker_artillery * damage_values["arty_dmg"]) + 
+                                    (attker_aa * damage_values["aa_dmg"]))
+                    attker_total_dmg = attker_troops_dmg + attker_veh_dmg
 
-                    target_troop_admg = (target_troops * armor_damage_values["troop_admg"])
-                    target_veh_admg = (target_tanks * armor_damage_values["tank_admg"]) + (target_artillery * armor_damage_values["arty_admg"]) + (target_aa * armor_damage_values["aa_admg"])
-                    target_troop_bdmg = (target_troops * body_damage_values["troop_bdmg"])
-                    target_veh_bdmg = (target_tanks * body_damage_values["tank_bdmg"]) + (target_artillery * body_damage_values["arty_bdmg"]) + (target_aa * body_damage_values["aa_bdmg"])
+                    # Defender stats
+                    target_troops_hp = target_troops * health_values["troop_hp"]
+                    target_veh_hp = ((target_tanks * health_values["tank_hp"]) + (target_artillery * health_values["arty_hp"]) + 
+                                    (target_aa * health_values["aa_hp"]))
+                    target_total_hp = target_troops_hp + target_veh_hp
 
-                    # Bonus health points from tactics
-                    target_troop_hp_bonus = 0
-                    target_veh_hp_bonus = 0
+                    target_troops_dmg = target_troops * damage_values["troop_dmg"]
+                    target_veh_dmg = ((target_tanks * damage_values["tank_dmg"]) + (target_artillery * damage_values["arty_dmg"]) + 
+                                    (target_aa * damage_values["aa_dmg"]))
+                    target_total_dmg = target_troops_dmg + target_veh_dmg
 
-                    attker_troop_hp_bonus = 0
-                    attker_veh_hp_bonus = 0
+                    # Bonuses
+                    target_hp_bonus = 0
+                    attker_hp_bonus = 0
 
-                    target_troop_armor_bonus = 0
-                    target_veh_armor_bonus = 0
+                    target_dmg_bonus = 0
+                    attker_dmg_bonus = 0
 
-                    attker_troop_armor_bonus = 0
-                    attker_veh_armor_bonus = 0
-                    
-                    # Bonus damage points from tactics
-                    target_veh_bdmg_bonus = 0
-                    target_troop_bdmg_bonus = 0
-                    target_veh_admg_bonus = 0
-                    target_troop_admg_bonus = 0
-
-                    attker_troop_admg_bonus = 0
-                    attker_veh_admg_bonus = 0
-                    attker_troop_bdmg_bonus = 0
-                    attker_veh_bdmg_bonus = 0
-
-                    match target_ground_tactic:
+                    match target_ground_tactic.lower():
                         case "Trench Warfare":
-                            target_troop_hp_bonus += target_troop_health * 1.3
-                            target_veh_hp_bonus += target_veh_health * 1.3
-
-                            target_troop_armor_bonus += target_troop_armor * 1.5
-                            target_veh_armor_bonus += target_veh_armor * 1.5
-
-                            target_troop_admg_bonus += target_troop_admg * 1.05
-                            target_veh_admg_bonus += target_veh_admg * 1.05
-
-                            target_troop_bdmg_bonus += target_troop_bdmg * 1.05
-                            target_veh_bdmg_bonus += target_veh_bdmg * 1.05
-
-                        case "Creeping Barage":
-                            target_troop_hp_bonus += target_troop_health * 0.95 # -1.05
-                            target_veh_hp_bonus += 0
-
-                            target_troop_armor_bonus += target_troop_armor * 0.95 # -1.05
-                            target_veh_armor_bonus += 0
-
-                            target_troop_admg_bonus += target_troop_admg * 1.05
-                            target_veh_admg_bonus += target_veh_admg * 1.05
-
-                            target_troop_bdmg_bonus += target_troop_bdmg * 1.15
-                            target_veh_bdmg_bonus += target_veh_bdmg * 1.15
-
+                            target_hp_bonus += target_total_hp * 0.3
+                            target_dmg_bonus += target_total_dmg * 0.05
+                        case "Creeping Barrage":
+                            target_hp_bonus += target_total_hp * -0.05
+                            target_dmg_bonus += target_total_dmg * 0.15
                         case "Superior Firepower":
-                            target_troop_hp_bonus += target_troop_health * 1.01
-                            target_veh_hp_bonus += target_veh_health * 1.05
-
-                            target_troop_armor_bonus += target_troop_armor * 1.05
-                            target_veh_armor_bonus += target_veh_armor * 1.05
-
-                            target_troop_admg_bonus += target_troop_admg * 1.25
-                            target_veh_admg_bonus += target_veh_admg * 1.5
-
-                            target_troop_bdmg_bonus += target_troop_bdmg * 1.5
-                            target_veh_bdmg_bonus += target_veh_bdmg * 1.25
-
+                            target_hp_bonus += target_total_hp * 0.1
+                            target_dmg_bonus += target_total_dmg * 0.50
                         case "Massed Assault":
-                            target_troop_hp_bonus += target_troop_health * 0.95 # -1.05
-                            target_veh_hp_bonus += target_veh_health * 0.95 # -1.05
-
-                            target_troop_armor_bonus += target_troop_armor * 0.95 # -1.05
-                            target_veh_armor_bonus += 0
-
-                            target_troop_admg_bonus += target_troop_admg * 1.1
-                            target_veh_admg_bonus += target_veh_admg * 1.1
-
-                            target_troop_bdmg_bonus += target_troop_bdmg * 1.35
-                            target_veh_bdmg_bonus += target_veh_bdmg * 1.15
-
+                            target_hp_bonus += target_total_hp * 0.35
+                            target_dmg_bonus += target_total_dmg * -0.05
                         case "Elastic Defense":
-                            target_troop_hp_bonus += target_troop_health * 1.1
-                            target_veh_hp_bonus += target_veh_health * 1.05
-
-                            target_troop_armor_bonus += target_troop_armor * 1.05
-                            target_veh_armor_bonus += target_veh_armor * 1.1
-
-                            target_troop_admg_bonus += target_troop_admg * 1.05
-                            target_veh_admg_bonus += target_veh_admg * 1.15
-
-                            target_troop_bdmg_bonus += target_troop_bdmg * 1.05
-                            target_veh_bdmg_bonus += target_veh_bdmg * 1.05
-
+                            target_hp_bonus += target_total_hp * 0.10
+                            target_dmg_bonus += target_total_dmg * 0.10
                         case "Armored Spearhead":
-                            target_troop_hp_bonus += target_troop_health * 1.05
-                            target_veh_hp_bonus += target_veh_health * 1.125
-
-                            target_troop_armor_bonus += target_troop_armor * 1.05
-                            target_veh_armor_bonus += target_veh_armor * 1.25
-
-                            target_troop_admg_bonus += target_troop_admg * 1.05
-                            target_veh_admg_bonus += target_veh_admg * 1.25
-
-                            target_troop_bdmg_bonus += target_troop_bdmg * 1.05
-                            target_veh_bdmg_bonus += target_veh_bdmg * 1.05
-
+                            target_hp_bonus += target_total_hp * 0.10
+                            target_dmg_bonus += target_total_dmg * 0.125
                         case _:
-                            await ctx.send("An error occurred. Ping a dev.")
-                            return
+                            pass
 
-                    match attker_ground_tactic:
+                    match attker_ground_tactic.lower():
                         case "Trench Warfare":
-                            attker_troop_hp_bonus += attker_troop_health * 1.3
-                            attker_veh_hp_bonus += attker_veh_health * 1.3
-
-                            attker_troop_armor_bonus += attker_troop_armor * 1.5
-                            attker_veh_armor_bonus += attker_veh_armor * 1.5
-
-                            attker_troop_admg_bonus += attker_troop_admg * 1.05
-                            attker_veh_admg_bonus += attker_veh_admg * 1.05
-
-                            attker_troop_bdmg_bonus += attker_troop_bdmg * 1.05
-                            attker_veh_bdmg_bonus += attker_veh_bdmg * 1.05
-
-                        case "Creeping Barage":
-                            attker_troop_hp_bonus += attker_troop_health * 0.95 # -1.05
-                            attker_veh_hp_bonus += 0
-
-                            attker_troop_armor_bonus += attker_troop_armor * 0.95 # -1.05
-                            attker_veh_armor_bonus += 0
-
-                            attker_troop_admg_bonus += attker_troop_admg * 1.05
-                            attker_veh_admg_bonus += attker_veh_admg * 1.05
-
-                            attker_troop_bdmg_bonus += attker_troop_bdmg * 1.15
-                            attker_veh_bdmg_bonus += attker_veh_bdmg * 1.15
-
+                            attker_hp_bonus += attker_total_hp * 0.3
+                            attker_dmg_bonus += attker_total_dmg * 0.05
+                        case "Creeping Barrage":
+                            attker_hp_bonus += attker_total_hp * -0.05
+                            attker_dmg_bonus += attker_total_dmg * 0.15
                         case "Superior Firepower":
-                            attker_troop_hp_bonus += attker_troop_health * 1.01
-                            attker_veh_hp_bonus += attker_veh_health * 1.05
-
-                            attker_troop_armor_bonus += attker_troop_armor * 1.05
-                            attker_veh_armor_bonus += attker_veh_armor * 1.05
-
-                            attker_troop_admg_bonus += attker_troop_admg * 1.25
-                            attker_veh_admg_bonus += attker_veh_admg * 1.5
-
-                            attker_troop_bdmg_bonus += attker_troop_bdmg * 1.5
-                            attker_veh_bdmg_bonus += attker_veh_bdmg * 1.25
-
+                            attker_hp_bonus += attker_total_hp * 0.1
+                            attker_dmg_bonus += attker_total_dmg * 0.50
                         case "Massed Assault":
-                            attker_troop_hp_bonus += attker_troop_health * 0.95 # -1.05
-                            attker_veh_hp_bonus += attker_veh_health * 0.95 # -1.05
-
-                            attker_troop_armor_bonus += attker_troop_armor * 0.95 # -1.05
-                            attker_veh_armor_bonus += 0
-
-                            attker_troop_admg_bonus += attker_troop_admg * 1.1
-                            attker_veh_admg_bonus += attker_veh_admg * 1.1
-
-                            attker_troop_bdmg_bonus += attker_troop_bdmg * 1.35
-                            attker_veh_bdmg_bonus += attker_veh_bdmg * 1.15
-
+                            attker_hp_bonus += attker_total_hp * 0.35
+                            attker_dmg_bonus += attker_total_dmg * -0.05
                         case "Elastic Defense":
-                            attker_troop_hp_bonus += attker_troop_health * 1.1
-                            attker_veh_hp_bonus += attker_veh_health * 1.05
-
-                            attker_troop_armor_bonus += attker_troop_armor * 1.05
-                            attker_veh_armor_bonus += attker_veh_armor * 1.1
-
-                            attker_troop_admg_bonus += attker_troop_admg * 1.05
-                            attker_veh_admg_bonus += attker_veh_admg * 1.15
-
-                            attker_troop_bdmg_bonus += attker_troop_bdmg * 1.05
-                            attker_veh_bdmg_bonus += attker_veh_bdmg * 1.05
-
+                            attker_hp_bonus += attker_total_hp * 0.10
+                            attker_dmg_bonus += attker_total_dmg * 0.10
                         case "Armored Spearhead":
-                            attker_troop_hp_bonus += attker_troop_health * 1.05
-                            attker_veh_hp_bonus += attker_veh_health * 1.125
-
-                            attker_troop_armor_bonus += attker_troop_armor * 1.05
-                            attker_veh_armor_bonus += attker_veh_armor * 1.25
-
-                            attker_troop_admg_bonus += attker_troop_admg * 1.05
-                            attker_veh_admg_bonus += attker_veh_admg * 1.25
-
-                            attker_troop_bdmg_bonus += attker_troop_bdmg * 1.05
-                            attker_veh_bdmg_bonus += attker_veh_bdmg * 1.05
-
+                            attker_hp_bonus += attker_total_hp * 0.10
+                            attker_dmg_bonus += attker_total_dmg * 0.125
                         case _:
-                            await ctx.send("An error occurred. Ping a dev.")
-                            return
+                            pass
                         
-                    # Defender's final stats
-                    targetf_troop_hp = target_troop_health + target_troop_hp_bonus
-                    targetf_veh_hp = target_veh_health + target_veh_hp_bonus
-                    target_total_hp = targetf_troop_hp + targetf_veh_hp
+                    # Final attacker stats
+                    final_attker_hp = attker_total_hp + attker_hp_bonus
+                    final_attker_dmg = attker_total_dmg + attker_dmg_bonus
 
-                    targetf_troop_armor = target_troop_armor + target_troop_armor_bonus
-                    targetf_veh_armor = target_veh_armor + target_veh_armor_bonus
-                    target_total_armor = targetf_troop_armor + targetf_veh_armor
-
-                    targetf_troop_bdmg = target_troop_bdmg + target_troop_bdmg_bonus
-                    targetf_veh_bdmg = target_veh_bdmg + target_veh_bdmg_bonus
-
-                    targetf_troop_admg = target_troop_admg + target_troop_admg_bonus
-                    targetf_veh_admg = target_veh_admg + target_veh_admg_bonus
-
-                    # Attacker's final stats
-                    attkerf_troop_hp = attker_troop_health + attker_troop_hp_bonus
-                    attkerf_veh_hp = attker_veh_health + attker_veh_hp_bonus
-                    attker_total_hp = attkerf_troop_hp + attkerf_veh_hp
-
-                    attkerf_troop_armor = attker_troop_armor + attker_troop_armor_bonus
-                    attkerf_veh_armor = attker_veh_armor + attker_veh_armor_bonus
-                    attker_total_armor = attkerf_troop_armor + attkerf_veh_armor
-
-                    attkerf_troop_bdmg = attker_troop_bdmg + attker_troop_bdmg_bonus
-                    attkerf_veh_bdmg = attker_veh_bdmg + attker_veh_bdmg_bonus
-
-                    attkerf_troop_admg = attker_troop_admg + attker_troop_admg_bonus
-                    attkerf_veh_admg = attker_veh_admg + attker_veh_admg_bonus
-
-                    war_ch = self.bot.get_channel(921494405909717092)
+                    # Final defender stats
+                    final_target_hp = target_total_hp + target_hp_bonus
+                    final_target_dmg = target_total_dmg + target_dmg_bonus
 
                     init_emb = discord.Embed(title=f"{attker_name} VS {target_name}. | Ground Battle.", 
-                                                description="The battle will start in 5 minutes.\n"
+                                            description="The battle will start in 5 minutes.\n"
                                                         "Get ready!", color=discord.Color.red())
-                    await war_ch.send(embed=init_emb)
+                    await ctx.send(embed=init_emb)
+                    await asyncio.sleep(300)
 
-                    await asyncio.sleep(10)
+                    initial_attker_hp = {
+                        "troops": attker_troops * health_values["troop_hp"],
+                        "tanks": attker_tanks * health_values["tank_hp"],
+                        "artillery": attker_artillery * health_values["arty_hp"],
+                        "aa": attker_aa * health_values["aa_hp"]
+                    }
 
-                    start_emb = discord.Embed(title=f"{attker_name} VS {target_name} | Ground Battle.",
-                                                      description=f"The battle between {attker_name} and {target_name} has started.",
-                                                      color=discord.Color.red())
-                    start_emb.add_field(name="Attacker Stats:\n", value=f"Troops: {attker_troops:,}\n"
-                                                                        f"Tanks: {attker_tanks:,}\n"
-                                                                        f"Artillery: {attker_artillery:,}\n"
-                                                                        f"Anti-Air: {attker_aa:,}\n"
-                                                                        f"HP: {attker_total_hp:,}\n"
-                                                                        f"Armor: {attker_total_armor:,}\n"
-                                                                        f"\n"
-                                                                        f"Body DMG: {attkerf_troop_bdmg+attkerf_veh_bdmg:,}\n"
-                                                                        f"Armor DMG: {attkerf_troop_admg+attkerf_veh_admg:,}\n", inline=True)
-                    start_emb.add_field(name="Defender Stats:\n", value=f"Troops: {target_troops:,}\n"
-                                                                        f"Tanks: {target_tanks:,}\n"
-                                                                        f"Artillery: {target_artillery:,}\n"
-                                                                        f"Anti-Air: {target_aa:,}\n"
-                                                                        f"HP: {target_total_hp:,}\n"
-                                                                        f"Armor: {target_total_armor:,}\n"
-                                                                        f"\n"
-                                                                        f"Body DMG: {targetf_troop_bdmg+targetf_veh_bdmg:,}\n"
-                                                                        f"Armor DMG: {targetf_troop_admg+targetf_veh_admg:,}\n", inline=True)
-                    await war_ch.send(embed=start_emb)
+                    initial_target_hp = {
+                        "troops": target_troops * health_values["troop_hp"],
+                        "tanks": target_tanks * health_values["tank_hp"],
+                        "artillery": target_artillery * health_values["arty_hp"],
+                        "aa": target_aa * health_values["aa_hp"]
+                    }
 
-                    await asyncio.sleep(10)
+                    total_hp_attker = sum(initial_attker_hp.values())
+                    total_hp_target = sum(initial_target_hp.values())
 
-                    def ensure_no_negative(value):
-                        return max(value, 0)
+                    rounds = 0
+                    while final_attker_hp > 0 and final_target_hp > 0:
+                        final_target_hp -= final_attker_dmg
+                        final_attker_hp -= final_target_dmg
+                        rounds += 1
 
-                    # The battle. It will keep looping until either the attacker or the defender have 0 or less health.
-                    while (target_total_hp > 0) and (attker_total_hp > 0):
+                        remaining_units_attker = {
+                            "troops": max(0, round(total_hp_attker / final_attker_hp)),
+                            "tanks": max(0, round(total_hp_attker / final_attker_hp)),
+                            "artillery": max(0, round(total_hp_attker / final_attker_hp)),
+                            "aa": max(0, round(total_hp_attker / final_attker_hp))
+                        }
 
-                        # The battle stuff
-                        if ((target_total_armor > 0) and (attker_total_armor > 0)):
+                        remaining_units_target = {
+                            "troops": max(0, round(total_hp_target / final_target_hp)),
+                            "tanks": max(0, round(total_hp_target / final_target_hp)),
+                            "artillery": max(0, round(total_hp_target / final_target_hp)),
+                            "aa": max(0, round(total_hp_target / final_target_hp))
+                        }
 
-                            if targetf_veh_admg > attkerf_veh_admg:
-                                
-                                # New defender armor.
-                                targetf_troop_armor = ensure_no_negative(targetf_troop_armor - (attkerf_troop_admg))
-                                targetf_veh_armor = ensure_no_negative(targetf_veh_armor - (attkerf_troop_admg))
-
-                                target_total_armor -= target_troop_armor + target_veh_armor
-
-                                # New attacker armor.
-                                attkerf_troop_armor = ensure_no_negative(attkerf_troop_armor - (targetf_troop_admg + targetf_veh_admg))
-                                attkerf_veh_armor = ensure_no_negative(attkerf_veh_armor - (targetf_troop_admg + targetf_veh_admg))
-
-                                attker_total_armor -= attker_troop_armor + attker_veh_armor
-
-                                await asyncio.sleep(3)
-                                new_emb = discord.Embed(title=f"{attker_name} VS {target_name} | Ground Battle.",
-                                                        description=f"The battle between {attker_name} and {target_name}.",
+                        await asyncio.sleep(3)
+                        new_emb = discord.Embed(title=f"{attker_name} VS {target_name} | Ground Battle.",
+                                                        description=f"Round: {rounds}",
                                                         color=discord.Color.red())
-                                new_emb.add_field(name="Attacker Stats:\n", value=f"Troops: {attker_troops:,}\n"
-                                                                                    f"Tanks: {attker_tanks:,}\n"
-                                                                                    f"Artillery: {attker_artillery:,}\n"
-                                                                                    f"Anti-Air: {attker_aa:,}\n"
-                                                                                    f"HP: {attker_total_hp:,}\n"
-                                                                                    f"Armor: {attker_total_armor:,}\n"
-                                                                                    f"\n"
-                                                                                    f"Body DMG: {attkerf_troop_bdmg+attkerf_veh_bdmg:,}\n"
-                                                                                    f"Armor DMG: {attkerf_troop_admg+attkerf_veh_admg:,}\n", inline=True)
-                                new_emb.add_field(name="Defender Stats:\n", value=f"Troops: {target_troops:,}\n"
-                                                                                    f"Tanks: {target_tanks:,}\n"
-                                                                                    f"Artillery: {target_artillery:,}\n"
-                                                                                    f"Anti-Air: {target_aa:,}\n"
-                                                                                    f"HP: {target_total_hp:,}\n"
-                                                                                    f"Armor: {target_total_armor:,}\n"
-                                                                                    f"\n"
-                                                                                    f"Body DMG: {targetf_troop_bdmg+targetf_veh_bdmg:,}\n"
-                                                                                    f"Armor DMG: {targetf_troop_admg+targetf_veh_admg:,}\n", inline=True)
-                                new_emb.set_footer(text="This is the battle for armor.")
-                                await war_ch.send(embed=new_emb)
+                        new_emb.add_field(name="Attacker Stats:\n", value=f"Troops: {remaining_units_attker['troops']:,}\n"
+                                                                            f"Tanks: {remaining_units_attker['tanks']:,}\n"
+                                                                            f"Artillery: {remaining_units_attker['artillery']:,}\n"
+                                                                            f"Anti-Air: {remaining_units_attker['aa']:,}\n"
+                                                                            f"HP: {final_attker_hp:,}\n"
+                                                                            f"\n"
+                                                                            f"Damage: {final_attker_dmg:,}\n", inline=True)
+                        new_emb.add_field(name="Defender Stats:\n", value=f"Troops: {remaining_units_target['troops']:,}\n"
+                                                                            f"Tanks: {remaining_units_target['tanks']:,}\n"
+                                                                            f"Artillery: {remaining_units_target['artillery']:,}\n"
+                                                                            f"Anti-Air: {remaining_units_target['aa']:,}\n"
+                                                                            f"HP: {final_target_hp:,}\n"
+                                                                            f"\n"
+                                                                            f"Damage: {final_target_dmg:,}\n", inline=True)
+                        await ctx.send(embed=new_emb)
 
-                            else:
-                                # New defender armor.
-                                targetf_troop_armor = ensure_no_negative(targetf_troop_armor - (attkerf_troop_admg + attkerf_veh_admg))
-                                targetf_veh_armor = ensure_no_negative(targetf_veh_armor - (attkerf_troop_admg + attkerf_veh_admg))
+                        # Gas and ammo usage
+                        attker_gas_use = round((attker_tanks + attker_aa + attker_artillery) / 1000)
+                        attker_ammo_use_troops = round(attker_troops / 4000)
+                        attker_ammo_use_veh = round((attker_tanks + attker_aa + attker_artillery) / 500)
+                        total_attker_ammo = attker_ammo_use_troops + attker_ammo_use_veh
 
-                                target_total_armor -= target_troop_armor + target_veh_armor
+                        cursor.execute('UPDATE resources SET gasoline = gasoline - ?, ammo = ammo - ? WHERE name = ?', (attker_gas_use, total_attker_ammo, attker_name))
+                        conn.commit()
 
-                                # New attacker armor.
-                                attkerf_troop_armor = ensure_no_negative(attkerf_troop_armor - (targetf_troop_admg))
-                                attkerf_veh_armor = ensure_no_negative(attkerf_veh_armor - (targetf_troop_admg))
+                        target_gas_use = round((target_tanks + target_aa + target_artillery) / 1000)
+                        target_ammo_use_troops = round(target_troops / 4000)
+                        target_ammo_use_veh = round((target_tanks + target_aa + target_artillery) / 500)
+                        total_target_ammo = target_ammo_use_troops + target_ammo_use_veh
 
-                                attker_total_armor -= attker_troop_armor + attker_veh_armor
+                        cursor.execute('UPDATE resources SET gasoline = gasoline - ?, ammo = ammo - ? WHERE name = ?', (target_gas_use, total_target_ammo, target_name))
+                        conn.commit()
 
-                                await asyncio.sleep(3)
-                                new_emb = discord.Embed(title=f"{attker_name} VS {target_name} | Ground Battle.",
-                                                        description=f"The battle between {attker_name} and {target_name}.",
-                                                        color=discord.Color.red())
-                                new_emb.add_field(name="Attacker Stats:\n", value=f"Troops: {attker_troops:,}\n"
-                                                                                    f"Tanks: {attker_tanks:,}\n"
-                                                                                    f"Artillery: {attker_artillery:,}\n"
-                                                                                    f"Anti-Air: {attker_aa:,}\n"
-                                                                                    f"HP: {attker_total_hp:,}\n"
-                                                                                    f"Armor: {attker_total_armor:,}\n"
-                                                                                    f"\n"
-                                                                                    f"Body DMG: {attkerf_troop_bdmg+attkerf_veh_bdmg:,}\n"
-                                                                                    f"Armor DMG: {attkerf_troop_admg+attkerf_veh_admg:,}\n", inline=True)
-                                new_emb.add_field(name="Defender Stats:\n", value=f"Troops: {target_troops:,}\n"
-                                                                                    f"Tanks: {target_tanks:,}\n"
-                                                                                    f"Artillery: {target_artillery:,}\n"
-                                                                                    f"Anti-Air: {target_aa:,}\n"
-                                                                                    f"HP: {target_total_hp:,}\n"
-                                                                                    f"Armor: {target_total_armor:,}\n"
-                                                                                    f"\n"
-                                                                                    f"Body DMG: {targetf_troop_bdmg+targetf_veh_bdmg:,}\n"
-                                                                                    f"Armor DMG: {targetf_troop_admg+targetf_veh_admg:,}\n", inline=True)
-                                new_emb.set_footer(text="This is the battle for armor.")
-                                await war_ch.send(embed=new_emb)
+                    if final_attker_hp > final_target_hp:
+                        winner_emb = discord.Embed(title=f"{attker_name} Victory!",
+                                                    description=f"{attker_name} has won the war against {target_name}.",
+                                                    color=discord.Color.green())
+                        await ctx.send(embed=winner_emb)
 
-                        else: # If one of the users no longer has armor.
-                            
-                            # If the defender's armor is less or equal to 0, while attacker's armor is more than 0
-                            if target_total_armor < 0 and attker_total_armor > 0:
+                        cursor.execute('UPDATE user_info SET war_status = ? WHERE user_id = ?', ("In Peace", attker_id))
+                        conn.commit()
+                        cursor.execute('UPDATE user_info SET war_status = ? WHERE user_id = ?', ("In Peace", target_id))
+                        conn.commit()
 
-                                if targetf_veh_bdmg > attkerf_veh_bdmg:
+                        # Update attacker's mil stats
+                        cursor.execute('''UPDATE user_mil SET troops = ?, tanks = ?, artillery = ?, 
+                                    anti_air = ? WHERE name = ?''', (remaining_units_attker["troops"], remaining_units_attker["tanks"], 
+                                                                        remaining_units_attker["artillery"], 
+                                                                        remaining_units_attker["aa"], attker_name))
+                        conn.commit()
 
-                                    # New target hp.
-                                    targetf_troop_hp = ensure_no_negative(targetf_troop_hp - (attkerf_troop_bdmg))
-                                    targetf_veh_hp = ensure_no_negative(targetf_veh_hp - (attkerf_troop_bdmg))
+                        # Update defender's mil stats
+                        cursor.execute('''UPDATE user_mil SET troops = ?, tanks = ?, artillery = ?, 
+                                    anti_air = ? WHERE name = ?''', (remaining_units_target['troops'], remaining_units_target['tanks'], 
+                                                                    remaining_units_target['artillery'],
+                                                                    remaining_units_target['aa'], target_name))
+                        conn.commit()
 
-                                    target_total_hp -= (targetf_troop_hp + targetf_veh_hp)
+                    else:
+                        winner_emb = discord.Embed(title=f"{target_name} Victory!",
+                                                    description=f"{target_name} has won the war against {attker_name}.",
+                                                    color=discord.Color.green())
+                        await ctx.send(embed=winner_emb)
 
-                                    target_troops -= round(targetf_troop_hp//25)
-                                    target_tanks -= round(targetf_veh_hp//2000)
-                                    target_artillery -= round(targetf_veh_hp//10)
-                                    target_aa -= round(targetf_veh_hp//75)
+                        cursor.execute('UPDATE user_info SET war_status = ? WHERE user_id = ?', ("In Peace", attker_id))
+                        conn.commit()
+                        cursor.execute('UPDATE user_info SET war_status = ? WHERE user_id = ?', ("In Peace", target_id))
+                        conn.commit()
 
-                                    # New attacker armor.
-                                    attkerf_troop_armor = ensure_no_negative(attkerf_troop_armor - (targetf_troop_admg + targetf_veh_admg))
-                                    attkerf_veh_armor = ensure_no_negative(attkerf_veh_armor - (targetf_troop_admg + targetf_veh_admg))
+                        # Update attacker's mil stats
+                        cursor.execute('''UPDATE user_mil SET troops = ?, tanks = ?, artillery = ?, 
+                                    anti_air = ? WHERE name = ?''', (remaining_units_attker["troops"], remaining_units_attker["tanks"], 
+                                                                        remaining_units_attker["artillery"], 
+                                                                        remaining_units_attker["aa"], attker_name))
+                        conn.commit()
 
-                                    attker_total_armor -= attker_troop_armor + attker_veh_armor
-
-                                    newhp_emb = discord.Embed(title=f"{attker_name} VS {target_name} | Ground Battle.",
-                                                            description=f"The battle between {attker_name} and {target_name}.",
-                                                            color=discord.Color.red())
-                                    newhp_emb.add_field(name="Attacker Stats:\n", value=f"Troops: {attker_troops:,}\n"
-                                                                                        f"Tanks: {attker_tanks:,}\n"
-                                                                                        f"Artillery: {attker_artillery:,}\n"
-                                                                                        f"Anti-Air: {attker_aa:,}\n"
-                                                                                        f"HP: {attker_total_hp:,}\n"
-                                                                                        f"Armor: {attker_total_armor}\n"
-                                                                                        f"\n"
-                                                                                        f"Body DMG: {attkerf_troop_bdmg+attkerf_veh_bdmg:,}\n"
-                                                                                        f"Armor DMG: {attkerf_troop_admg+attkerf_veh_admg:,}\n", inline=True)
-                                    
-                                    newhp_emb.add_field(name="Defender Stats:\n", value=f"Troops: {target_troops:,}\n"
-                                                                                        f"Tanks: {target_tanks:,}\n"
-                                                                                        f"Artillery: {target_artillery:,}\n"
-                                                                                        f"Anti-Air: {target_aa:,}\n"
-                                                                                        f"HP: {target_total_hp:,}\n"
-                                                                                        f"Armor: 0\n"
-                                                                                        f"\n"
-                                                                                        f"Body DMG: {targetf_troop_bdmg+targetf_veh_bdmg:,}\n"
-                                                                                        f"Armor DMG: {targetf_troop_admg+targetf_veh_admg:,}\n", inline=True)
-                                    await war_ch.send(embed=newhp_emb)
-
-                                else:
-                                    # New target hp.
-                                    targetf_troop_hp = ensure_no_negative(targetf_troop_hp - (attkerf_troop_bdmg + attkerf_veh_bdmg))
-                                    targetf_veh_hp = ensure_no_negative(targetf_veh_hp - (attkerf_troop_bdmg + attkerf_veh_bdmg))
-
-                                    target_total_hp -= targetf_troop_hp + targetf_veh_hp
-
-                                    target_troops -= round(targetf_troop_hp//25)
-                                    target_tanks -= round(targetf_veh_hp//2000)
-                                    target_artillery -= round(targetf_veh_hp//10)
-                                    target_aa -= round(targetf_veh_hp//75)
-
-                                    # New attacker armor.
-                                    attkerf_troop_armor = ensure_no_negative(attkerf_troop_armor - (targetf_troop_admg))
-                                    attkerf_veh_armor = ensure_no_negative(attkerf_veh_armor - (targetf_troop_admg))
-
-                                    attker_total_armor -= attker_troop_armor + attker_veh_armor
-
-                                    newhp_emb = discord.Embed(title=f"{attker_name} VS {target_name} | Ground Battle.",
-                                                            description=f"The battle between {attker_name} and {target_name}.",
-                                                            color=discord.Color.red())
-                                    newhp_emb.add_field(name="Attacker Stats:\n", value=f"Troops: {attker_troops:,}\n"
-                                                                                        f"Tanks: {attker_tanks:,}\n"
-                                                                                        f"Artillery: {attker_artillery:,}\n"
-                                                                                        f"Anti-Air: {attker_aa:,}\n"
-                                                                                        f"HP: {attker_total_hp:,}\n"
-                                                                                        f"Armor: {attker_total_armor}\n"
-                                                                                        f"\n"
-                                                                                        f"Body DMG: {attkerf_troop_bdmg+attkerf_veh_bdmg:,}\n"
-                                                                                        f"Armor DMG: {attkerf_troop_admg+attkerf_veh_admg:,}\n", inline=True)
-                                    newhp_emb.add_field(name="Defender Stats:\n", value=f"Troops: {target_troops:,}\n"
-                                                                                        f"Tanks: {target_tanks:,}\n"
-                                                                                        f"Artillery: {target_artillery:,}\n"
-                                                                                        f"Anti-Air: {target_aa:,}\n"
-                                                                                        f"HP: {target_total_hp:,}\n"
-                                                                                        f"Armor: 0\n"
-                                                                                        f"\n"
-                                                                                        f"Body DMG: {targetf_troop_bdmg+targetf_veh_bdmg:,}\n"
-                                                                                        f"Armor DMG: {targetf_troop_admg+targetf_veh_admg:,}\n", inline=True)
-                                    await war_ch.send(embed=newhp_emb)
-
-                            # If the defender's armor is more than 0, while attacker's armor is less or equal to 0
-                            elif target_total_armor > 0 and attker_total_armor < 0:
-                                if targetf_veh_bdmg > attkerf_veh_bdmg:
-
-                                    # New target armor.
-                                    targetf_troop_armor = ensure_no_negative(targetf_troop_armor - (attkerf_troop_admg))
-                                    targetf_veh_armor = ensure_no_negative(targetf_veh_armor - (attkerf_troop_admg))
-
-                                    target_total_armor -= target_troop_armor + target_veh_armor
-
-                                    # New attacker hp.
-                                    attkerf_troop_hp = ensure_no_negative(attkerf_troop_hp - (targetf_troop_bdmg + targetf_veh_bdmg))
-                                    attkerf_veh_hp = ensure_no_negative(attkerf_veh_hp - (targetf_troop_bdmg + targetf_veh_bdmg))
-
-                                    attker_total_hp -= (attkerf_troop_hp + attkerf_veh_hp)
-
-                                    attker_troops -= round(attkerf_troop_hp//25)
-                                    attker_tanks -= round(attkerf_veh_hp//2000)
-                                    attker_artillery -= round(attkerf_veh_hp//10)
-                                    attker_aa -= round(attkerf_veh_hp//75)
-
-                                    newhp_emb = discord.Embed(title=f"{attker_name} VS {target_name} | Ground Battle.",
-                                                            description=f"The battle between {attker_name} and {target_name}.",
-                                                            color=discord.Color.red())
-                                    newhp_emb.add_field(name="Attacker Stats:\n", value=f"Troops: {attker_troops:,}\n"
-                                                                                        f"Tanks: {attker_tanks:,}\n"
-                                                                                        f"Artillery: {attker_artillery:,}\n"
-                                                                                        f"Anti-Air: {attker_aa:,}\n"
-                                                                                        f"HP: {attker_total_hp:,}\n"
-                                                                                        f"Armor: 0\n"
-                                                                                        f"\n"
-                                                                                        f"Body DMG: {attkerf_troop_bdmg+attkerf_veh_bdmg:,}\n"
-                                                                                        f"Armor DMG: {attkerf_troop_admg+attkerf_veh_admg:,}\n", inline=True)
-                                    newhp_emb.add_field(name="Defender Stats:\n", value=f"Troops: {target_troops:,}\n"
-                                                                                        f"Tanks: {target_tanks:,}\n"
-                                                                                        f"Artillery: {target_artillery:,}\n"
-                                                                                        f"Anti-Air: {target_aa:,}\n"
-                                                                                        f"HP: {target_total_hp:,}\n"
-                                                                                        f"Armor: {target_total_armor}\n"
-                                                                                        f"\n"
-                                                                                        f"Body DMG: {targetf_troop_bdmg+targetf_veh_bdmg:,}\n"
-                                                                                        f"Armor DMG: {targetf_troop_admg+targetf_veh_admg:,}\n", inline=True)
-                                    await war_ch.send(embed=newhp_emb)
-
-                                else:
-                                    # New target armor.
-                                    targetf_troop_armor = ensure_no_negative(targetf_troop_armor - (attkerf_troop_admg + attkerf_veh_admg))
-                                    targetf_veh_armor = ensure_no_negative(targetf_veh_armor - (attkerf_troop_admg + attkerf_veh_admg))
-
-                                    target_total_armor -= target_troop_armor + target_veh_armor
-
-                                    # New attacker hp.
-                                    attkerf_troop_hp = ensure_no_negative(attkerf_troop_hp - (targetf_troop_bdmg))
-                                    attkerf_veh_hp = ensure_no_negative(attkerf_veh_hp - (targetf_troop_bdmg))
-
-                                    attker_total_hp -= attkerf_troop_hp + attkerf_veh_hp
-
-                                    attker_troops -= round(attkerf_troop_hp//25)
-                                    attker_tanks -= round(attkerf_veh_hp//2000)
-                                    attker_artillery -= round(attkerf_veh_hp//10)
-                                    attker_aa -= round(attkerf_veh_hp//75)
-
-                                    newhp_emb = discord.Embed(title=f"{attker_name} VS {target_name} | Ground Battle.",
-                                                            description=f"The battle between {attker_name} and {target_name}.",
-                                                            color=discord.Color.red())
-                                    newhp_emb.add_field(name="Attacker Stats:\n", value=f"Troops: {attker_troops:,}\n"
-                                                                                        f"Tanks: {attker_tanks:,}\n"
-                                                                                        f"Artillery: {attker_artillery:,}\n"
-                                                                                        f"Anti-Air: {attker_aa:,}\n"
-                                                                                        f"HP: {attker_total_hp:,}\n"
-                                                                                        f"Armor: 0\n"
-                                                                                        f"\n"
-                                                                                        f"Body DMG: {attkerf_troop_bdmg+attkerf_veh_bdmg:,}\n"
-                                                                                        f"Armor DMG: {attkerf_troop_admg+attkerf_veh_admg:,}\n", inline=True)
-                                    newhp_emb.add_field(name="Defender Stats:\n", value=f"Troops: {target_troops:,}\n"
-                                                                                        f"Tanks: {target_tanks:,}\n"
-                                                                                        f"Artillery: {target_artillery:,}\n"
-                                                                                        f"Anti-Air: {target_aa:,}\n"
-                                                                                        f"HP: {target_total_hp:,}\n"
-                                                                                        f"Armor: 0\n"
-                                                                                        f"\n"
-                                                                                        f"Body DMG: {targetf_troop_bdmg+targetf_veh_bdmg:,}\n"
-                                                                                        f"Armor DMG: {targetf_troop_admg+targetf_veh_admg:,}\n", inline=True)
-                                    await war_ch.send(embed=newhp_emb)
-
-                            # If both the attacker and defender do not have armor.
-                            if targetf_veh_bdmg > attkerf_veh_bdmg:
-
-                                # New target hp.
-                                targetf_troop_hp = ensure_no_negative(targetf_troop_hp - (attkerf_troop_bdmg))
-                                targetf_veh_hp = ensure_no_negative(targetf_veh_hp - (attkerf_troop_bdmg))
-
-                                target_total_hp = ensure_no_negative(target_total_hp - (targetf_troop_hp + targetf_veh_hp))
-
-                                target_troops -= round(targetf_troop_hp//25)
-                                target_tanks -= round(targetf_veh_hp//2000)
-                                target_artillery -= round(targetf_veh_hp//10)
-                                target_aa -= round(targetf_veh_hp//75)
-
-                                # New attacker hp.
-                                attkerf_troop_hp = ensure_no_negative(attkerf_troop_hp - (targetf_troop_bdmg + targetf_veh_bdmg))
-                                attkerf_veh_hp = ensure_no_negative(attkerf_veh_hp - (targetf_troop_bdmg + targetf_veh_bdmg))
-
-                                attker_total_hp = ensure_no_negative(attker_total_hp - (attkerf_troop_hp + attkerf_veh_hp))
-
-                                attker_troops -= round(attkerf_troop_hp//25)
-                                attker_tanks -= round(attkerf_veh_hp//2000)
-                                attker_artillery -= round(attkerf_veh_hp//10)
-                                attker_aa -= round(attkerf_veh_hp//75)
-
-                                newhp_emb = discord.Embed(title=f"{attker_name} VS {target_name} | Ground Battle.",
-                                                        description=f"The battle between {attker_name} and {target_name}.",
-                                                        color=discord.Color.red())
-                                newhp_emb.add_field(name="Attacker Stats:\n", value=f"Troops: {attker_troops:,}\n"
-                                                                                    f"Tanks: {attker_tanks:,}\n"
-                                                                                    f"Artillery: {attker_artillery:,}\n"
-                                                                                    f"Anti-Air: {attker_aa:,}\n"
-                                                                                    f"HP: {attker_total_hp:,}\n"
-                                                                                    f"Armor: 0\n"
-                                                                                    f"\n"
-                                                                                    f"Body DMG: {attkerf_troop_bdmg+attkerf_veh_bdmg:,}\n"
-                                                                                    f"Armor DMG: {attkerf_troop_admg+attkerf_veh_admg:,}\n", inline=True)
-                                newhp_emb.add_field(name="Defender Stats:\n", value=f"Troops: {target_troops:,}\n"
-                                                                                    f"Tanks: {target_tanks:,}\n"
-                                                                                    f"Artillery: {target_artillery:,}\n"
-                                                                                    f"Anti-Air: {target_aa:,}\n"
-                                                                                    f"HP: {target_total_hp:,}\n"
-                                                                                    f"Armor: 0\n"
-                                                                                    f"\n"
-                                                                                    f"Body DMG: {targetf_troop_bdmg+targetf_veh_bdmg:,}\n"
-                                                                                    f"Armor DMG: {targetf_troop_admg+targetf_veh_admg:,}\n", inline=True)
-                                await war_ch.send(embed=newhp_emb)
-
-                            else:
-                                # New target hp.
-                                targetf_troop_hp = ensure_no_negative(targetf_troop_hp - (attkerf_troop_bdmg + attkerf_veh_bdmg))
-                                targetf_veh_hp = ensure_no_negative(targetf_veh_hp - (attkerf_troop_bdmg + attkerf_veh_bdmg))
-
-                                target_total_hp = ensure_no_negative(target_total_hp - (targetf_troop_hp + targetf_veh_hp))
-
-                                target_troops -= round(targetf_troop_hp//25)
-                                target_tanks -= round(targetf_veh_hp//2000)
-                                target_artillery -= round(targetf_veh_hp//10)
-                                target_aa -= round(targetf_veh_hp//75)
-
-                                # New attacker hp.
-                                attkerf_troop_hp = ensure_no_negative(attkerf_troop_hp - (targetf_troop_bdmg))
-                                attkerf_veh_hp = ensure_no_negative(attkerf_veh_hp - (targetf_troop_bdmg))
-
-                                attker_total_hp = ensure_no_negative(attker_total_hp - (attkerf_troop_hp + attkerf_veh_hp))
-
-                                attker_troops -= round(attkerf_troop_hp//25)
-                                attker_tanks -= round(attkerf_veh_hp//2000)
-                                attker_artillery -= round(attkerf_veh_hp//10)
-                                attker_aa -= round(attkerf_veh_hp//75)
-
-                                newhp_emb = discord.Embed(title=f"{attker_name} VS {target_name} | Ground Battle.",
-                                                        description=f"The battle between {attker_name} and {target_name}.",
-                                                        color=discord.Color.red())
-                                newhp_emb.add_field(name="Attacker Stats:\n", value=f"Troops: {attker_troops:,}\n"
-                                                                                    f"Tanks: {attker_tanks:,}\n"
-                                                                                    f"Artillery: {attker_artillery:,}\n"
-                                                                                    f"Anti-Air: {attker_aa:,}\n"
-                                                                                    f"HP: {attker_total_hp:,}\n"
-                                                                                    f"Armor: 0\n"
-                                                                                    f"\n"
-                                                                                    f"Body DMG: {attkerf_troop_bdmg+attkerf_veh_bdmg:,}\n"
-                                                                                    f"Armor DMG: {attkerf_troop_admg+attkerf_veh_admg:,}\n", inline=True)
-                                newhp_emb.add_field(name="Defender Stats:\n", value=f"Troops: {target_troops:,}\n"
-                                                                                    f"Tanks: {target_tanks:,}\n"
-                                                                                    f"Artillery: {target_artillery:,}\n"
-                                                                                    f"Anti-Air: {target_aa:,}\n"
-                                                                                    f"HP: {target_total_hp:,}\n"
-                                                                                    f"Armor: 0\n"
-                                                                                    f"\n"
-                                                                                    f"Body DMG: {targetf_troop_bdmg+targetf_veh_bdmg:,}\n"
-                                                                                    f"Armor DMG: {targetf_troop_admg+targetf_veh_admg:,}\n", inline=True)
-                                await war_ch.send(embed=newhp_emb)
-
-                            if ((target_troops <= 0 and attker_troops > 0) or (target_tanks <= 0 and attker_tanks > 0) or 
-                                (target_artillery <= 0 and attker_artillery > 0) or (target_aa <= 0 and attker_aa > 0)):
-                                winner_emb = discord.Embed(title=f"{attker_name} Victory!",
-                                                           description=f"{attker_name} has won the war against {target_name}.",
-                                                           color=discord.Color.green())
-                                await war_ch.send(embed=winner_emb)
-
-                                # Update the war status for attacker.
-                                cursor.execute('UPDATE user_info SET war_status = ? WHERE user_id = ?', ("In Peace", attker_id))
-                                conn.commit()
-
-                                # Update the war status for defender.
-                                cursor.execute('UPDATE user_info SET war_status = ? WHERE user_id = ?', ("In Peace", target_id))
-                                conn.commit()
-
-                                # Update attacker's mil stats
-                                cursor.execute('''UPDATE user_mil SET troops = ?, tanks = ?, artillery = ?, 
-                                            anti_air = ? WHERE name_nation = ?''', (attker_troops, attker_tanks, 
-                                                                                    attker_artillery, attker_aa, attker_name))
-                                conn.commit()
-
-                                # Update defender's mil stats
-                                cursor.execute('''UPDATE user_mil SET troops = ?, tanks = ?, artillery = ?, 
-                                            anti_air = ? WHERE name_nation = ?''', (0, target_tanks, target_artillery,
-                                                                                                target_aa, target_name))
-                                conn.commit()
-                                break
-
-                            else:
-                                winner_emb = discord.Embed(title=f"{target_name} Victory!",
-                                                           description=f"{target_name} has won the war against {attker_name}.",
-                                                           color=discord.Color.green())
-                                await war_ch.send(embed=winner_emb)
-
-                                cursor.execute('UPDATE user_info SET war_status = ? WHERE user_id = ?', ("In Peace", attker_id))
-                                conn.commit()
-                                cursor.execute('UPDATE user_info SET war_status = ? WHERE user_id = ?', ("In Peace", target_id))
-                                conn.commit()
-
-                                # Update attacker's mil stats
-                                cursor.execute('''UPDATE user_mil SET troops = ?, tanks = ?, artillery = ?, 
-                                            anti_air = ? WHERE name_nation = ?''', (0, attker_tanks, 
-                                                                                    attker_artillery, attker_aa, attker_name))
-                                conn.commit()
-
-                                # Update defender's mil stats
-                                cursor.execute('''UPDATE user_mil SET troops = ?, tanks = ?, artillery = ?, 
-                                            anti_air = ? WHERE name_nation = ?''', (target_troops, target_tanks, target_artillery,
-                                                                                                target_aa, target_name))
-                                conn.commit()
-                                break
-
+                        # Update defender's mil stats
+                        cursor.execute('''UPDATE user_mil SET troops = ?, tanks = ?, artillery = ?, 
+                                    anti_air = ? WHERE name = ?''', (remaining_units_target['troops'], remaining_units_target['tanks'], 
+                                                                    remaining_units_target['artillery'],
+                                                                    remaining_units_target['aa'], target_name))
+                        conn.commit()
             else:
-                await ctx.send("Cannot declare war on yourself. ||retard||")
+                embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                        description=f'You cannot delcare war on yourself!.')
+                await ctx.send(embed=embed)
+                return
+        else:
+            if target_result: # If the target (defender) does not have a nation.
+                embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                    description=f'You do not have a nation.{new_line}'
+                                                f'To create one, type `$create`.')
+                await ctx.send(embed=embed)
+                return
+            
+            else: # Else, if the attacker does not have a nation.
+                embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                    description=f'<@{target_id}> does not have a nation.{new_line}'
+                                                f'To create one, type `$create`.')
+                await ctx.send(embed=embed)
+                return
 
 async def setup(bot):
     await bot.add_cog(War(bot))

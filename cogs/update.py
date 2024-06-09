@@ -1485,19 +1485,19 @@ async def UpdateMilitary():
     except Exception as e:
         logger.info(f'UPDATE MILITARY ERROR: {e}\n')
 
-@tasks.loop(seconds=60)
+@tasks.loop(seconds=3600)
 async def CheckHousingTask():
     await CheckHousing()
 
-@tasks.loop(seconds=60)
+@tasks.loop(seconds=3600)
 async def UpdateEconomyTask():
     await UpdateEconomy()
 
-@tasks.loop(seconds=60)
+@tasks.loop(seconds=3600)
 async def FoodCheckTask():
     await FoodCheck()
 
-@tasks.loop(seconds=60)
+@tasks.loop(seconds=3600)
 async def UpdateMilitaryTask():
     await UpdateMilitary()
 

@@ -1,7 +1,8 @@
-from flask import Flask, render_template, redirect, request, url_for
+from flask import Flask, render_template, redirect, request, url_for, flash
 import sqlite3
 
 app = Flask(__name__)
+app.secret_key = 'my_dark_secret'
 
 conn = sqlite3.connect('player_info.db')
 cursor = conn.cursor()
@@ -25,6 +26,9 @@ def get_data(nation_name):
 def update_data(table, nation_name, column, operation, amount):
     conn = sqlite3.connect('player_info.db')
     cursor = conn.cursor()
+    if column == "name":
+        flash("You cannot edit the 'name' column.")
+        return redirect(url_for('update'))
     if operation == "add":
         query = f'UPDATE {table} SET {column} = {column} + ? WHERE name = ?'
     elif operation == "subtract":

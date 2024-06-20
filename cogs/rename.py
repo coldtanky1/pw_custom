@@ -15,7 +15,7 @@ class Rename(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def rename(self, ctx, new_name: str):
+    async def rename(self, ctx, *, new_name: str):
         if new_name == "":
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                   description=f'You forgot to write the new name.{new_line}{new_line}'
@@ -27,6 +27,15 @@ class Rename(commands.Cog):
         if len(new_name) > 25:
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                   description=f'Your nation name cannot be longer than 25 characters.')
+            await ctx.send(embed=embed)
+            return
+
+        # Checks if name already exists in database
+        names = cursor.execute('''SELECT name FROM user_info''').fetchall()
+        tuple_name = (new_name, )
+        if tuple_name in names:
+            embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                  description=f'That name is already used.')
             await ctx.send(embed=embed)
             return
 

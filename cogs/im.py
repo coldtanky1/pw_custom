@@ -146,6 +146,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -188,6 +189,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -230,6 +232,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -272,6 +275,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -314,6 +318,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -356,6 +361,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -398,6 +404,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -440,6 +447,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -482,6 +490,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -524,6 +533,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -566,6 +576,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -608,6 +619,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -650,6 +662,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -735,6 +748,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Reserve", value=f"Wood: {wood:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Reserve", value=f"Wood: {wood:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -777,6 +791,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Reserve", value=f"Coal: {coal:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Reserve", value=f"Coal: {coal:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -819,6 +834,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Reserve", value=f"Iron: {iron:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Reserve", value=f"Iron: {iron:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -861,6 +877,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Reserve", value=f"Lead: {lead:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Reserve", value=f"Lead: {lead:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -903,6 +920,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Reserve", value=f"Bauxite: {bauxite:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Reserve", value=f"Bauxite: {bauxite:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -945,6 +963,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Reserve", value=f"Oil: {oil:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Reserve", value=f"Oil: {oil:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -987,6 +1006,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Reserve", value=f"Uranium: {uranium:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Reserve", value=f"Uranium: {uranium:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -1029,6 +1049,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Reserve", value=f"Food: {food:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Reserve", value=f"Food: {food:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -1071,6 +1092,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Reserve", value=f"Steel: {steel:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Reserve", value=f"Steel: {steel:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -1113,6 +1135,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Reserve", value=f"Aluminium: {aluminium:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Reserve", value=f"Aluminium: {aluminium:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -1155,6 +1178,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Reserve", value=f"Gasoline: {gasoline:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Reserve", value=f"Gasoline: {gasoline:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -1197,6 +1221,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Reserve", value=f"Ammo: {ammo:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Reserve", value=f"Ammo: {ammo:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"
@@ -1239,6 +1264,7 @@ class IM(commands.Cog):
                             embed.add_field(name="Reserve", value=f"Concrete: {concrete:,}{new_line}"
                                                                   f"You __cannot__ afford this sale.", inline=True)
                             await ctx.send(embed=embed)
+                            return
                         else:
                             embed.add_field(name="Reserve", value=f"Concrete: {concrete:,}{new_line}"
                                                                   f"You __can__ afford this sale.{new_line}"

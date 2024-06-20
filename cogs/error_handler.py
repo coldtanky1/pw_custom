@@ -1,24 +1,20 @@
 import discord
 from discord.ext import commands
 from discord.utils import get
+import globals
 
-
-debug = True
 new_line = '\n'
 
 def dev_check(usid):
     return usid == 837257162223910912 or usid == 669517694751604738
 
-
 class Errorhandler(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        global debug
-        if debug is False:   # Checks if bot is in debug mode
+        if globals.debug is False:   # Checks if bot is in debug mode
             if hasattr(ctx.command, 'on_error'):
                 return
             error = getattr(error, 'original', error)
@@ -43,8 +39,7 @@ class Errorhandler(commands.Cog):
     @commands.command()   # Debug mode status
     async def debug_status(self, ctx):
         if dev_check(ctx.author.id):
-            global debug
-            await ctx.send(f'Debug Status: {debug}')
+            await ctx.send(f'Debug Status: {globals.debug}')
         else:
             print(f'{ctx.author} attempted to enable debug')
             await ctx.send(f'Permission denied: You are not a developer.')
@@ -52,13 +47,12 @@ class Errorhandler(commands.Cog):
     @commands.command()   # Debug mode switcher
     async def debug_mode(self, ctx):
         if dev_check(ctx.author.id):
-            global debug
-            if debug:
-                debug = False
+            if globals.debug:
+                globals.debug = False
                 await ctx.send(f'Debug mode: OFF')
                 print("Debug disabled")
             else:
-                debug = True
+                globals.debug = True
                 await ctx.send(f'Debug mode: ON')
                 print("Debug enabled")
         else:

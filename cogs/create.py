@@ -51,6 +51,15 @@ class Create(commands.Cog):
             await emb.edit(embed=embed)
             return
 
+        # Checks if name already exists in database
+        names = cursor.execute('''SELECT name FROM user_info''').fetchall()
+        tuple_name = (nat_name,)
+        if tuple_name in names:
+            embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                  description=f'That name is already used.')
+            await ctx.send(embed=embed)
+            return
+
         embed = discord.Embed(
             title='Nation Successfully Created',
             description=f'This is the glorious start of the **{nat_name}**! '

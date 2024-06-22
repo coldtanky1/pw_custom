@@ -8,6 +8,7 @@ from discord.utils import get
 from dotenv import load_dotenv
 import subprocess
 import re
+import globals
 
 new_line = '\n'
 intents = discord.Intents.all()
@@ -15,7 +16,7 @@ bot = commands.Bot(command_prefix="$", intents=intents, case_insensitive=True)
 
 load_dotenv()
 
-token = os.getenv("DISCORD_TOKEN")
+token = "BOT TOKEN"
 
 async def load():
     for filename in os.listdir('./cogs'):
@@ -121,6 +122,7 @@ cursor.execute('''
         )
     ''')
 
+globals.init()
 
 @bot.event
 async def on_ready():
@@ -137,13 +139,12 @@ def dev_check(usid):
 @bot.command()  # Help command and command list made specifically for devs
 async def devhelp(ctx, cmd: str = ""):
     if dev_check(ctx.author.id):
-        global debug
         cmd = cmd.lower()
         match cmd:
             case "debug_mode" | "debugmode":
                 embed = discord.Embed(colour=0xdc8a78, title="Dev Help | Debug Mode", type='rich',
                                       description=f'Syntax: `$debug_mode`{new_line}{new_line}'
-                                                  f'Status: {debug}{new_line}{new_line}'
+                                                  f'Status: {globals.debug}{new_line}{new_line}'
                                                   f'Switches the global variable \'debug\' from on to off and vice versa. {new_line}'
                                                   f'While on, this can do many things, but for now it only disables the error handler and prints the error to the console.{new_line}'
                                                   f'Debug mode is switched to off on boot.')
@@ -151,7 +152,7 @@ async def devhelp(ctx, cmd: str = ""):
             case "debug" | "debug_status" | "debugstatus" | "dstatus":
                 embed = discord.Embed(colour=0xdc8a78, title="Dev Help | Debug Status", type='rich',
                                       description=f'Syntax: `$debug_status`{new_line}{new_line}'
-                                                  f'Status: {debug}{new_line}{new_line}'
+                                                  f'Status: {globals.debug}{new_line}{new_line}'
                                                   f'Shows whether debug mode is on or off')
                 await ctx.send(embed=embed)
             case _:

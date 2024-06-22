@@ -49,12 +49,16 @@ class Production(commands.Cog):
                 (name,))
             pop_result = cursor.fetchone()
 
-
             if infra_result and res_result:
                 name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
                 name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
                 name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
                 name, nation_score, gdp, adult, balance = pop_result
+
+                # production multipliers
+                res_prod_multiplier = 1.0
+                if gov_type == "Communism":
+                    res_prod_multiplier *= 2
 
                 # the production of military equipment.
                 prod_aa = anti_air_factory * militaryfactory // 40
@@ -63,20 +67,19 @@ class Production(commands.Cog):
                 prod_tank = tank_factory * militaryfactory // 42 
 
                 # The production of each resource
-                prod_wood = lumber_mill * 2
-                prod_coal = coal_mine * 1.2
-                prod_iron = iron_mine * 1
-                prod_lead = lead_mine * 0.8
-                prod_bauxite = bauxite_mine * 0.6
-                prod_oil = oil_derrick * 1
-                prod_uranium = uranium_mine * 0.05
-                prod_farm = farm * 10
-                prod_aluminium = aluminium_factory * 0.4
-                prod_steel = steel_factory * 0.3
-                prod_gas = oil_refinery * 0.2
-                prod_ammo = ammo_factory * 0.5
-                prod_concrete = concrete_factory * 0.6
-
+                prod_wood = lumber_mill * 2 * res_prod_multiplier
+                prod_coal = coal_mine * 1.2 * res_prod_multiplier
+                prod_iron = iron_mine * 1 * res_prod_multiplier
+                prod_lead = lead_mine * 0.8 * res_prod_multiplier
+                prod_bauxite = bauxite_mine * 0.6 * res_prod_multiplier
+                prod_oil = oil_derrick * 1 * res_prod_multiplier
+                prod_uranium = uranium_mine * 0.05 * res_prod_multiplier
+                prod_farm = farm * 10 * res_prod_multiplier
+                prod_aluminium = aluminium_factory * 0.4 * res_prod_multiplier
+                prod_steel = steel_factory * 0.3 * res_prod_multiplier
+                prod_gas = oil_refinery * 0.2 * res_prod_multiplier
+                prod_ammo = ammo_factory * 0.5 * res_prod_multiplier
+                prod_concrete = concrete_factory * 0.6 * res_prod_multiplier
 
                 # The consumption of each resource
                 usage_iron_wood = prod_wood * 0
@@ -140,159 +143,6 @@ class Production(commands.Cog):
                     prod_ammo = 0
                     prod_concrete = 0
 
-
-                    main_emb = discord.Embed(title='Production', type='rich',
-                                            description=f'Displays {name}\'s production.\n'
-                                                        'React with "⛏" for Mined Resources.\n'
-                                                        'React with "🏭" for Manufactured Resources.\n'
-                                                        'React with "🛡" for Military Equipment.',
-                                            color=discord.Color.blue()
-                                            )
-
-                    mined_emb = discord.Embed(title="Mined Resources", type='rich',
-                                            description=f'Displays {name}\'s Mined Resources Production.',
-                                            color=discord.Color.blue()
-                                            )
-                    mined_emb.add_field(name='Wood', value=f'{prod_wood:,}', inline=False)
-                    mined_emb.add_field(name='Coal', value=f'{prod_coal:,}', inline=False)
-                    mined_emb.add_field(name='Iron', value=f'{final_prod_iron:,}', inline=False)
-                    mined_emb.add_field(name='Lead', value=f'{final_prod_lead:,}', inline=False)
-                    mined_emb.add_field(name='Bauxite', value=f'{final_prod_bauxite:,}', inline=False)
-                    mined_emb.add_field(name='Oil', value=f'{final_prod_oil:,}', inline=False)
-                    mined_emb.add_field(name='Uranium', value=f'{prod_uranium:,}', inline=False)
-                    mined_emb.add_field(name='Food', value=f'{final_prod_food:,}', inline=False)
-
-                    manu_emb = discord.Embed(title='Manufactured Resources', type='rich',
-                                            description=f'Displays {name}\'s Mined Resources Production.',
-                                            color=discord.Color.blue()
-                                            )
-                    manu_emb.add_field(name='Aluminium', value=f'{prod_aluminium:,}', inline=False)
-                    manu_emb.add_field(name='Steel', value=f'{prod_steel:,}', inline=False)
-                    manu_emb.add_field(name='Gasoline', value=f'{prod_gas:,}', inline=False)
-                    manu_emb.add_field(name='Ammo', value=f'{prod_ammo:,}', inline=False)
-                    manu_emb.add_field(name='Concrete', value=f'{prod_concrete:,}', inline=False)
-
-                    mil_emb = discord.Embed(title='Military Equipment', type='rich',
-                                            description=f'Displays {name}\'s Military Equipment Production.',
-                                            color=discord.Color.blue()
-                                            )
-                    mil_emb.add_field(name='Tanks', value=f'{prod_tank:,}', inline=False)
-                    mil_emb.add_field(name='Plane', value=f'{prod_plane:,}', inline=False)
-                    mil_emb.add_field(name='Artillery', value=f'{prod_arty:,}', inline=False)
-                    mil_emb.add_field(name='Anti-Air', value=f'{prod_aa:,}', inline=False)
-
-                    prod_emb = await ctx.send(embed=main_emb)
-                    await prod_emb.add_reaction("⛏")
-                    await prod_emb.add_reaction("🏭")
-                    await prod_emb.add_reaction("🛡")
-
-                    def chk(rec, usr):
-                        return usr == ctx.author and str(rec.emoji) in ['⛏', '🏭', '🛡']
-
-                    while True:
-                        try:
-                            reaction, user = await self.bot.wait_for('reaction_add', timeout=60, check=chk)
-                        except TimeoutError:
-                            break
-                        match(str(reaction.emoji)):   # Choosing Tab based on emoji
-                            case '⛏':
-                                await prod_emb.edit(embed=mined_emb)
-                            case '🏭':
-                                await prod_emb.edit(embed=manu_emb)
-                            case '🛡':
-                                await prod_emb.edit(embed=mil_emb)
-                            case _:
-                                break
-                        await prod_emb.remove_reaction(reaction.emoji, user)
-
-                if gov_type == "Communism":
-                    # The production of each resource
-                    com_prod_wood = lumber_mill * 2 * 2
-                    com_prod_coal = coal_mine * 1.2 * 2
-                    com_prod_iron = iron_mine * 1 * 2
-                    com_prod_lead = lead_mine * 0.8 * 2
-                    com_prod_bauxite = bauxite_mine * 0.6 * 2
-                    com_prod_oil = oil_derrick * 1 * 2
-                    com_prod_uranium = uranium_mine * 0.05 * 2
-                    com_prod_farm = farm * 10 * 2
-                    com_prod_aluminium = aluminium_factory * 0.4 * 2
-                    com_prod_steel = steel_factory * 0.3 * 2
-                    com_prod_gas = oil_refinery * 0.2 * 2
-                    com_prod_ammo = ammo_factory * 0.5 * 2
-                    com_prod_concrete = concrete_factory * 0.6 * 2
-
-                    final_prod_iron = com_prod_iron - final_usage_iron
-                    final_prod_lead = com_prod_lead - final_usage_lead
-                    final_prod_bauxite = com_prod_bauxite - final_usage_bauxite
-                    final_prod_oil = com_prod_oil - usage_oil_gas
-                    final_prod_food = com_prod_farm - usage_food
-
-
-                    main_emb = discord.Embed(title='Production', type='rich',
-                                            description=f'Displays {name}\'s production.\n'
-                                                        'React with "⛏" for Mined Resources.\n'
-                                                        'React with "🏭" for Manufactured Resources.\n'
-                                                        'React with "🛡" for Military Equipment.',
-                                            color=discord.Color.blue()
-                                            )
-
-                    mined_emb = discord.Embed(title="Mined Resources", type='rich',
-                                            description=f'Displays {name}\'s Mined Resources Production.',
-                                            color=discord.Color.blue()
-                                            )
-                    mined_emb.add_field(name='Wood', value=f'{com_prod_wood:,}', inline=False)
-                    mined_emb.add_field(name='Coal', value=f'{com_prod_coal:,}', inline=False)
-                    mined_emb.add_field(name='Iron', value=f'{final_prod_iron:,}', inline=False)
-                    mined_emb.add_field(name='Lead', value=f'{final_prod_lead:,}', inline=False)
-                    mined_emb.add_field(name='Bauxite', value=f'{final_prod_bauxite:,}', inline=False)
-                    mined_emb.add_field(name='Oil', value=f'{final_prod_oil:,}', inline=False)
-                    mined_emb.add_field(name='Uranium', value=f'{com_prod_uranium:,}', inline=False)
-                    mined_emb.add_field(name='Food', value=f'{final_prod_food:,}', inline=False)
-
-                    manu_emb = discord.Embed(title='Manufactured Resources', type='rich',
-                                            description=f'Displays {name}\'s Mined Resources Production.',
-                                            color=discord.Color.blue()
-                                            )
-                    manu_emb.add_field(name='Aluminium', value=f'{com_prod_aluminium:,}', inline=False)
-                    manu_emb.add_field(name='Steel', value=f'{com_prod_steel:,}', inline=False)
-                    manu_emb.add_field(name='Gasoline', value=f'{com_prod_gas:,}', inline=False)
-                    manu_emb.add_field(name='Ammo', value=f'{com_prod_ammo:,}', inline=False)
-                    manu_emb.add_field(name='Concrete', value=f'{com_prod_concrete:,}', inline=False)
-
-                    mil_emb = discord.Embed(title='Military Equipment', type='rich',
-                                            description=f'Displays {name}\'s Military Equipment Production.',
-                                            color=discord.Color.blue()
-                                            )
-                    mil_emb.add_field(name='Tanks', value=f'{prod_tank:,}', inline=False)
-                    mil_emb.add_field(name='Plane', value=f'{prod_plane:,}', inline=False)
-                    mil_emb.add_field(name='Artillery', value=f'{prod_arty:,}', inline=False)
-                    mil_emb.add_field(name='Anti-Air', value=f'{prod_aa:,}', inline=False)
-
-                    prod_emb = await ctx.send(embed=main_emb)
-                    await prod_emb.add_reaction("⛏")
-                    await prod_emb.add_reaction("🏭")
-                    await prod_emb.add_reaction("🛡")
-
-                    def chk(rec, usr):
-                        return usr == ctx.author and str(rec.emoji) in ['⛏', '🏭', '🛡']
-
-                    while True:
-                        try:
-                            reaction, user = await self.bot.wait_for('reaction_add', timeout=60, check=chk)
-                        except TimeoutError:
-                            break
-                        match(str(reaction.emoji)):   # Choosing Tab based on emoji
-                            case '⛏':
-                                await prod_emb.edit(embed=mined_emb)
-                            case '🏭':
-                                await prod_emb.edit(embed=manu_emb)
-                            case '🛡':
-                                await prod_emb.edit(embed=mil_emb)
-                            case _:
-                                break
-                        await prod_emb.remove_reaction(reaction.emoji, user)
-
-
                 main_emb = discord.Embed(title='Production', type='rich',
                                             description=f'Displays {name}\'s production.\n'
                                                         'React with "⛏" for Mined Resources.\n'
@@ -305,33 +155,33 @@ class Production(commands.Cog):
                                         description=f'Displays {name}\'s Mined Resources Production.',
                                         color=discord.Color.blurple()
                                         )
-                mined_emb.add_field(name='Wood', value=f'{prod_wood:,}', inline=False)
-                mined_emb.add_field(name='Coal', value=f'{prod_coal:,}', inline=False)
-                mined_emb.add_field(name='Iron', value=f'{final_prod_iron:,}', inline=False)
-                mined_emb.add_field(name='Lead', value=f'{final_prod_lead:,}', inline=False)
-                mined_emb.add_field(name='Bauxite', value=f'{final_prod_bauxite:,}', inline=False)
-                mined_emb.add_field(name='Oil', value=f'{final_prod_oil:,}', inline=False)
-                mined_emb.add_field(name='Uranium', value=f'{prod_uranium:,}', inline=False)
-                mined_emb.add_field(name='Food', value=f'{final_prod_food:,}', inline=False)
+                mined_emb.add_field(name='Wood', value=f'{int(round(prod_wood)):,}', inline=False)
+                mined_emb.add_field(name='Coal', value=f'{int(round(prod_coal)):,}', inline=False)
+                mined_emb.add_field(name='Iron', value=f'{int(round(final_prod_iron)):,}', inline=False)
+                mined_emb.add_field(name='Lead', value=f'{int(round(final_prod_lead)):,}', inline=False)
+                mined_emb.add_field(name='Bauxite', value=f'{int(round(final_prod_bauxite)):,}', inline=False)
+                mined_emb.add_field(name='Oil', value=f'{int(round(final_prod_oil)):,}', inline=False)
+                mined_emb.add_field(name='Uranium', value=f'{int(round(prod_uranium)):,}', inline=False)
+                mined_emb.add_field(name='Food', value=f'{int(round(final_prod_food)):,}', inline=False)
 
                 manu_emb = discord.Embed(title='Manufactured Resources', type='rich',
-                                        description=f'Displays {name}\'s Mined Resources Production.',
-                                        color=discord.Color.blurple()
-                                        )
-                manu_emb.add_field(name='Aluminium', value=f'{prod_aluminium:,}', inline=False)
-                manu_emb.add_field(name='Steel', value=f'{prod_steel:,}', inline=False)
-                manu_emb.add_field(name='Gasoline', value=f'{prod_gas:,}', inline=False)
-                manu_emb.add_field(name='Ammo', value=f'{prod_ammo:,}', inline=False)
-                manu_emb.add_field(name='Concrete', value=f'{prod_concrete:,}', inline=False)
+                                         description=f'Displays {name}\'s Mined Resources Production.',
+                                         color=discord.Color.blue()
+                                         )
+                manu_emb.add_field(name='Aluminium', value=f'{int(round(prod_aluminium)):,}', inline=False)
+                manu_emb.add_field(name='Steel', value=f'{int(round(prod_steel)):,}', inline=False)
+                manu_emb.add_field(name='Gasoline', value=f'{int(round(prod_gas)):,}', inline=False)
+                manu_emb.add_field(name='Ammo', value=f'{int(round(prod_ammo)):,}', inline=False)
+                manu_emb.add_field(name='Concrete', value=f'{int(round(prod_concrete)):,}', inline=False)
 
                 mil_emb = discord.Embed(title='Military Equipment', type='rich',
                                         description=f'Displays {name}\'s Military Equipment Production.',
-                                        color=discord.Color.blurple()
+                                        color=discord.Color.blue()
                                         )
-                mil_emb.add_field(name='Tanks', value=f'{prod_tank:,}', inline=False)
-                mil_emb.add_field(name='Plane', value=f'{prod_plane:,}', inline=False)
-                mil_emb.add_field(name='Artillery', value=f'{prod_arty:,}', inline=False)
-                mil_emb.add_field(name='Anti-Air', value=f'{prod_aa:,}', inline=False)
+                mil_emb.add_field(name='Tanks', value=f'{int(round(prod_tank)):,}', inline=False)
+                mil_emb.add_field(name='Plane', value=f'{int(round(prod_plane)):,}', inline=False)
+                mil_emb.add_field(name='Artillery', value=f'{int(round(prod_arty)):,}', inline=False)
+                mil_emb.add_field(name='Anti-Air', value=f'{int(round(prod_aa)):,}', inline=False)
 
                 prod_emb = await ctx.send(embed=main_emb)
                 await prod_emb.add_reaction("⛏")
@@ -392,19 +242,19 @@ class Production(commands.Cog):
                     title=f'{name}\'s Reserves',
                     description='Displays nation\'s national reserves.',
                     color=0x4CAF50)
-                embed.add_field(name=f'Wood: {wood:,}', value='', inline=False)
-                embed.add_field(name=f'Coal: {coal:,}', value='', inline=False)
-                embed.add_field(name=f'Iron: {iron:,}', value='', inline=False)
-                embed.add_field(name=f'Lead: {lead:,}', value='', inline=False)
-                embed.add_field(name=f'Bauxite: {bauxite:,}', value='', inline=False)
-                embed.add_field(name=f'Oil: {oil:,}', value='', inline=False)
-                embed.add_field(name=f'Uranium: {uranium:,}', value='', inline=False)
-                embed.add_field(name=f'Food: {food:,}', value='', inline=False)
-                embed.add_field(name=f'Steel: {steel:,}', value='', inline=False)
-                embed.add_field(name=f'Aluminium: {aluminium:,}', value='', inline=False)
-                embed.add_field(name=f'Gasoline: {gasoline:,}', value='', inline=False)
-                embed.add_field(name=f'Ammo: {ammo:,}', value='', inline=False)
-                embed.add_field(name=f'Concrete: {concrete:,}', value='', inline=False)
+                embed.add_field(name=f'Wood: {int(round(wood)):,}', value='', inline=False)
+                embed.add_field(name=f'Coal: {int(round(coal)):,}', value='', inline=False)
+                embed.add_field(name=f'Iron: {int(round(iron)):,}', value='', inline=False)
+                embed.add_field(name=f'Lead: {int(round(lead)):,}', value='', inline=False)
+                embed.add_field(name=f'Bauxite: {int(round(bauxite)):,}', value='', inline=False)
+                embed.add_field(name=f'Oil: {int(round(oil)):,}', value='', inline=False)
+                embed.add_field(name=f'Uranium: {int(round(uranium)):,}', value='', inline=False)
+                embed.add_field(name=f'Food: {int(round(food)):,}', value='', inline=False)
+                embed.add_field(name=f'Steel: {int(round(steel)):,}', value='', inline=False)
+                embed.add_field(name=f'Aluminium: {int(round(aluminium)):,}', value='', inline=False)
+                embed.add_field(name=f'Gasoline: {int(round(gasoline)):,}', value='', inline=False)
+                embed.add_field(name=f'Ammo: {int(round(ammo)):,}', value='', inline=False)
+                embed.add_field(name=f'Concrete: {int(round(concrete)):,}', value='', inline=False)
                 await ctx.send(embed=embed)
 
             else:

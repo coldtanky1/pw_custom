@@ -60,7 +60,10 @@ async def CheckHousing():
                 total_housing = basic_house_housing + small_flat_housing + apt_complex_housing + skyscraper_housing
 
                 if (adult > total_housing): # If user does not have enough housing.
-                    if happiness < 0:
+                    if happiness <= 0:
+                        happiness = 0
+                        cursor.execute('UPDATE user_info SET happiness = 0 WHERE user_id = ?', (user_id,))
+                        conn.commit()
                         pass
                     else:
                         cursor.execute('UPDATE user_info SET happiness = happiness - 15 WHERE name = ?', (name,))
@@ -1291,8 +1294,10 @@ async def FoodCheck():
                 if (pop_food_req > food):
 
                     if riot_chance == 1:
-                        if happiness < 0:
-                            pass
+                        if happiness <= 0:
+                            happiness = 0
+                            cursor.execute('UPDATE user_info SET happiness = 0 WHERE user_id = ?', (user_id, ))
+                            conn.commit()
                         else:
                             cursor.execute('UPDATE user_info SET happiness = happiness - ? WHERE user_id = ?', (15, user_id))
                             conn.commit()
@@ -1333,8 +1338,13 @@ async def FoodCheck():
                         logger.info(f"FOOD CHECK: {name} failed the food check. RIOT DETECTED.\n")
 
                     else:
-                        cursor.execute('UPDATE user_info SET happiness = happiness - ? WHERE user_id = ?', (15, user_id))
-                        conn.commit()
+                        if happiness <= 0:
+                            happiness = 0
+                            cursor.execute('UPDATE user_info SET happiness = 0 WHERE user_id = ?', (user_id, ))
+                            conn.commit()
+                        else:
+                            cursor.execute('UPDATE user_info SET happiness = happiness - ? WHERE user_id = ?', (15, user_id))
+                            conn.commit()
 
                         adult_deaths = round(adult//24)
 
@@ -1346,36 +1356,23 @@ async def FoodCheck():
                         logger.info(f"FOOD CHECK: {name} failed the food check. NO RIOT DETECTED.\n")
 
                 else:
+                    growth_multiplier = 1.0
                     if hospital_policy == "Enhanced Healthcare":
-                        # Update the population with the growth
-                        adult_growth = round(adult//3) * 1.2
-                        new_food = round((food - pop_food_req))
+                        growth_multiplier += 0.2
+                    # Update the population with the growth
+                    adult_growth = round(adult//10 * growth_multiplier)
+                    new_food = round((food - pop_food_req))
 
-                        # Update the pop values.
-                        cursor.execute('UPDATE user_stats SET adult = adult + ? WHERE name = ?',
-                                        (adult_growth, name))
-                        conn.commit()
+                    # Update the pop values.
+                    cursor.execute('UPDATE user_stats SET adult = adult + ? WHERE name = ?',
+                                    (adult_growth, name))
+                    conn.commit()
 
-                        # Update food value.
-                        cursor.execute('UPDATE resources SET food = food - ? WHERE name = ?', (new_food, name))
-                        conn.commit()
+                    # Update food value.
+                    cursor.execute('UPDATE resources SET food = food - ? WHERE name = ?', (new_food, name))
+                    conn.commit()
 
-                        logger.info(f"FOOD CHECK: {name} passed the food check.\n")
-                    else:
-                        # Update the population with the growth
-                        adult_growth = round(adult//3)
-                        new_food = round((food - pop_food_req))
-
-                        # Update the pop values.
-                        cursor.execute('UPDATE user_stats SET adult = adult + ? WHERE name = ?',
-                                        (adult_growth, name))
-                        conn.commit()
-
-                        # Update food value.
-                        cursor.execute('UPDATE resources SET food = food - ? WHERE name = ?', (new_food, name))
-                        conn.commit()
-
-                        logger.info(f"FOOD CHECK: {name} passed the food check.\n")
+                    logger.info(f"FOOD CHECK: {name} passed the food check.\n")
 
             else:
                 logger.info(f"UPDATE ECONOMY ERROR: Error fetching stats of {user_id}.\n")

@@ -25,13 +25,14 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
             
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             gov_emb = discord.Embed(title="Government Overview", type='rich',
                                     description=f'Displays an overview of {name}\'s government.', color=discord.Color.blue())
             gov_emb.add_field(name='Key: C = Current', value='', inline=False)
             gov_emb.add_field(name=f'🏦 C: {gov_type}', value=f'Government Selection: `$gov-ide`', inline=False)
-            gov_emb.add_field(name=f'💵 C: {tax_rate}', value=f'Tax Rate Selection: `$gov-tax <amount>`', inline=False)
+            gov_emb.add_field(name=f'💵 C: {tax_rate}%', value=f'Income Tax Rate Selection: `$gov-tax`', inline=False)
+            gov_emb.add_field(name=f'💵 C: {corp_tax}%', value=f'Corporate Tax Rate Selection: `$gov-tax`', inline=False)
             gov_emb.add_field(name=f'💂 C: {conscription}', value=f'Conscription Selection: `$gov-con`', inline=False)
             gov_emb.add_field(name=f'🕊️ C: {freedom}', value=f'Freedom Selection: `$gov-fre`', inline=False)
             gov_emb.add_field(name=f'🚔 C: {police_policy}', value=f'Police Selection: `$gov-pol`', inline=False)
@@ -55,7 +56,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Government Ideology", type='rich',
                                 description="Displays government ideologies.", color=discord.Color.blue())
@@ -96,7 +97,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if gov_type == "Democracy":
                 await ctx.send("You already have Democracy as your ideology.")
@@ -125,7 +126,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if gov_type == "Monarchy":
                 await ctx.send("You already have Monarchy as your ideology.")
@@ -154,7 +155,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if gov_type == "Communism":
                 await ctx.send("You already have Communism as your ideology.")
@@ -183,7 +184,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if gov_type == "Fascism":
                 await ctx.send("You already have Fascism as your ideology.")
@@ -212,7 +213,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if gov_type == "Socialism":
                 await ctx.send("You already have Socialism as your ideology.")
@@ -241,7 +242,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if gov_type == "Anarchy":
                 await ctx.send("You already have Anarchy as your ideology.")
@@ -271,7 +272,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Conscription", type='rich',
                                 description="Displays conscription laws.", color=discord.Color.red())
@@ -300,7 +301,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if conscription == "Volunteer":
                 await ctx.send("You already have Volunteer as your conscription law.")
@@ -332,7 +333,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if conscription == "Conscription":
                 await ctx.send("You already have Conscription as your conscription law.")
@@ -364,7 +365,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if conscription == "Full Conscription":
                 await ctx.send("You already have Full Conscription as your conscription law.")
@@ -397,7 +398,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Freedom", type='rich',
                                 description="Displays your freedom laws.", color=discord.Color.green())
@@ -427,7 +428,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if freedom == "Free Speech":
                 await ctx.send("You already have Free Speech as your freedom law.")
@@ -459,7 +460,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if freedom == "Moderate Freedom":
                 await ctx.send("You already have Moderate Freedom as your freedom law.")
@@ -491,7 +492,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if freedom == "No Freedom":
                 await ctx.send("You already have No Freedom as your freedom law.")
@@ -524,7 +525,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Police Policy", type='rich',
                                 description="Displays your police policy.", color=discord.Color.dark_blue())
@@ -555,7 +556,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if police_policy == "Chill Police":
                 await ctx.send("You already have Chill Police as your police policy.")
@@ -587,7 +588,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if police_policy == "Normal Police":
                 await ctx.send("You already have Normal Police as your police policy.")
@@ -619,7 +620,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if police_policy == "Serious Police":
                 await ctx.send("You already have Serious Police as your police policy.")
@@ -643,40 +644,20 @@ class Politics(commands.Cog):
 
     @commands.command(name='gov-tax')
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def gov_tax(self, ctx, amount: int):
+    async def gov_tax(self, ctx):
         user_id = ctx.author.id
-
-        if amount <= 0:
-            await ctx.send("Invalid amount, try a positive number.")
-            return
 
         # fetch user name
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
-            if gov_type == "Democracy":
-                if amount < 300:
-                    await ctx.send("You cannot set your tax lower than 300 as a Democracy.")
-                    return
-
-            embed = discord.Embed(title="Tax Rate", type='rich',
-                                description="Set a custom tax rate.", color=discord.Color.blue())
-            tax_emb = await ctx.send(embed=embed)
-
-            cursor.execute('UPDATE user_info SET tax_rate = ? WHERE user_id = ?', (amount, user_id))
-            conn.commit()
-
-            done_emb = discord.Embed(title="Tax Rate", type='rich',
-                                    description=f"Your tax rate has been set to {amount}!")
-            await tax_emb.edit(embed=done_emb)
-
-        else:
-            embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
-                                  description=f'You do not have a nation.{new_line}'
-                                              f'To create one, type `$create`.')
+            embed = discord.Embed(title="Tax Policy", type='rich',
+                                  description="Displays your tax policy.", color=discord.Color.brand_green())
+            embed.add_field(name="Income Tax", value=f"-1 Happiness per 1 percent over 12.5%.", inline=False)
+            embed.add_field(name="Corporate Tax", value=f"", inline=False)
             await ctx.send(embed=embed)
 
     @commands.command(name='gov-fir')
@@ -689,7 +670,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Firefighter Policy", type='rich',
                                 description="Displays your firefighter policy.", color=discord.Color.dark_red())
@@ -717,7 +698,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if fire_policy == "Careless Firefighters":
                 await ctx.send("You already have Careless Firefighters as your firefighter policy.")
@@ -749,7 +730,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if fire_policy == "Normal Firefighters":
                 await ctx.send("You already have Normal Firefighters as your firefighter policy.")
@@ -781,7 +762,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if fire_policy == "Speedy Firefighters":
                 await ctx.send("You already have Speedy Firefighters as your firefighter policy.")
@@ -813,7 +794,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
                                 description="Displays your healtcare policy.", color=discord.Color.dark_red())
@@ -844,7 +825,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if hospital_policy == "Enhanced Healthcare":
                 await ctx.send("You already have Enhanced Healthcare as your healthcare policy.")
@@ -876,7 +857,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if hospital_policy == "Normal Healthcare":
                 await ctx.send("You already have Normal Healthcare as your healthcare policy.")
@@ -908,7 +889,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if hospital_policy == "No Healthcare":
                 await ctx.send("You already have No Healthcare as your healthcare policy.")
@@ -940,7 +921,7 @@ class Politics(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             if hospital_policy == "Private Healthcare":
                 await ctx.send("You already have Private Healthcare as your healthcare policy.")

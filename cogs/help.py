@@ -137,6 +137,18 @@ class Help(commands.Cog):
                                                   f'View info about buildings.')
                 await ctx.send(embed=embed)
 
+            case "war":
+                embed = discord.Embed(colour=0xdd7878, title="Help: War", type='rich',
+                                      description=f'Syntax: `$war <user>`{new_line}{new_line}'
+                                                  f'Go to war against players.')
+                await ctx.send(embed=embed)
+
+            case "overview":
+                embed = discord.Embed(colour=0xdd7878, title="Help: Overview", type='rich',
+                                      description=f'Syntax: `$info`{new_line}{new_line}'
+                                                  f'Shows an overview of your nation.')
+                await ctx.send(embed=embed)
+
             case _:   # Actual command list
                 generating = discord.Embed(colour=0xdce0e8, title="Help", type='rich',
                                            description="Generating help pages...")
@@ -182,7 +194,10 @@ class Help(commands.Cog):
                                   inline=False)
 
                 pol_emb = discord.Embed(colour=0x8839ef, title="Help | Politics", type='rich')   # Politics Tab
-                pol_emb.add_field(name="Category", value="Gov - View your nation\'s government.",
+                pol_emb.add_field(name="Governing", value="Gov - View your nation\'s government."
+                                                          "Overview - Shows and overview of your nation.",
+                                  inline=False)
+                pol_emb.add_field(name="Conflict", value="War - Go to war against nations.",
                                   inline=False)
 
                 adm_emb = discord.Embed(colour=0x40a02b, title="Help | Administration", type='rich')   # Administration Tab

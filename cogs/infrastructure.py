@@ -23,7 +23,7 @@ class Infra(commands.Cog):
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             # fetch user's military stats
             cursor.execute(
@@ -33,12 +33,12 @@ class Infra(commands.Cog):
 
             # fetch user's infra
             cursor.execute(
-                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
+                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
                 (name,))
             infra_result = cursor.fetchone()
 
             if infra_result and mil_result:
-                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
+                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
                 name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
 
                 main_emb = discord.Embed(title='Infrastructure', type='rich',
@@ -72,7 +72,8 @@ class Infra(commands.Cog):
                                                         f"Steel Factory: {steel_factory}{new_line}"
                                                         f"Oil Refinery: {oil_refinery}{new_line}"
                                                         f"Munitions Factory: {ammo_factory}{new_line}"
-                                                        f"Concrete Factory: {concrete_factory}{new_line}", inline=False)
+                                                        f"Concrete Factory: {concrete_factory}{new_line}"
+                                                        f"Corporations: {corps}{new_line}", inline=False)
 
                 page_three = discord.Embed(title=f"{name}'s Infrastructure.", type='rich',
                                         description=f"Displays {name}'s military infrastructure.", color=discord.Color.blue())

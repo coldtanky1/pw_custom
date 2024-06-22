@@ -44,7 +44,8 @@ cursor.execute('''
         fire_policy TEXT,
         hospital_policy TEXT,
         war_status TEXT,
-        happiness INTEGER
+        happiness INTEGER,
+        corp_tax REAL
         )
     ''')
 
@@ -95,7 +96,8 @@ cursor.execute('''
         oil_refinery INTEGER,
         ammo_factory INTEGER,
         concrete_factory INTEGER,
-        militaryfactory INTEGER
+        militaryfactory INTEGER,
+        corps INTEGER
         )
     ''')
 

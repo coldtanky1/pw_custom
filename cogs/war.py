@@ -124,7 +124,7 @@ class War(commands.Cog):
 
                         def check(message):
                             return message.author == target_user
-                        
+
                         msg = await self.bot.wait_for('message', timeout=60, check=check)
 
                         match msg.content:

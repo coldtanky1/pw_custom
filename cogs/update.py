@@ -3,7 +3,9 @@ import discord
 from discord.ext import commands, tasks
 import random
 import logging
-
+from sim_funcs.NAI_func import NAI_Determiner
+from sim_funcs.corps_func import Corp_spawn
+from sim_funcs.corps_func import Corp_remove
 
 new_line = '\n'
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
@@ -23,11 +25,11 @@ async def CheckHousing():
     try:
         cursor.execute('SELECT * FROM user_info')
         for row in cursor.fetchall():
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = row
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = row
 
             # Fetch user's production infra
             cursor.execute(
-                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
+                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
                 (name,))
             infra_result = cursor.fetchone()
 
@@ -44,7 +46,7 @@ async def CheckHousing():
             pop_result = cursor.fetchone()
 
             if infra_result and mil_result and pop_result:
-                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
+                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
                 name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
                 name, nation_score, gdp, adult, balance = pop_result
 
@@ -124,7 +126,11 @@ async def UpdateEconomy():
     try:
         cursor.execute('SELECT * FROM user_info')
         for row in cursor.fetchall():
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = row
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = row
+
+            NAI_Determiner(user_id)
+            Corp_spawn(user_id)
+            Corp_remove(user_id)
 
             # fetch user's resources
             cursor.execute(
@@ -134,7 +140,7 @@ async def UpdateEconomy():
 
             # fetch user's production infra
             cursor.execute(
-                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
+                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
                 (name,))
             infra_result = cursor.fetchone()
 
@@ -151,7 +157,7 @@ async def UpdateEconomy():
             pop_result = cursor.fetchone()
 
             if infra_result:
-                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
+                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
                 name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
                 name, nation_score, gdp, adult, balance = pop_result
                 name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
@@ -1246,7 +1252,7 @@ async def FoodCheck():
     try:
         cursor.execute('SELECT * FROM user_info')
         for row in cursor.fetchall():
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = row
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = row
 
             # fetch user's resources
             cursor.execute(
@@ -1256,7 +1262,7 @@ async def FoodCheck():
 
             # fetch user's production infra
             cursor.execute(
-                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
+                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
                 (name,))
             infra_result = cursor.fetchone()
 
@@ -1273,7 +1279,7 @@ async def FoodCheck():
             pop_result = cursor.fetchone()
 
             if infra_result:
-                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
+                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
                 name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
                 name, nation_score, gdp, adult, balance = pop_result
                 name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
@@ -1382,7 +1388,7 @@ async def UpdateMilitary():
     try:
         cursor.execute('SELECT * FROM user_info')
         for row in cursor.fetchall():
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = row
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = row
 
             # fetch user's resources
             cursor.execute(
@@ -1392,7 +1398,7 @@ async def UpdateMilitary():
 
             # fetch user's production infra
             cursor.execute(
-                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
+                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
                 (name,))
             infra_result = cursor.fetchone()
 
@@ -1409,7 +1415,7 @@ async def UpdateMilitary():
             pop_result = cursor.fetchone()
 
             if infra_result:
-                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
+                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
                 name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
                 name, nation_score, gdp, adult, balance = pop_result
                 name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
@@ -1501,6 +1507,11 @@ async def FoodCheckTask():
 async def UpdateMilitaryTask():
     await UpdateMilitary()
 
+@tasks.loop(seconds=3600)
+async def SpawnCorps():
+    Corp_spawn()
+
+SpawnCorps.start()
 UpdateMilitaryTask.start()
 FoodCheckTask.start()
 UpdateEconomyTask.start()

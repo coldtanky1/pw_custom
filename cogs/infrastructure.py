@@ -3,11 +3,12 @@ import asyncio
 import discord
 from discord.ext import commands
 from discord.utils import get
+import globals
 
 new_line = '\n'
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = sqlite3.connect('player_info.db')
-cursor = conn.cursor()
+conn = globals.conn
+cursor = globals.cursor
 
 
 class Infra(commands.Cog):
@@ -18,39 +19,38 @@ class Infra(commands.Cog):
     async def infra(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = result
+            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             # fetch user's military stats
             cursor.execute(
-                'SELECT name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
+                'SELECT troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
                 (name,))
             mil_result = cursor.fetchone()
 
             # fetch user's infra
             cursor.execute(
-                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
+                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
                 (name,))
             infra_result = cursor.fetchone()
 
             if infra_result and mil_result:
-                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
-                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
+                troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
 
                 main_emb = discord.Embed(title='Infrastructure', type='rich',
-                                            description=f'Displays {name}\'s infrastructure.\n'
-                                                        'React with "1️⃣" for Housing infrastructure.\n'
-                                                        'React with "2️⃣" for Production infrastructure.\n'
-                                                        'React with "3️⃣" for Military infrastructure.',
-                                            color=discord.Color.blue()
-                                            )
+                                         description=f'Displays {name}\'s infrastructure.\n'
+                                                     f'React with "1️⃣" for Housing infrastructure.\n'
+                                                     f'React with "2️⃣" for Production infrastructure.\n'
+                                                     f'React with "3️⃣" for Military infrastructure.',
+                                         color=0x1E66F5)
 
                 page_one = discord.Embed(title=f"{name}'s Infrastructure.", type='rich',
-                                        description=f"Displays {name}'s housing infrastructure.", color=discord.Color.blue())
+                                         description=f"Displays {name}'s housing infrastructure.", color=0x1E66F5)
                 page_one.add_field(name="Page 1", value=f"{new_line}{new_line}"
                                                         f"Basic House: {basic_house}{new_line}"
                                                         f"Small Flat: {small_flat}{new_line}"
@@ -58,7 +58,7 @@ class Infra(commands.Cog):
                                                         f"Skyscraper: {skyscraper}{new_line}", inline=False)
 
                 page_two = discord.Embed(title=f"{name}'s Infrastructure.", type='rich',
-                                        description=f"Displays {name}'s production infrastructure.", color=discord.Color.blue())
+                                         description=f"Displays {name}'s production infrastructure.", color=0x1E66F5)
                 page_two.add_field(name="Page 2", value=f"{new_line}{new_line}"
                                                         f"Lumber Mill: {lumber_mill}{new_line}"
                                                         f"Coal Mine: {coal_mine}{new_line}"
@@ -72,10 +72,11 @@ class Infra(commands.Cog):
                                                         f"Steel Factory: {steel_factory}{new_line}"
                                                         f"Oil Refinery: {oil_refinery}{new_line}"
                                                         f"Munitions Factory: {ammo_factory}{new_line}"
-                                                        f"Concrete Factory: {concrete_factory}{new_line}", inline=False)
+                                                        f"Concrete Factory: {concrete_factory}{new_line}"
+                                                        f"Corporations: {corps}{new_line}", inline=False)
 
                 page_three = discord.Embed(title=f"{name}'s Infrastructure.", type='rich',
-                                        description=f"Displays {name}'s military infrastructure.", color=discord.Color.blue())
+                                           description=f"Displays {name}'s military infrastructure.", color=0x1E66F5)
                 page_three.add_field(name='Page 3', value=f"{new_line}{new_line}"
                                                           f"Military Factory: {militaryfactory}{new_line}"
                                                           f"Tank Factory: {tank_factory}{new_line}"

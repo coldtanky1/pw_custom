@@ -2,12 +2,13 @@ import sqlite3
 import discord
 from discord.ext import commands
 import asyncio
+import globals
 
 
 new_line = '\n'
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = sqlite3.connect('player_info.db')
-cursor = conn.cursor()
+conn = globals.conn
+cursor = globals.cursor
 
 
 health_values = {
@@ -32,11 +33,19 @@ class War(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def war(self, ctx, user: discord.User):
+    async def war(self, ctx, user: discord.User = None):
+
+        # Checks if target user was specified
+        if user is None:
+            embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                  description=f'You cannot declare war on nothing!{new_line} Please specify a target.')
+            await ctx.send(embed=embed)
+            return
+
         attker_id = ctx.author.id
         target_id = user.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (attker_id,))
         attker_result = cursor.fetchone()
 
@@ -45,8 +54,6 @@ class War(commands.Cog):
         target_result = cursor.fetchone()
 
         if attker_result and target_result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = attker_result
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness = target_result
 
             attker_name = attker_result[1]
             target_name = target_result[1]
@@ -82,10 +89,6 @@ class War(commands.Cog):
                 target_mil_result = cursor.fetchone()
 
                 if attker_res_result and target_res_result and target_mil_result and attker_mil_result:
-                    name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = attker_res_result
-                    name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = target_res_result
-                    name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = attker_mil_result
-                    name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = target_mil_result
 
                     # The attacker's mil stats
                     attker_troops = attker_mil_result[1]
@@ -115,16 +118,16 @@ class War(commands.Cog):
                     # Ask for the ground tactics
                     try:
                         await target_user.send("What ground tactic would you like to use? (reply with a number)\n"
-                                            "**1.** Trench Warfare\n"
-                                            "**2.** Creeping Barrage\n"
-                                            "**3.** Superior Firepower\n"
-                                            "**4.** Massed Assault\n"
-                                            "**5.** Elastic Defense\n"
-                                            "**6.** Armored Spearhead\n")
+                                               "**1.** Trench Warfare\n"
+                                               "**2.** Creeping Barrage\n"
+                                               "**3.** Superior Firepower\n"
+                                               "**4.** Massed Assault\n"
+                                               "**5.** Elastic Defense\n"
+                                               "**6.** Armored Spearhead\n")
 
                         def check(message):
                             return message.author == target_user
-                        
+
                         msg = await self.bot.wait_for('message', timeout=60, check=check)
 
                         match msg.content:
@@ -157,12 +160,12 @@ class War(commands.Cog):
                     # Ask the attacker for tactic.
                     try:
                         await attker_user.send("What ground tactic would you like to use? (reply with a number)\n"
-                                            "**1.** Trench Warfare\n"
-                                            "**2.** Creeping Barrage\n"
-                                            "**3.** Superior Firepower\n"
-                                            "**4.** Massed Assault\n"
-                                            "**5.** Elastic Defense\n"
-                                            "**6.** Armored Spearhead\n")
+                                               "**1.** Trench Warfare\n"
+                                               "**2.** Creeping Barrage\n"
+                                               "**3.** Superior Firepower\n"
+                                               "**4.** Massed Assault\n"
+                                               "**5.** Elastic Defense\n"
+                                               "**6.** Armored Spearhead\n")
 
                         def check3(message):
                             return message.author == attker_user
@@ -200,10 +203,10 @@ class War(commands.Cog):
                     # Ask the defender for air tactic.
                     try:
                         await target_user.send("What air tactic would you like to use? (reply with a number)\n"
-                                            "**1.** Scramble\n"
-                                            "**2.** Close Air Support\n"
-                                            "**3.** Formation Flying\n"
-                                            "**4.** Superior Firepower\n")
+                                               "**1.** Scramble\n"
+                                               "**2.** Close Air Support\n"
+                                               "**3.** Formation Flying\n"
+                                               "**4.** Superior Firepower\n")
 
                         def check2(message):
                             return message.author == target_user
@@ -229,15 +232,14 @@ class War(commands.Cog):
                     except asyncio.TimeoutError:
                         return await target_user.send("You took too long to respond.")
 
-
                     # Ask for the air tactics
                     await asyncio.sleep(10)
                     try:
                         await attker_user.send("What air tactic would you like to use? (reply with a number)\n"
-                                            "**1.** Scramble\n"
-                                            "**2.** Close Air Support\n"
-                                            "**3.** Formation Flying\n"
-                                            "**4.** Superior Firepower\n")
+                                               "**1.** Scramble\n"
+                                               "**2.** Close Air Support\n"
+                                               "**3.** Formation Flying\n"
+                                               "**4.** Superior Firepower\n")
 
                         def check2(message):
                             return message.author == attker_user
@@ -263,27 +265,40 @@ class War(commands.Cog):
                     except asyncio.TimeoutError:
                         return await attker_user.send("You took too long to respond.")
 
-
                     # Attacker stats
                     attker_troops_hp = attker_troops * health_values["troop_hp"]
-                    attker_veh_hp = ((attker_tanks * health_values["tank_hp"]) + (attker_artillery * health_values["arty_hp"]) + 
-                                    (attker_aa * health_values["aa_hp"]))
-                    attker_total_hp = attker_troops_hp + attker_veh_hp
+                    attker_tank_hp = attker_tanks * health_values["tank_hp"]
+                    attker_art_hp = attker_artillery * health_values["arty_hp"]
+                    attker_aa_hp = attker_aa * health_values["aa_hp"]
+                    attker_total_hp = attker_troops_hp + attker_tank_hp + attker_art_hp + attker_aa_hp
+                    attker_army_percentage = {
+                        "troops": round(attker_troops_hp / attker_total_hp, 4),
+                        "tanks": round(attker_tank_hp / attker_total_hp, 4),
+                        "artillery": round(attker_art_hp / attker_total_hp, 4),
+                        "antiair": round(attker_aa_hp / attker_total_hp, 4)
+                    }
 
                     attker_troops_dmg = attker_troops * damage_values["troop_dmg"]
-                    attker_veh_dmg = ((attker_tanks * damage_values["tank_dmg"]) + (attker_artillery * damage_values["arty_dmg"]) + 
-                                    (attker_aa * damage_values["aa_dmg"]))
+                    attker_veh_dmg = ((attker_tanks * damage_values["tank_dmg"]) + (attker_artillery * damage_values["arty_dmg"]) +
+                                      (attker_aa * damage_values["aa_dmg"]))
                     attker_total_dmg = attker_troops_dmg + attker_veh_dmg
 
                     # Defender stats
                     target_troops_hp = target_troops * health_values["troop_hp"]
-                    target_veh_hp = ((target_tanks * health_values["tank_hp"]) + (target_artillery * health_values["arty_hp"]) + 
-                                    (target_aa * health_values["aa_hp"]))
-                    target_total_hp = target_troops_hp + target_veh_hp
+                    target_tank_hp = target_tanks * health_values["tank_hp"]
+                    target_art_hp = target_artillery * health_values["arty_hp"]
+                    target_aa_hp = target_aa * health_values["aa_hp"]
+                    target_total_hp = target_troops_hp + target_tank_hp + target_art_hp + target_aa_hp
+                    target_army_percentage = {
+                        "troops": round(target_troops_hp / target_total_hp, 4),
+                        "tanks": round(target_tank_hp / target_total_hp, 4),
+                        "artillery": round(target_art_hp / target_total_hp, 4),
+                        "antiair": round(target_aa_hp / target_total_hp, 4)
+                    }
 
                     target_troops_dmg = target_troops * damage_values["troop_dmg"]
-                    target_veh_dmg = ((target_tanks * damage_values["tank_dmg"]) + (target_artillery * damage_values["arty_dmg"]) + 
-                                    (target_aa * damage_values["aa_dmg"]))
+                    target_veh_dmg = ((target_tanks * damage_values["tank_dmg"]) + (target_artillery * damage_values["arty_dmg"]) +
+                                      (target_aa * damage_values["aa_dmg"]))
                     target_total_dmg = target_troops_dmg + target_veh_dmg
 
                     # Bonuses
@@ -293,7 +308,7 @@ class War(commands.Cog):
                     target_dmg_bonus = 0
                     attker_dmg_bonus = 0
 
-                    match target_ground_tactic.lower():
+                    match target_ground_tactic:
                         case "Trench Warfare":
                             target_hp_bonus += target_total_hp * 0.3
                             target_dmg_bonus += target_total_dmg * 0.05
@@ -315,7 +330,7 @@ class War(commands.Cog):
                         case _:
                             pass
 
-                    match attker_ground_tactic.lower():
+                    match attker_ground_tactic:
                         case "Trench Warfare":
                             attker_hp_bonus += attker_total_hp * 0.3
                             attker_dmg_bonus += attker_total_dmg * 0.05
@@ -339,17 +354,23 @@ class War(commands.Cog):
                         
                     # Final attacker stats
                     final_attker_hp = attker_total_hp + attker_hp_bonus
+                    print(attker_total_hp)
+                    print(attker_hp_bonus)
+                    print(f"final_attker_hp: {final_attker_hp}")
                     final_attker_dmg = attker_total_dmg + attker_dmg_bonus
+                    print(f"final_attker_dmg: {final_attker_dmg}")
 
                     # Final defender stats
                     final_target_hp = target_total_hp + target_hp_bonus
+                    print(f"final_target_hp: {final_attker_hp}")
                     final_target_dmg = target_total_dmg + target_dmg_bonus
+                    print(f"final_target_dmg: {final_attker_dmg}")
 
                     init_emb = discord.Embed(title=f"{attker_name} VS {target_name}. | Ground Battle.", 
-                                            description="The battle will start in 5 minutes.\n"
-                                                        "Get ready!", color=discord.Color.red())
+                                             description="The battle will start in 5 minutes.\n"
+                                                         "Get ready!", color=0xEF2F73)
                     await ctx.send(embed=init_emb)
-                    await asyncio.sleep(300)
+                    await asyncio.sleep(5)
 
                     initial_attker_hp = {
                         "troops": attker_troops * health_values["troop_hp"],
@@ -375,37 +396,37 @@ class War(commands.Cog):
                         rounds += 1
 
                         remaining_units_attker = {
-                            "troops": max(0, round(total_hp_attker / final_attker_hp)),
-                            "tanks": max(0, round(total_hp_attker / final_attker_hp)),
-                            "artillery": max(0, round(total_hp_attker / final_attker_hp)),
-                            "aa": max(0, round(total_hp_attker / final_attker_hp))
+                            "troops": max(0, round(final_attker_hp * attker_army_percentage["troops"] / health_values["troop_hp"])),
+                            "tanks": max(0, round(final_attker_hp * attker_army_percentage["tanks"] / health_values["tank_hp"])),
+                            "artillery": max(0, round(final_attker_hp * attker_army_percentage["artillery"] / health_values["arty_hp"])),
+                            "aa": max(0, round(final_attker_hp * attker_army_percentage["antiair"] / health_values["aa_hp"]))
                         }
 
                         remaining_units_target = {
-                            "troops": max(0, round(total_hp_target / final_target_hp)),
-                            "tanks": max(0, round(total_hp_target / final_target_hp)),
-                            "artillery": max(0, round(total_hp_target / final_target_hp)),
-                            "aa": max(0, round(total_hp_target / final_target_hp))
+                            "troops": max(0, round(final_target_hp * target_army_percentage["troops"] / health_values["troop_hp"])),
+                            "tanks": max(0, round(final_target_hp * target_army_percentage["tanks"] / health_values["tank_hp"])),
+                            "artillery": max(0, round(final_target_hp * target_army_percentage["artillery"] / health_values["arty_hp"])),
+                            "aa": max(0, round(final_target_hp * target_army_percentage["antiair"] / health_values["aa_hp"]))
                         }
 
                         await asyncio.sleep(3)
                         new_emb = discord.Embed(title=f"{attker_name} VS {target_name} | Ground Battle.",
-                                                        description=f"Round: {rounds}",
-                                                        color=discord.Color.red())
+                                                description=f"Round: {rounds}",
+                                                color=0xEF2F73)
                         new_emb.add_field(name="Attacker Stats:\n", value=f"Troops: {remaining_units_attker['troops']:,}\n"
-                                                                            f"Tanks: {remaining_units_attker['tanks']:,}\n"
-                                                                            f"Artillery: {remaining_units_attker['artillery']:,}\n"
-                                                                            f"Anti-Air: {remaining_units_attker['aa']:,}\n"
-                                                                            f"HP: {final_attker_hp:,}\n"
-                                                                            f"\n"
-                                                                            f"Damage: {final_attker_dmg:,}\n", inline=True)
+                                                                          f"Tanks: {remaining_units_attker['tanks']:,}\n"
+                                                                          f"Artillery: {remaining_units_attker['artillery']:,}\n"
+                                                                          f"Anti-Air: {remaining_units_attker['aa']:,}\n"
+                                                                          f"HP: {max(0, final_attker_hp):,}\n"
+                                                                          f"\n"
+                                                                          f"Damage: {final_attker_dmg:,}\n", inline=True)
                         new_emb.add_field(name="Defender Stats:\n", value=f"Troops: {remaining_units_target['troops']:,}\n"
-                                                                            f"Tanks: {remaining_units_target['tanks']:,}\n"
-                                                                            f"Artillery: {remaining_units_target['artillery']:,}\n"
-                                                                            f"Anti-Air: {remaining_units_target['aa']:,}\n"
-                                                                            f"HP: {final_target_hp:,}\n"
-                                                                            f"\n"
-                                                                            f"Damage: {final_target_dmg:,}\n", inline=True)
+                                                                          f"Tanks: {remaining_units_target['tanks']:,}\n"
+                                                                          f"Artillery: {remaining_units_target['artillery']:,}\n"
+                                                                          f"Anti-Air: {remaining_units_target['aa']:,}\n"
+                                                                          f"HP: {max(0, final_target_hp):,}\n"
+                                                                          f"\n"
+                                                                          f"Damage: {final_target_dmg:,}\n", inline=True)
                         await ctx.send(embed=new_emb)
 
                         # Gas and ammo usage
@@ -427,8 +448,8 @@ class War(commands.Cog):
 
                     if final_attker_hp > final_target_hp:
                         winner_emb = discord.Embed(title=f"{attker_name} Victory!",
-                                                    description=f"{attker_name} has won the war against {target_name}.",
-                                                    color=discord.Color.green())
+                                                   description=f"{attker_name} has won the war against {target_name}.",
+                                                   color=0x5BF9A0)
                         await ctx.send(embed=winner_emb)
 
                         cursor.execute('UPDATE user_info SET war_status = ? WHERE user_id = ?', ("In Peace", attker_id))
@@ -439,21 +460,21 @@ class War(commands.Cog):
                         # Update attacker's mil stats
                         cursor.execute('''UPDATE user_mil SET troops = ?, tanks = ?, artillery = ?, 
                                     anti_air = ? WHERE name = ?''', (remaining_units_attker["troops"], remaining_units_attker["tanks"], 
-                                                                        remaining_units_attker["artillery"], 
-                                                                        remaining_units_attker["aa"], attker_name))
+                                                                     remaining_units_attker["artillery"],
+                                                                     remaining_units_attker["aa"], attker_name))
                         conn.commit()
 
                         # Update defender's mil stats
                         cursor.execute('''UPDATE user_mil SET troops = ?, tanks = ?, artillery = ?, 
                                     anti_air = ? WHERE name = ?''', (remaining_units_target['troops'], remaining_units_target['tanks'], 
-                                                                    remaining_units_target['artillery'],
-                                                                    remaining_units_target['aa'], target_name))
+                                                                     remaining_units_target['artillery'],
+                                                                     remaining_units_target['aa'], target_name))
                         conn.commit()
 
                     else:
                         winner_emb = discord.Embed(title=f"{target_name} Victory!",
-                                                    description=f"{target_name} has won the war against {attker_name}.",
-                                                    color=discord.Color.green())
+                                                   description=f"{target_name} has won the war against {attker_name}.",
+                                                   color=0x5BF9A0)
                         await ctx.send(embed=winner_emb)
 
                         cursor.execute('UPDATE user_info SET war_status = ? WHERE user_id = ?', ("In Peace", attker_id))
@@ -464,33 +485,33 @@ class War(commands.Cog):
                         # Update attacker's mil stats
                         cursor.execute('''UPDATE user_mil SET troops = ?, tanks = ?, artillery = ?, 
                                     anti_air = ? WHERE name = ?''', (remaining_units_attker["troops"], remaining_units_attker["tanks"], 
-                                                                        remaining_units_attker["artillery"], 
-                                                                        remaining_units_attker["aa"], attker_name))
+                                                                     remaining_units_attker["artillery"],
+                                                                     remaining_units_attker["aa"], attker_name))
                         conn.commit()
 
                         # Update defender's mil stats
                         cursor.execute('''UPDATE user_mil SET troops = ?, tanks = ?, artillery = ?, 
                                     anti_air = ? WHERE name = ?''', (remaining_units_target['troops'], remaining_units_target['tanks'], 
-                                                                    remaining_units_target['artillery'],
-                                                                    remaining_units_target['aa'], target_name))
+                                                                     remaining_units_target['artillery'],
+                                                                     remaining_units_target['aa'], target_name))
                         conn.commit()
             else:
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
-                                        description=f'You cannot delcare war on yourself!.')
+                                      description=f'You cannot declare war on yourself!.')
                 await ctx.send(embed=embed)
                 return
         else:
-            if target_result: # If the target (defender) does not have a nation.
+            if target_result:  # If the target (defender) does not have a nation.
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
-                                    description=f'You do not have a nation.{new_line}'
-                                                f'To create one, type `$create`.')
+                                      description=f'You do not have a nation.{new_line}'
+                                                  f'To create one, type `$create`.')
                 await ctx.send(embed=embed)
                 return
             
-            else: # Else, if the attacker does not have a nation.
+            else:  # Else, if the attacker does not have a nation.
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
-                                    description=f'<@{target_id}> does not have a nation.{new_line}'
-                                                f'To create one, type `$create`.')
+                                      description=f'<@{target_id}> does not have a nation.{new_line}'
+                                                  f'To create one, type `$create`.')
                 await ctx.send(embed=embed)
                 return
 

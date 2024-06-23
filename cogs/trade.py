@@ -3,11 +3,12 @@ import asyncio
 import discord
 from discord.ext import commands
 from discord.utils import get
+import globals
 
 new_line = '\n'
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = sqlite3.connect('player_info.db')
-cursor = conn.cursor()
+conn = globals.conn
+cursor = globals.cursor
 
 
 class Trade(commands.Cog):
@@ -157,7 +158,7 @@ class Trade(commands.Cog):
                     return
             else:
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
-                                      description=f'The user you wish to trade with does not have a nation.')
+                                      description=f'@<{receiver_id}> does not have a nation, as such you cannot trade with them.')
                 embed.set_footer(text="Ask them kindly to create one :3")
                 await ctx.send(embed=embed)
                 return

@@ -1,11 +1,12 @@
 import sqlite3
 import discord
 from discord.ext import commands
+import globals
 
 new_line = '\n'
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = sqlite3.connect('player_info.db')
-cursor = conn.cursor()
+conn = globals.conn
+cursor = globals.cursor
 
 
 class Demolish(commands.Cog):
@@ -30,12 +31,12 @@ class Demolish(commands.Cog):
 
             # fetch user's production infra
             cursor.execute(
-                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
+                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
                 (name,))
             infra_result = cursor.fetchone()
 
             if infra_result:
-                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
+                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
 
                 match building:
                     case "basichouse" | "basic_house":

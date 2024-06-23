@@ -1,11 +1,12 @@
 import sqlite3
 import discord
 from discord.ext import commands
+import globals
 
 new_line = '\n'
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = sqlite3.connect('player_info.db')
-cursor = conn.cursor()
+conn = globals.conn
+cursor = globals.cursor
 
 Wood = 10
 Coal = 30
@@ -202,8 +203,29 @@ class Info(commands.Cog):
                                                          f"Economic output: {eco_output:,}${new_line}", inline=False)
                 await ctx.send(embed=embed)
 
+            case "basichouse" | "basic":
+                embed = discord.Embed(title="Info (basichouse)", type='rich',
+                                      description="View info about buildings", color=discord.Color.blue())
+                embed.add_field(name="Housing", value=f"Houses 4 people.", inline=False)
+
+            case "smallflat" | "flat":
+                embed = discord.Embed(title="Info (smallflat)", type='rich',
+                                      description="View info about buildings", color=discord.Color.blue())
+                embed.add_field(name="Housing", value=f"Houses 25 people.", inline=False)
+
+            case "aptcomplex" | "complex":
+                embed = discord.Embed(title="Info (aptcomplex)", type='rich',
+                                      description="View info about buildings", color=discord.Color.blue())
+                embed.add_field(name="Housing", value=f"Houses 30 people.", inline=False)
+
+            case "skyscraper":
+                embed = discord.Embed(title="Info (skyscraper)", type='rich',
+                                      description="View info about buildings", color=discord.Color.blue())
+                embed.add_field(name="Housing", value=f"Houses 100 people.", inline=False)
+
             case _:
                 return
-            
+
+
 async def setup(bot):
     await bot.add_cog(Info(bot))

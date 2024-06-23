@@ -2,11 +2,12 @@ import sqlite3
 import asyncio
 import discord
 from discord.ext import commands
+import globals
 
 new_line = '\n'
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = sqlite3.connect('player_info.db')
-cursor = conn.cursor()
+conn = globals.conn
+cursor = globals.cursor
 
 
 class Construct(commands.Cog):
@@ -37,16 +38,16 @@ class Construct(commands.Cog):
 
             # fetch user's production infra
             cursor.execute(
-                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory FROM infra WHERE name = ?',
+                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
                 (name,))
             infra_result = cursor.fetchone()
 
             if infra_result:
-                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
+                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
 
 
                 match building: # Each building the user wants to build. You can reuse later for info command.
-                    case "basichouse":
+                    case "basichouse" | "basic":
                         basichouse_amt = amount
                         basichouse_wood = basichouse_amt * 2
                         basichouse_concrete = basichouse_amt * 0.6
@@ -85,8 +86,6 @@ class Construct(commands.Cog):
                                         ''', (basichouse_wood, basichouse_concrete, name))
 
                                         cursor.execute('UPDATE infra SET basic_house = basic_house + ? WHERE name = ?', (basichouse_amt, name))
-
-                                        # Commit the changes to the database
                                         conn.commit()
 
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
@@ -104,7 +103,7 @@ class Construct(commands.Cog):
                         except asyncio.TimeoutError:
                             return await ctx.send("You took too long to respond.")
 
-                    case "smallflat":
+                    case "smallflat" | "flat":
                         smallflat_amt = amount
                         smallflat_wood = smallflat_amt * 1
                         smallflat_concrete = smallflat_amt * 6
@@ -341,6 +340,11 @@ class Construct(commands.Cog):
                                         # Commit the changes to the database
                                         conn.commit()
 
+                                        # Update worker amount.
+                                        workers = round(amount // 2.33)
+                                        cursor.execute('UPDATE user_info SET adult = adult - ? WHERE name = ?', (workers, name))
+                                        conn.commit()
+
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
                                                                 description='Construction complete!')
                                         await construct_msg.edit(embed=cons_done)
@@ -402,6 +406,11 @@ class Construct(commands.Cog):
                                         cursor.execute('UPDATE infra SET coal_mine = coal_mine + ? WHERE name = ?', (coal_amt, name))
 
                                         # Commit the changes to the database
+                                        conn.commit()
+
+                                        # Update worker amount.
+                                        workers = round(amount // 5)
+                                        cursor.execute('UPDATE user_info SET adult = adult - ? WHERE name = ?', (workers, name))
                                         conn.commit()
 
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
@@ -468,6 +477,11 @@ class Construct(commands.Cog):
                                         # Commit the changes to the database
                                         conn.commit()
 
+                                        # Update worker amount.
+                                        workers = round(amount // 5)
+                                        cursor.execute('UPDATE user_info SET adult = adult - ? WHERE name = ?', (workers, name))
+                                        conn.commit()
+
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
                                                                 description='Construction complete!')
                                         await construct_msg.edit(embed=cons_done)
@@ -529,6 +543,11 @@ class Construct(commands.Cog):
                                         cursor.execute('UPDATE infra SET lead_mine = lead_mine + ? WHERE name = ?', (lead_amt, name))
 
                                         # Commit the changes to the database
+                                        conn.commit()
+
+                                        # Update worker amount.
+                                        workers = round(amount // 5)
+                                        cursor.execute('UPDATE user_info SET adult = adult - ? WHERE name = ?', (workers, name))
                                         conn.commit()
 
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
@@ -594,6 +613,11 @@ class Construct(commands.Cog):
                                         # Commit the changes to the database
                                         conn.commit()
 
+                                        # Update worker amount.
+                                        workers = round(amount // 5)
+                                        cursor.execute('UPDATE user_info SET adult = adult - ? WHERE name = ?', (workers, name))
+                                        conn.commit()
+
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
                                                                 description='Construction complete!')
                                         await construct_msg.edit(embed=cons_done)
@@ -655,6 +679,11 @@ class Construct(commands.Cog):
                                         cursor.execute('UPDATE infra SET oil_derrick = oil_derrick + ? WHERE name = ?', (oil_amt, name))
 
                                         # Commit the changes to the database
+                                        conn.commit()
+
+                                        # Update worker amount.
+                                        workers = round(amount // 2.33)
+                                        cursor.execute('UPDATE user_info SET adult = adult - ? WHERE name = ?', (workers, name))
                                         conn.commit()
 
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
@@ -720,6 +749,11 @@ class Construct(commands.Cog):
                                         # Commit the changes to the database
                                         conn.commit()
 
+                                        # Update worker amount.
+                                        workers = round(amount // 5)
+                                        cursor.execute('UPDATE user_info SET adult = adult - ? WHERE name = ?', (workers, name))
+                                        conn.commit()
+
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
                                                                 description='Construction complete!')
                                         await construct_msg.edit(embed=cons_done)
@@ -781,6 +815,11 @@ class Construct(commands.Cog):
                                         cursor.execute('UPDATE infra SET farm = farm + ? WHERE name = ?', (farm_amt, name))
 
                                         # Commit the changes to the database
+                                        conn.commit()
+
+                                        # Update worker amount.
+                                        workers = round(amount // 2.33)
+                                        cursor.execute('UPDATE user_info SET adult = adult - ? WHERE name = ?', (workers, name))
                                         conn.commit()
 
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
@@ -846,6 +885,11 @@ class Construct(commands.Cog):
                                         # Commit the changes to the database
                                         conn.commit()
 
+                                        # Update worker amount.
+                                        workers = round(amount // 6)
+                                        cursor.execute('UPDATE user_info SET adult = adult - ? WHERE name = ?', (workers, name))
+                                        conn.commit()
+
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
                                                                 description='Construction complete!')
                                         await construct_msg.edit(embed=cons_done)
@@ -907,6 +951,11 @@ class Construct(commands.Cog):
                                         cursor.execute('UPDATE infra SET steel_factory = steel_factory + ? WHERE name = ?', (steel_amt, name))
 
                                         # Commit the changes to the database
+                                        conn.commit()
+
+                                        # Update worker amount.
+                                        workers = round(amount // 8)
+                                        cursor.execute('UPDATE user_info SET adult = adult - ? WHERE name = ?', (workers, name))
                                         conn.commit()
 
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
@@ -972,6 +1021,11 @@ class Construct(commands.Cog):
                                         # Commit the changes to the database
                                         conn.commit()
 
+                                        # Update worker amount.
+                                        workers = round(amount // 4)
+                                        cursor.execute('UPDATE user_info SET adult = adult - ? WHERE name = ?', (workers, name))
+                                        conn.commit()
+
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
                                                                 description='Construction complete!')
                                         await construct_msg.edit(embed=cons_done)
@@ -1035,6 +1089,11 @@ class Construct(commands.Cog):
                                         # Commit the changes to the database
                                         conn.commit()
 
+                                        # Update worker amount.
+                                        workers = round(amount // 10)
+                                        cursor.execute('UPDATE user_info SET adult = adult - ? WHERE name = ?', (workers, name))
+                                        conn.commit()
+
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
                                                                 description='Construction complete!')
                                         await construct_msg.edit(embed=cons_done)
@@ -1096,6 +1155,11 @@ class Construct(commands.Cog):
                                         cursor.execute('UPDATE infra SET concrete_factory = concrete_factory + ? WHERE name = ?', (concrete_amt, name))
 
                                         # Commit the changes to the database
+                                        conn.commit()
+
+                                        # Update worker amount.
+                                        workers = round(amount // 5)
+                                        cursor.execute('UPDATE user_info SET adult = adult - ? WHERE name = ?', (workers, name))
                                         conn.commit()
 
                                         cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',

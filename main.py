@@ -45,7 +45,8 @@ cursor.execute('''
         fire_policy TEXT,
         hospital_policy TEXT,
         war_status TEXT,
-        happiness INTEGER
+        happiness INTEGER,
+        corp_tax REAL
         )
     ''')
 
@@ -96,7 +97,8 @@ cursor.execute('''
         oil_refinery INTEGER,
         ammo_factory INTEGER,
         concrete_factory INTEGER,
-        militaryfactory INTEGER
+        militaryfactory INTEGER,
+        corps INTEGER
         )
     ''')
 
@@ -161,7 +163,9 @@ async def devhelp(ctx, cmd: str = ""):
                 await ctx.send(embed=embed)
     else:
         print(f'{ctx.author} attempted to enable debug')
-        await ctx.send(f'Permission denied: You are not a developer.')
+        embed = discord.Embed(colour=0xEF2F73, title="Permission Denied", type='rich',
+                              description=f'You are not a developer.')
+        await ctx.send(embed=embed)
 
 
 asyncio.run(main())

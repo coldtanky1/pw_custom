@@ -1,12 +1,13 @@
+import logging
 import sqlite3
 import discord
 from discord.ext import commands, tasks
 import random
-import logging
 from sim_funcs.NAI_func import NAI_Determiner
 from sim_funcs.corps_func import Corp_spawn
 from sim_funcs.corps_func import Corp_remove
 import globals
+import os
 
 new_line = '\n'
 conn = globals.conn
@@ -15,10 +16,10 @@ cursor = globals.cursor
 logging_folder = globals.logging_folder + 'update.log'
 
 logging.basicConfig(filename=logging_folder, level=logging.INFO,
-                    format='%(asctime)s %(message)s')
+                    format='%(asctime)s %(message)s',
+                    force=True)
 
 logger = logging.getLogger(__name__)
-
 
 # Check housing.
 async def CheckHousing():

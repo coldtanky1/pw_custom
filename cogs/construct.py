@@ -1217,7 +1217,7 @@ class Construct(commands.Cog):
                                             WHERE name = ?
                                         ''', (barrack_concrete, barrack_steel, name))
 
-                                        cursor.execute('UPDATE user_mil SET barrack = barrack + ? WHERE name = ?', (barrack_amt, name))
+                                        cursor.execute('UPDATE user_mil SET barracks = barracks + ? WHERE name = ?', (barrack_amt, name))
 
                                         # Commit the changes to the database
                                         conn.commit()

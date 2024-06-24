@@ -133,7 +133,7 @@ class Help(commands.Cog):
 
             case "info":
                 embed = discord.Embed(colour=0xdd7878, title="Help: Info", type='rich',
-                                      description=f'Syntax: `$info`{new_line}{new_line}'
+                                      description=f'Syntax: `$info <building>`{new_line}{new_line}'
                                                   f'View info about buildings.')
                 await ctx.send(embed=embed)
 
@@ -145,7 +145,7 @@ class Help(commands.Cog):
 
             case "overview":
                 embed = discord.Embed(colour=0xdd7878, title="Help: Overview", type='rich',
-                                      description=f'Syntax: `$info`{new_line}{new_line}'
+                                      description=f'Syntax: `$overview`{new_line}{new_line}'
                                                   f'Shows an overview of your nation.')
                 await ctx.send(embed=embed)
 

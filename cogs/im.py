@@ -2,11 +2,12 @@ import sqlite3
 import asyncio
 import discord
 from discord.ext import commands
+import globals
 
 new_line = '\n'
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = sqlite3.connect('player_info.db')
-cursor = conn.cursor()
+conn = globals.conn
+cursor = globals.cursor
 
 resources_prices = [
     ("Wood", 12, 8),
@@ -24,10 +25,12 @@ resources_prices = [
     ("Concrete", 1000, 798)
 ]
 
+resource_list = ["Wood", "Coal", "Iron", "Lead", "Bauxite", "Oil", "Uranium", "Food", "Steel", "Aluminium", "Gasoline", "Ammo", "Concrete"]
+
 class IM(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        
+
     resources_prices = [
         ("Wood", 12, 8),
         ("Coal", 38, 28),
@@ -49,7 +52,7 @@ class IM(commands.Cog):
     async def im(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -58,7 +61,7 @@ class IM(commands.Cog):
 
             # fetch user's resources
             cursor.execute(
-                'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
+                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
                 (name,))
             res_result = cursor.fetchone()
 
@@ -68,7 +71,7 @@ class IM(commands.Cog):
 
             if res_result and stats_result:
                 name, nation_score, gdp, adult, balance = stats_result
-                name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
+                wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
 
                 embed = discord.Embed(title="International Market", type='rich',
                                       description="Displays the International Market", color=discord.Color.green())
@@ -90,41 +93,49 @@ class IM(commands.Cog):
                                                               f"Uranium{new_line}"
                                                               f"🛒 1250 🚚 998{new_line}"
                                                               f"Food {new_line}"
-                                                              f"🛒 25 🚚 18{new_line}"
-                                                              f"**Manufactured Resources**{new_line}"
-                                                              f"Steel {new_line}"
-                                                              f"🛒 1875 🚚 1498{new_line}"
-                                                              f"Aluminium{new_line}"
-                                                              f"🛒 1250 🚚 998{new_line}"
-                                                              f"Gasoline {new_line}"
-                                                              f"🛒 2125 🚚 1698{new_line}"
-                                                              f"Munitions{new_line}"
-                                                              f"🛒 1250 🚚 998{new_line}"
-                                                              f"Concrete{new_line}"
-                                                              f"🛒 1000 🚚 798{new_line}", inline=False)
+                                                              f"🛒 25 🚚 18{new_line}", inline=True)
+                embed.add_field(name="Manufactured Resources", value=f"Steel {new_line}"
+                                                                     f"🛒 1875 🚚 1498{new_line}"
+                                                                     f"Aluminium{new_line}"
+                                                                     f"🛒 1250 🚚 998{new_line}"
+                                                                     f"Gasoline {new_line}"
+                                                                     f"🛒 2125 🚚 1698{new_line}"
+                                                                     f"Munitions{new_line}"
+                                                                     f"🛒 1250 🚚 998{new_line}"
+                                                                     f"Concrete{new_line}"
+                                                                     f"🛒 1000 🚚 798{new_line}", inline=True)
                 await ctx.send(embed=embed)
-
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def order(self, ctx, material: str, amount: int):
+    async def order(self, ctx, material: str = None, amount: int = 0):
+
+        # Checks if user specified a material
+        if material is None:
+            embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                  description=f'Please specify a material to order.')
+            await ctx.send(embed=embed)
+            return
+
         user_id = ctx.author.id
         material = material.lower()
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if amount <= 0:
-            await ctx.send("Please try a positive number.")
+            embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                  description=f'Please try a positive number.')
+            await ctx.send(embed=embed)
             return
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            name = result[1]
 
             # fetch user's resources
             cursor.execute(
-                'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
+                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
                 (name,))
             res_result = cursor.fetchone()
 
@@ -133,570 +144,88 @@ class IM(commands.Cog):
             stats_result = cursor.fetchone()
 
             if res_result and stats_result:
-                name, nation_score, gdp, adult, balance = stats_result
-                name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
+                balance = stats_result[4]
 
                 match material:
                     case "wood":
-                        price = round(resources_prices[0][1] * amount)
-                        embed = discord.Embed(title="Market Order", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Order", value=f"Price of Wood {price:,}{new_line}", inline=False)
-                        if price > balance:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
-                                                                    description='Ordering...')
-                                order_msg = await ctx.send(embed=ordering)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET wood = wood + ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
-                                await order_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 0
                     case "coal":
-                        price = round(resources_prices[1][1] * amount)
-                        embed = discord.Embed(title="Market Order", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Order", value=f"Price of Coal {price}{new_line}", inline=False)
-                        if price > balance:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
-                                                                    description='Ordering...')
-                                order_msg = await ctx.send(embed=ordering)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET coal = coal + ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
-                                await order_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 1
                     case "iron":
-                        price = round(resources_prices[2][1] * amount)
-                        embed = discord.Embed(title="Market Order", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Order", value=f"Price of Iron {price}{new_line}", inline=False)
-                        if price > balance:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
-                                                                    description='Ordering...')
-                                order_msg = await ctx.send(embed=ordering)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET iron = iron + ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
-                                await order_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 2
                     case "lead":
-                        price = round(resources_prices[3][1] * amount)
-                        embed = discord.Embed(title="Market Order", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Order", value=f"Price of Lead {price}{new_line}", inline=False)
-                        if price > balance:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
-                                                                    description='Ordering...')
-                                order_msg = await ctx.send(embed=ordering)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET lead = lead + ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
-                                await order_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 3
                     case "bauxite":
-                        price = round(resources_prices[4][1] * amount)
-                        embed = discord.Embed(title="Market Order", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Order", value=f"Price of Bauxite {price}{new_line}", inline=False)
-                        if price > balance:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
-                                                                    description='Ordering...')
-                                order_msg = await ctx.send(embed=ordering)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET bauxite = bauxite + ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
-                                await order_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 4
                     case "oil":
-                        price = round(resources_prices[5][1] * amount)
-                        embed = discord.Embed(title="Market Order", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Order", value=f"Price of Oil {price}{new_line}", inline=False)
-                        if price > balance:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
-                                                                    description='Ordering...')
-                                order_msg = await ctx.send(embed=ordering)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET oil = oil + ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
-                                await order_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 5
                     case "uranium":
-                        price = round(resources_prices[6][1] * amount)
-                        embed = discord.Embed(title="Market Order", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Order", value=f"Price of Uranium {price}{new_line}", inline=False)
-                        if price > balance:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
-                                                                    description='Ordering...')
-                                order_msg = await ctx.send(embed=ordering)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET uranium = uranium + ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
-                                await order_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 6
                     case "food":
-                        price = round(resources_prices[7][1] * amount)
-                        embed = discord.Embed(title="Market Order", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Order", value=f"Price of Food {price}{new_line}", inline=False)
-                        if price > balance:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
-                                                                    description='Ordering...')
-                                order_msg = await ctx.send(embed=ordering)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET food = food + ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
-                                await order_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 7
                     case "steel":
-                        price = round(resources_prices[8][1] * amount)
-                        embed = discord.Embed(title="Market Order", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Order", value=f"Price of Steel {price}{new_line}", inline=False)
-                        if price > balance:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
-                                                                    description='Ordering...')
-                                order_msg = await ctx.send(embed=ordering)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET steel = steel + ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
-                                await order_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 8
                     case "aluminium":
-                        price = round(resources_prices[9][1] * amount)
-                        embed = discord.Embed(title="Market Order", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Order", value=f"Price of Aluminium {price}{new_line}", inline=False)
-                        if price > balance:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
-                                                                    description='Ordering...')
-                                order_msg = await ctx.send(embed=ordering)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET aluminium = aluminium + ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
-                                await order_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 9
                     case "gas" | "gasoline":
-                        price = round(resources_prices[10][1] * amount)
-                        embed = discord.Embed(title="Market Order", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Order", value=f"Price of Gasoline {price}{new_line}", inline=False)
-                        if price > balance:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
-                                                                    description='Ordering...')
-                                order_msg = await ctx.send(embed=ordering)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET gasoline = gasoline + ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
-                                await order_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 10
                     case "ammo" | "munitions":
-                        price = round(resources_prices[11][1] * amount)
-                        embed = discord.Embed(title="Market Order", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Order", value=f"Price of Munitions {price}{new_line}", inline=False)
-                        if price > balance:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
-                                                                    description='Ordering...')
-                                order_msg = await ctx.send(embed=ordering)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET ammo = ammo + ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
-                                await order_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 11
                     case "concrete":
-                        price = round(resources_prices[12][1] * amount)
-                        embed = discord.Embed(title="Market Order", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Order", value=f"Price of Concrete {price}{new_line}", inline=False)
-                        if price > balance:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
-                                                                    description='Ordering...')
-                                order_msg = await ctx.send(embed=ordering)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET concrete = concrete + ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!", color=discord.Color.green())
-                                await order_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
+                        res_id = 12
                     case _:
+                        embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                              description=f"Specified material doesn't exit.")
+                        await ctx.send(embed=embed)
                         return
+                price = round(resources_prices[res_id][1] * amount)
+                embed = discord.Embed(title="Market Order", type='rich',
+                                      description="Purchase resources from the market.", color=0x1E66F5)
+                embed.add_field(name="Market Order",
+                                value=f"Price of {resources_prices[res_id][0]}: {resources_prices[res_id][1]:,}{new_line}"
+                                      f"Units of {resources_prices[res_id][0]}: {amount:,}{new_line}"
+                                      f"**Total Price: {price:,}**", inline=False)
+                if price > balance:
+                    embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
+                                                          f"You __cannot__ afford this sale.", inline=True)
+                    await ctx.send(embed=embed)
+                    return
+                else:
+                    embed.add_field(name="Balance", value=f"Balance: {balance:,}{new_line}"
+                                                          f"You __can__ afford this sale.{new_line}"
+                                                          f"Type **CONFIRM** to complete this sale.{new_line}",
+                                    inline=True)
+                    await ctx.send(embed=embed)
+
+                try:
+                    def check(message):
+                        return message.author == ctx.author and message.channel == ctx.channel and message.content in [
+                            'CONFIRM']
+
+                    response_message = await self.bot.wait_for('message', timeout=30, check=check)
+
+                    if response_message.content == 'CONFIRM':
+                        ordering = discord.Embed(colour=0xdd7878, title='Market Order', type='rich',
+                                                 description='Ordering...')
+                        order_msg = await ctx.send(embed=ordering)
+
+                        # Update user's balance
+                        cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
+                        conn.commit()
+
+                        # Update user's resource
+                        query = '''UPDATE resources SET {0} = {0} + {1} WHERE name = "{2}"'''.format(resource_list[res_id], amount, name)
+                        cursor.execute(query)
+                        conn.commit()
+
+                        order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!",
+                                                   color=0x5BF9A0)
+                        await order_msg.edit(embed=order_done)
+                    else:
+                        await ctx.send("Aborting...")
+                        return
+                except asyncio.TimeoutError:
+                    return await ctx.send("You took too long to respond.")
             else:
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                       description=f'Cannot find stats.')
@@ -709,24 +238,34 @@ class IM(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def sell(self, ctx, material: str, amount: int):
+    async def sell(self, ctx, material: str = None, amount: int = 0):
+
+        # Checks if user specified a material
+        if material is None:
+            embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                  description=f'Please specify a material to sell.')
+            await ctx.send(embed=embed)
+            return
+
         user_id = ctx.author.id
         material = material.lower()
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if amount <= 0:
-            await ctx.send("Please try a positive number.")
+            embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                  description=f'Please try a positive number.')
+            await ctx.send(embed=embed)
             return
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            name = result[1]
 
             # fetch user's resources
             cursor.execute(
-                'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
+                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
                 (name,))
             res_result = cursor.fetchone()
 
@@ -735,570 +274,88 @@ class IM(commands.Cog):
             stats_result = cursor.fetchone()
 
             if res_result and stats_result:
-                name, nation_score, gdp, adult, balance = stats_result
-                name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
 
                 match material:
                     case "wood":
-                        price = round(resources_prices[0][2] * amount)
-                        embed = discord.Embed(title="Market Sell", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Sell", value=f"Sell Price of Wood {price:,}{new_line}", inline=False)
-                        if amount > wood:
-                            embed.add_field(name="Reserve", value=f"Wood: {wood:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Reserve", value=f"Wood: {wood:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
-                                                                    description='Selling...')
-                                sell_msg = await ctx.send(embed=selling)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET wood = wood - ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
-                                await sell_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 0
                     case "coal":
-                        price = round(resources_prices[1][2] * amount)
-                        embed = discord.Embed(title="Market Sell", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Sell", value=f"Price of Coal {price:,}{new_line}", inline=False)
-                        if amount > coal:
-                            embed.add_field(name="Reserve", value=f"Coal: {coal:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Reserve", value=f"Coal: {coal:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
-                                                                    description='Selling...')
-                                sell_msg = await ctx.send(embed=selling)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET coal = coal - ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
-                                await sell_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 1
                     case "iron":
-                        price = round(resources_prices[2][2] * amount)
-                        embed = discord.Embed(title="Market Sell", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Sell", value=f"Price of Iron {price:,}{new_line}", inline=False)
-                        if amount > iron:
-                            embed.add_field(name="Reserve", value=f"Iron: {iron:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Reserve", value=f"Iron: {iron:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
-                                                                    description='Selling...')
-                                sell_msg = await ctx.send(embed=selling)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET iron = iron - ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
-                                await sell_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 2
                     case "lead":
-                        price = round(resources_prices[3][2] * amount)
-                        embed = discord.Embed(title="Market Sell", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Sell", value=f"Price of Lead {price:,}{new_line}", inline=False)
-                        if amount > lead:
-                            embed.add_field(name="Reserve", value=f"Lead: {lead:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Reserve", value=f"Lead: {lead:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
-                                                                    description='Selling...')
-                                sell_msg = await ctx.send(embed=selling)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET lead = lead - ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
-                                await sell_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 3
                     case "bauxite":
-                        price = round(resources_prices[4][2] * amount)
-                        embed = discord.Embed(title="Market Sell", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Sell", value=f"Price of Bauxite {price:,}{new_line}", inline=False)
-                        if amount > bauxite:
-                            embed.add_field(name="Reserve", value=f"Bauxite: {bauxite:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Reserve", value=f"Bauxite: {bauxite:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
-                                                                    description='Selling...')
-                                sell_msg = await ctx.send(embed=selling)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET bauxite = bauxite - ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
-                                await sell_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 4
                     case "oil":
-                        price = round(resources_prices[5][2] * amount)
-                        embed = discord.Embed(title="Market Sell", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Sell", value=f"Price of Oil {price:,}{new_line}", inline=False)
-                        if amount > oil:
-                            embed.add_field(name="Reserve", value=f"Oil: {oil:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Reserve", value=f"Oil: {oil:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
-                                                                    description='Selling...')
-                                sell_msg = await ctx.send(embed=selling)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET oil = oil - ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
-                                await sell_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 5
                     case "uranium":
-                        price = round(resources_prices[6][2] * amount)
-                        embed = discord.Embed(title="Market Sell", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Sell", value=f"Price of Uranium {price:,}{new_line}", inline=False)
-                        if amount > uranium:
-                            embed.add_field(name="Reserve", value=f"Uranium: {uranium:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Reserve", value=f"Uranium: {uranium:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
-                                                                    description='Selling...')
-                                sell_msg = await ctx.send(embed=selling)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET uranium = uranium - ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
-                                await sell_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 6
                     case "food":
-                        price = round(resources_prices[7][2] * amount)
-                        embed = discord.Embed(title="Market Sell", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Sell", value=f"Price of Food {price:,}{new_line}", inline=False)
-                        if amount > food:
-                            embed.add_field(name="Reserve", value=f"Food: {food:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Reserve", value=f"Food: {food:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
-                                                                    description='Selling...')
-                                sell_msg = await ctx.send(embed=selling)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET food = food - ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
-                                await sell_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 7
                     case "steel":
-                        price = round(resources_prices[8][2] * amount)
-                        embed = discord.Embed(title="Market Sell", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Sell", value=f"Price of Steel {price:,}{new_line}", inline=False)
-                        if amount > steel:
-                            embed.add_field(name="Reserve", value=f"Steel: {steel:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Reserve", value=f"Steel: {steel:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
-                                                                    description='Selling...')
-                                sell_msg = await ctx.send(embed=selling)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET steel = steel - ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
-                                await sell_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 8
                     case "aluminium":
-                        price = round(resources_prices[9][2] * amount)
-                        embed = discord.Embed(title="Market Sell", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Sell", value=f"Price of Aluminium {price:,}{new_line}", inline=False)
-                        if amount > aluminium:
-                            embed.add_field(name="Reserve", value=f"Aluminium: {aluminium:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Reserve", value=f"Aluminium: {aluminium:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
-                                                                    description='Selling...')
-                                sell_msg = await ctx.send(embed=selling)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET aluminium = aluminium - ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
-                                await sell_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 9
                     case "gas" | "gasoline":
-                        price = round(resources_prices[10][2] * amount)
-                        embed = discord.Embed(title="Market Sell", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Sell", value=f"Price of Gasoline {price:,}{new_line}", inline=False)
-                        if amount > gasoline:
-                            embed.add_field(name="Reserve", value=f"Gasoline: {gasoline:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Reserve", value=f"Gasoline: {gasoline:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
-                                                                    description='Selling...')
-                                sell_msg = await ctx.send(embed=selling)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET gasoline = gasoline - ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
-                                await sell_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 10
                     case "ammo" | "munitions":
-                        price = round(resources_prices[11][2] * amount)
-                        embed = discord.Embed(title="Market Sell", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Sell", value=f"Price of Munitions {price:,}{new_line}", inline=False)
-                        if amount > ammo:
-                            embed.add_field(name="Reserve", value=f"Ammo: {ammo:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Reserve", value=f"Ammo: {ammo:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
-                                                                    description='Selling...')
-                                sell_msg = await ctx.send(embed=selling)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET ammo = ammo - ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
-                                await sell_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
-
+                        res_id = 11
                     case "concrete":
-                        price = round(resources_prices[12][2] * amount)
-                        embed = discord.Embed(title="Market Sell", type='rich',
-                                             description="Purchase resources from the market.", color=discord.Color.blue())
-                        embed.add_field(name="Market Sell", value=f"Price of Concrete {price:,}{new_line}", inline=False)
-                        if amount > concrete:
-                            embed.add_field(name="Reserve", value=f"Concrete: {concrete:,}{new_line}"
-                                                                  f"You __cannot__ afford this sale.", inline=True)
-                            await ctx.send(embed=embed)
-                            return
-                        else:
-                            embed.add_field(name="Reserve", value=f"Concrete: {concrete:,}{new_line}"
-                                                                  f"You __can__ afford this sale.{new_line}"
-                                                                  f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
-                            await ctx.send(embed=embed)
-
-                        try:
-                            def check(message):
-                                return message.author == ctx.author and message.channel == ctx.channel and message.content in ['CONFIRM']
-
-                            response_message = await self.bot.wait_for('message', timeout=30, check=check)
-
-                            if response_message.content == 'CONFIRM':
-                                selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
-                                                                    description='Selling...')
-                                sell_msg = await ctx.send(embed=selling)
-                                
-                                # Update user's balance
-                                cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                                conn.commit()
-
-                                # Update user's resource
-                                cursor.execute('UPDATE resources SET concrete = concrete - ? WHERE name = ?', (amount, name))
-                                conn.commit()
-
-                                order_done = discord.Embed(title="Market Sell", type='rich',description="Sale fulfilled!", color=discord.Color.green())
-                                await sell_msg.edit(embed=order_done)
-                            else:
-                                await ctx.send("Aborting...")
-                                return
-                        except asyncio.TimeoutError:
-                            return await ctx.send("You took too long to respond.")
+                        res_id = 12
                     case _:
+                        embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                              description=f"Specified material doesn't exit.")
+                        await ctx.send(embed=embed)
                         return
+                price = round(resources_prices[res_id][2] * amount)
+                embed = discord.Embed(title="Market Sell", type='rich',
+                                      description="Purchase resources from the market.", color=discord.Color.blue())
+                embed.add_field(name="Market Sell",
+                                value=f"Sell Price of {resources_prices[res_id][0]} {price:,}{new_line}", inline=False)
+
+                if amount > res_result[res_id]:
+                    embed.add_field(name="Reserve",
+                                    value=f"{resources_prices[res_id][0]}: {res_result[res_id]:,}{new_line}"
+                                          f"You __cannot__ afford this sale.", inline=True)
+                    await ctx.send(embed=embed)
+                    return
+                else:
+                    embed.add_field(name="Reserve",
+                                    value=f"{resources_prices[res_id][0]}: {res_result[res_id]:,}{new_line}"
+                                          f"You __can__ afford this sale.{new_line}"
+                                          f"Type **CONFIRM** to complete this sale.{new_line}", inline=True)
+                    await ctx.send(embed=embed)
+
+                try:
+                    def check(message):
+                        return message.author == ctx.author and message.channel == ctx.channel and message.content in [
+                            'CONFIRM']
+
+                    response_message = await self.bot.wait_for('message', timeout=30, check=check)
+
+                    if response_message.content == 'CONFIRM':
+                        selling = discord.Embed(colour=0xdd7878, title='Market Sell', type='rich',
+                                                description='Selling...')
+                        sell_msg = await ctx.send(embed=selling)
+
+                        # Update user's balance
+                        cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
+                        conn.commit()
+
+                        # Update user's resource
+                        query = '''UPDATE resources SET {0} = {0} - {1} WHERE name = "{2}"'''.format(resource_list[res_id], amount, name)
+                        cursor.execute(query)
+                        conn.commit()
+
+                        order_done = discord.Embed(title="Market Sell", type='rich', description="Sale fulfilled!",
+                                                   color=0x5BF9A0)
+                        await sell_msg.edit(embed=order_done)
+                    else:
+                        await ctx.send("Aborting...")
+                        return
+                except asyncio.TimeoutError:
+                    return await ctx.send("You took too long to respond.")
+
             else:
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                       description=f'Cannot find stats.')
@@ -1308,7 +365,6 @@ class IM(commands.Cog):
                                   description=f'You do not have a nation.{new_line}'
                                               f'To create one, type `$create`.')
             await ctx.send(embed=embed)
-
 
 
 async def setup(bot):

@@ -3,11 +3,12 @@ import asyncio
 import discord
 from discord.ext import commands
 from discord.utils import get
+import globals
 
 new_line = '\n'
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = sqlite3.connect('player_info.db')
-cursor = conn.cursor()
+conn = globals.conn
+cursor = globals.cursor
 
 
 class Production(commands.Cog):
@@ -27,33 +28,33 @@ class Production(commands.Cog):
 
             # fetch user's resources
             cursor.execute(
-                'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
+                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
                 (name,))
             res_result = cursor.fetchone()
 
             # fetch user's production infra
             cursor.execute(
-                'SELECT name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
+                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
                 (name,))
             infra_result = cursor.fetchone()
 
             # fetch user's military stats
             cursor.execute(
-                'SELECT name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
+                'SELECT troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
                 (name,))
             mil_result = cursor.fetchone()
 
             # fetch user's population stats.
             cursor.execute(
-                'SELECT name, nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
+                'SELECT nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
                 (name,))
             pop_result = cursor.fetchone()
 
             if infra_result and res_result:
-                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
-                name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
-                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
-                name, nation_score, gdp, adult, balance = pop_result
+                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
+                wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
+                troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                nation_score, gdp, adult, balance = pop_result
 
                 # production multipliers
                 res_prod_multiplier = 1.0
@@ -222,7 +223,7 @@ class Production(commands.Cog):
     async def reserve(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT name FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -231,14 +232,14 @@ class Production(commands.Cog):
 
             # fetch user's resources
             cursor.execute(
-                'SELECT name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
+                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
                 (name,))
             resource_result = cursor.fetchone()
 
             if resource_result:
-                name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = resource_result
+                wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = resource_result
 
-                embed=discord.Embed(
+                embed = discord.Embed(
                     title=f'{name}\'s Reserves',
                     description='Displays nation\'s national reserves.',
                     color=0x4CAF50)

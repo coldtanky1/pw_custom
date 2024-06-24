@@ -2,11 +2,12 @@ import sqlite3
 import asyncio
 import discord
 from discord.ext import commands
+import globals
 
 new_line = '\n'
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = sqlite3.connect('player_info.db')
-cursor = conn.cursor()
+conn = globals.conn
+cursor = globals.cursor
 
 
 class Construct(commands.Cog):

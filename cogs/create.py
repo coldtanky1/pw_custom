@@ -3,11 +3,12 @@ import asyncio
 import discord
 from discord.ext import commands
 from discord.utils import get
+import globals
 
 new_line = '\n'
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = sqlite3.connect('player_info.db')
-cursor = conn.cursor()
+conn = globals.conn
+cursor = globals.cursor
 
 
 class Create(commands.Cog):
@@ -69,7 +70,7 @@ class Create(commands.Cog):
         await emb.edit(embed=embed)
 
         # insert data into the table
-        cursor.execute('INSERT INTO user_info (user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+        cursor.execute('INSERT INTO user_info (user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         (user_id, nat_name, 1, 'Democracy', 12.5, 'Volunteer', 'Moderate Freedom', 'Normal Police', 'Normal Firefighers', 'Normal Healthcare', "In Peace", 50, 0))
         conn.commit()
 

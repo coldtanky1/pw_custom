@@ -1,11 +1,12 @@
 from flask import Flask, render_template, redirect, request, url_for, flash
 import sqlite3
+import globals
 
 app = Flask(__name__)
 app.secret_key = 'my_dark_secret'
 
-conn = sqlite3.connect('player_info.db')
-cursor = conn.cursor()
+conn = globals.conn
+cursor = globals.cursor
 
 def get_data(nation_name):
     conn = sqlite3.connect('player_info.db')

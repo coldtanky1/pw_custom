@@ -14,7 +14,7 @@ conn = globals.conn
 cursor = globals.cursor
 
 def NAI_Determiner(user_id):
-    cursor.execute('SELECT * FROM user_info FROM user_id = ?', (user_id,))
+    cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
     user_data = cursor.fetchone()
 
     if user_data:

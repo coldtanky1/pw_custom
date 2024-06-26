@@ -15,21 +15,21 @@ class Politics(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def gov(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
-            
+
         if result:
             user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             gov_emb = discord.Embed(title="Government Overview", type='rich',
-                                    description=f'Displays an overview of {name}\'s government.', color=discord.Color.blue())
+                                    description=f'Displays an overview of {name}\'s government.',
+                                    color=0x04A5E5)
             gov_emb.add_field(name='Key: C = Current', value='', inline=False)
             gov_emb.add_field(name=f'🏦 C: {gov_type}', value=f'Government Selection: `$gov-ide`', inline=False)
             gov_emb.add_field(name=f'💵 C: {tax_rate}%', value=f'Income Tax Rate Selection: `$gov-tax`', inline=False)
@@ -51,8 +51,8 @@ class Politics(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def gov_ide(self, ctx):
         user_id = ctx.author.id
-        
-        # fetch user name
+
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -60,40 +60,39 @@ class Politics(commands.Cog):
             user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Government Ideology", type='rich',
-                                description="Displays government ideologies.", color=discord.Color.blue())
+                                  description="Displays government ideologies.", color=0x04A5E5)
             embed.add_field(name="🗳️ Democracy", value=f"No less than 300 tax.{new_line}"
                                                        f"+20% tax income.{new_line}"
                                                        f"+20% upkeep costs.{new_line}", inline=False)
             embed.add_field(name="👑 Monarchy", value=f"+10% tax income.{new_line}"
-                                                      f"+10% upkeep costs.{new_line}",inline=False)
+                                                     f"+10% upkeep costs.{new_line}", inline=False)
             embed.add_field(name="☭ Communism", value=f"2x production bonus.{new_line}"
                                                       f"-20% upkeep costs.{new_line}"
-                                                      f"-50% tax income.{new_line}",inline=False)
+                                                      f"-50% tax income.{new_line}", inline=False)
             embed.add_field(name="🏴 Fascism", value=f"-10% tax income.{new_line}"
-                                                      f"+50% upkeep costs.{new_line}"
-                                                      f"2x cheaper soldiers.{new_line}",inline=False)
+                                                    f"+50% upkeep costs.{new_line}"
+                                                    f"2x cheaper soldiers.{new_line}", inline=False)
             embed.add_field(name="☭ Socialism", value=f"-40% tax income.{new_line}"
                                                       f"-10% upkeep costs.{new_line}"
-                                                      f"2x less effect from losing a war.{new_line}",inline=False)
+                                                      f"2x less effect from losing a war.{new_line}", inline=False)
             embed.add_field(name="Ⓐ Anarchy", value=f"-100% tax income.{new_line}"
-                                                      f"Literal chaos.{new_line}",inline=False)
+                                                    f"Literal chaos.{new_line}", inline=False)
             embed.add_field(name='Command Usage', value=f'`ide-X`{new_line}'
                                                         f"X = first 3 letters of the policy.", inline=False)
             await ctx.send(embed=embed)
-        
+
         else:
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                   description=f'You do not have a nation.{new_line}'
                                               f'To create one, type `$create`.')
             await ctx.send(embed=embed)
 
-
     @commands.command(name='ide-dem')
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def ide_dem(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -108,7 +107,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Government Ideology", type='rich',
-                                description="You have successfully changed your ideology to **Democracy**.", color=discord.Color.blue())
+                                  description="You have successfully changed your ideology to **Democracy**.",
+                                  color=0x04A5E5)
             await ctx.send(embed=embed)
 
         else:
@@ -122,7 +122,7 @@ class Politics(commands.Cog):
     async def ide_mon(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -137,7 +137,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Government Ideology", type='rich',
-                                description="You have successfully changed your ideology to **Monarchy**.", color=discord.Color.blue())
+                                  description="You have successfully changed your ideology to **Monarchy**.",
+                                  color=0x04A5E5)
             await ctx.send(embed=embed)
 
         else:
@@ -151,7 +152,7 @@ class Politics(commands.Cog):
     async def ide_com(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -166,7 +167,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Government Ideology", type='rich',
-                                description="You have successfully changed your ideology to **Communism**.", color=discord.Color.blue())
+                                  description="You have successfully changed your ideology to **Communism**.",
+                                  color=0x04A5E5)
             await ctx.send(embed=embed)
 
         else:
@@ -180,7 +182,7 @@ class Politics(commands.Cog):
     async def ide_fas(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -195,7 +197,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Government Ideology", type='rich',
-                                description="You have successfully changed your ideology to **Fascism**.", color=discord.Color.blue())
+                                  description="You have successfully changed your ideology to **Fascism**.",
+                                  color=0x04A5E5)
             await ctx.send(embed=embed)
 
         else:
@@ -209,7 +212,7 @@ class Politics(commands.Cog):
     async def ide_soc(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -224,7 +227,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Government Ideology", type='rich',
-                                description="You have successfully changed your ideology to **Socialism**.", color=discord.Color.blue())
+                                  description="You have successfully changed your ideology to **Socialism**.",
+                                  color=0x04A5E5)
             await ctx.send(embed=embed)
 
         else:
@@ -238,7 +242,7 @@ class Politics(commands.Cog):
     async def ide_ana(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -253,7 +257,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Government Ideology", type='rich',
-                                description="You have successfully changed your ideology to **Anarchy**.", color=discord.Color.blue())
+                                  description="You have successfully changed your ideology to **Anarchy**.",
+                                  color=0x04A5E5)
             await ctx.send(embed=embed)
 
         else:
@@ -262,13 +267,12 @@ class Politics(commands.Cog):
                                               f'To create one, type `$create`.')
             await ctx.send(embed=embed)
 
-    
     @commands.command(name='gov-con')
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def gov_con(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -276,16 +280,16 @@ class Politics(commands.Cog):
             user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Conscription", type='rich',
-                                description="Displays conscription laws.", color=discord.Color.red())
+                                  description="Displays conscription laws.", color=0xD20F39)
             embed.add_field(name="Volunteer", value=f"Normal Recruitable population.{new_line}", inline=False)
             embed.add_field(name="Conscription", value=f"2x Recruitable population.{new_line}"
-                                                        f"-15 Happiness.{new_line}", inline=False)
+                                                       f"-15 Happiness.{new_line}", inline=False)
             embed.add_field(name="Full Conscription", value=f"4x Recruitable population.{new_line}"
-                                                             f"-40% Happiness.{new_line}", inline=False)
+                                                            f"-40% Happiness.{new_line}", inline=False)
             embed.add_field(name='Command Usage', value=f'`con-X`{new_line}'
                                                         f"X = first 3 letters of the policy.", inline=False)
             await ctx.send(embed=embed)
-        
+
         else:
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                   description=f'You do not have a nation.{new_line}'
@@ -297,7 +301,7 @@ class Politics(commands.Cog):
     async def con_vol(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -315,7 +319,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Conscription", type='rich',
-                                description="You have successfully set **Volunteer** as your conscription law.", color=discord.Color.red())
+                                  description="You have successfully set **Volunteer** as your conscription law.",
+                                  color=0xD20F39)
             await ctx.send(embed=embed)
 
         else:
@@ -329,7 +334,7 @@ class Politics(commands.Cog):
     async def con_con(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -347,7 +352,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Conscription", type='rich',
-                                description="You have successfully set **Conscription** as your conscription law.", color=discord.Color.red())
+                                  description="You have successfully set **Conscription** as your conscription law.",
+                                  color=0xD20F39)
             await ctx.send(embed=embed)
 
         else:
@@ -361,7 +367,7 @@ class Politics(commands.Cog):
     async def con_ful(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -379,7 +385,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Conscription", type='rich',
-                                description="You have successfully set **Full Conscription** as your conscription law.", color=discord.Color.red())
+                                  description="You have successfully set **Full Conscription** as your conscription law.",
+                                  color=0xD20F39)
             await ctx.send(embed=embed)
 
         else:
@@ -388,13 +395,12 @@ class Politics(commands.Cog):
                                               f'To create one, type `$create`.')
             await ctx.send(embed=embed)
 
-
     @commands.command(name='gov-fre')
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def gov_fre(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -402,13 +408,13 @@ class Politics(commands.Cog):
             user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Freedom", type='rich',
-                                description="Displays your freedom laws.", color=discord.Color.green())
+                                  description="Displays your freedom laws.", color=0xA6D189)
             embed.add_field(name="Free Speech", value=f"+20 Happiness.{new_line}"
                                                       f"2x More events.{new_line}", inline=False)
             embed.add_field(name="Moderate Freedom", value=f"+10 Happiness.{new_line}"
-                                                      f"+20% effects from losing a war.{new_line}", inline=False)
+                                                           f"+20% effects from losing a war.{new_line}", inline=False)
             embed.add_field(name="No Freedom", value=f"-20 Happiness.{new_line}"
-                                                      f"-40% effects from losing a war.{new_line}", inline=False)
+                                                     f"-40% effects from losing a war.{new_line}", inline=False)
             embed.add_field(name='Command Usage', value=f'`fre-X`{new_line}'
                                                         f"X = first 3 letters of the policy.", inline=False)
             await ctx.send(embed=embed)
@@ -424,7 +430,7 @@ class Politics(commands.Cog):
     async def fre_fre(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -442,7 +448,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Freedom", type='rich',
-                                description="You have successfully set **Free Speech** as your freedom law.", color=discord.Color.red())
+                                  description="You have successfully set **Free Speech** as your freedom law.",
+                                  color=0xD20F39)
             await ctx.send(embed=embed)
 
         else:
@@ -456,7 +463,7 @@ class Politics(commands.Cog):
     async def fre_mod(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -474,7 +481,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Freedom", type='rich',
-                                description="You have successfully set **Moderate Freedom** as your freedom law.", color=discord.Color.red())
+                                  description="You have successfully set **Moderate Freedom** as your freedom law.",
+                                  color=0xD20F39)
             await ctx.send(embed=embed)
 
         else:
@@ -488,7 +496,7 @@ class Politics(commands.Cog):
     async def fre_no(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -506,7 +514,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Freedom", type='rich',
-                                description="You have successfully set **No Freedom** as your freedom law.", color=discord.Color.red())
+                                  description="You have successfully set **No Freedom** as your freedom law.",
+                                  color=0xD20F39)
             await ctx.send(embed=embed)
 
         else:
@@ -515,13 +524,12 @@ class Politics(commands.Cog):
                                               f'To create one, type `$create`.')
             await ctx.send(embed=embed)
 
-
     @commands.command(name='gov-pol')
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def gov_pol(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -529,14 +537,14 @@ class Politics(commands.Cog):
             user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Police Policy", type='rich',
-                                description="Displays your police policy.", color=discord.Color.dark_blue())
+                                  description="Displays your police policy.", color=0x8839EF)
             embed.add_field(name="Chill Police", value=f"+15 Happiness{new_line}"
                                                        f"Riots are not dealt with.{new_line}", inline=False)
             embed.add_field(name="Normal Police", value=f"Normal state security.{new_line}"
                                                         f"1,000 Required Funding.{new_line}", inline=False)
             embed.add_field(name="Serious Police", value=f"-10 Happiness{new_line}"
-                                                       f"Riots are dealth with.{new_line}"
-                                                       f"7,000 Required Funding.{new_line}", inline=False)
+                                                         f"Riots are dealth with.{new_line}"
+                                                         f"7,000 Required Funding.{new_line}", inline=False)
             embed.add_field(name='Command Usage', value=f'`pol-X`{new_line}'
                                                         f"X = first 3 letters of the policy.", inline=False)
             await ctx.send(embed=embed)
@@ -552,7 +560,7 @@ class Politics(commands.Cog):
     async def pol_chi(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -570,7 +578,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Police Policy", type='rich',
-                                description="You have successfully set **Chill Police** as your police policy.", color=discord.Color.dark_blue())
+                                  description="You have successfully set **Chill Police** as your police policy.",
+                                  color=0x8839EF)
             await ctx.send(embed=embed)
 
         else:
@@ -584,7 +593,7 @@ class Politics(commands.Cog):
     async def pol_nor(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -602,7 +611,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Police Policy", type='rich',
-                                description="You have successfully set **Normal Police** as your police policy.", color=discord.Color.dark_blue())
+                                  description="You have successfully set **Normal Police** as your police policy.",
+                                  color=0x8839EF)
             await ctx.send(embed=embed)
 
         else:
@@ -616,7 +626,7 @@ class Politics(commands.Cog):
     async def pol_ser(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -634,7 +644,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Police Policy", type='rich',
-                                description="You have successfully set **Serious Police** as your police policy.", color=discord.Color.dark_blue())
+                                  description="You have successfully set **Serious Police** as your police policy.",
+                                  color=0x8839EF)
             await ctx.send(embed=embed)
 
         else:
@@ -648,7 +659,7 @@ class Politics(commands.Cog):
     async def gov_tax(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -656,7 +667,7 @@ class Politics(commands.Cog):
             user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Tax Policy", type='rich',
-                                  description="Displays your tax policy.", color=discord.Color.brand_green())
+                                  description="Displays your tax policy.", color=0x40A02B)
             embed.add_field(name="Income Tax", value=f"-1 Happiness per 1 percent over 12.5%.", inline=False)
             embed.add_field(name="Corporate Tax", value=f"", inline=False)
             await ctx.send(embed=embed)
@@ -666,7 +677,7 @@ class Politics(commands.Cog):
     async def gov_fir(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -674,11 +685,11 @@ class Politics(commands.Cog):
             user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Firefighter Policy", type='rich',
-                                description="Displays your firefighter policy.", color=discord.Color.dark_red())
+                                  description="Displays your firefighter policy.", color=0xE64553)
             embed.add_field(name="Careless Firefighters", value=f"-20 Happiness{new_line}", inline=False)
             embed.add_field(name="Normal Firefighters", value=f"Normal fire control.{new_line}", inline=False)
             embed.add_field(name="Speedy Firefighters", value=f"+15 Happiness{new_line}"
-                                                       f"7,000 Required Funding.{new_line}", inline=False)
+                                                              f"7,000 Required Funding.{new_line}", inline=False)
             embed.add_field(name='Command Usage', value=f'`fir-X`{new_line}'
                                                         f"X = first 3 letters of the policy.", inline=False)
             await ctx.send(embed=embed)
@@ -694,7 +705,7 @@ class Politics(commands.Cog):
     async def fir_car(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -712,7 +723,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Firefigther Policy", type='rich',
-                                description="You have successfully set **Careless Firefighters** as your fire policy.", color=discord.Color.dark_blue())
+                                  description="You have successfully set **Careless Firefighters** as your fire policy.",
+                                  color=0x8839EF)
             await ctx.send(embed=embed)
 
         else:
@@ -726,7 +738,7 @@ class Politics(commands.Cog):
     async def fir_nor(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -744,7 +756,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Firefigther Policy", type='rich',
-                                description="You have successfully set **Normal Firefighters** as your fire policy.", color=discord.Color.dark_blue())
+                                  description="You have successfully set **Normal Firefighters** as your fire policy.",
+                                  color=0x8839EF)
             await ctx.send(embed=embed)
 
         else:
@@ -758,7 +771,7 @@ class Politics(commands.Cog):
     async def fir_spe(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -776,7 +789,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Firefigther Policy", type='rich',
-                                description="You have successfully set **Speedy Firefighters** as your fire policy.", color=discord.Color.dark_blue())
+                                  description="You have successfully set **Speedy Firefighters** as your fire policy.",
+                                  color=0x8839EF)
             await ctx.send(embed=embed)
 
         else:
@@ -790,7 +804,7 @@ class Politics(commands.Cog):
     async def gov_hea(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -798,18 +812,18 @@ class Politics(commands.Cog):
             user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
-                                description="Displays your healtcare policy.", color=discord.Color.dark_red())
+                                  description="Displays your healtcare policy.", color=0xE64553)
             embed.add_field(name="Enhanced Healthcare", value=f"+15 Happiness{new_line}"
-                                                       f"18,000 Required funding.{new_line}", inline=False)
+                                                              f"18,000 Required funding.{new_line}", inline=False)
             embed.add_field(name="Normal Healthcare", value=f"1000 Required funding.{new_line}", inline=False)
             embed.add_field(name="Private Healthcare", value=f"-15 Happiness{new_line}"
-                                                       f"5s00 Required Funding.{new_line}", inline=False)
+                                                             f"5s00 Required Funding.{new_line}", inline=False)
             embed.add_field(name="No Healthcare", value=f"-40 Happiness{new_line}"
-                                                       f"0 Required Funding.{new_line}", inline=False)
+                                                        f"0 Required Funding.{new_line}", inline=False)
             embed.add_field(name='Command Usage', value=f'`hea-X`{new_line}'
                                                         f"X = first 3 letters of the policy.", inline=False)
             await ctx.send(embed=embed)
-            
+
         else:
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                   description=f'You do not have a nation.{new_line}'
@@ -821,7 +835,7 @@ class Politics(commands.Cog):
     async def hea_enh(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -832,14 +846,16 @@ class Politics(commands.Cog):
                 await ctx.send("You already have Enhanced Healthcare as your healthcare policy.")
                 return
 
-            cursor.execute('UPDATE user_info SET hospital_policy = ? WHERE user_id = ?', ("Enhanced Healthcare", user_id))
+            cursor.execute('UPDATE user_info SET hospital_policy = ? WHERE user_id = ?',
+                           ("Enhanced Healthcare", user_id))
             conn.commit()
 
             cursor.execute('UPDATE user_info SET happiness = happiness + 20 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
-                                description="You have successfully set **Enhanced Healthcare** as your healthcare policy.", color=discord.Color.dark_blue())
+                                  description="You have successfully set **Enhanced Healthcare** as your healthcare policy.",
+                                  color=0x8839EF)
             await ctx.send(embed=embed)
 
         else:
@@ -853,7 +869,7 @@ class Politics(commands.Cog):
     async def hea_nor(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -871,7 +887,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
-                                description="You have successfully set **Normal Healthcare** as your healthcare policy.", color=discord.Color.dark_blue())
+                                  description="You have successfully set **Normal Healthcare** as your healthcare policy.",
+                                  color=0x8839EF)
             await ctx.send(embed=embed)
 
         else:
@@ -885,7 +902,7 @@ class Politics(commands.Cog):
     async def hea_no(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -903,7 +920,8 @@ class Politics(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
-                                description="You have successfully set **No Healthcare** as your healthcare policy.", color=discord.Color.dark_blue())
+                                  description="You have successfully set **No Healthcare** as your healthcare policy.",
+                                  color=0x8839EF)
             await ctx.send(embed=embed)
 
         else:
@@ -917,7 +935,7 @@ class Politics(commands.Cog):
     async def hea_pri(self, ctx):
         user_id = ctx.author.id
 
-        # fetch user name
+        # fetch username
         cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
@@ -928,14 +946,16 @@ class Politics(commands.Cog):
                 await ctx.send("You already have Private Healthcare as your healthcare policy.")
                 return
 
-            cursor.execute('UPDATE user_info SET hospital_policy = ? WHERE user_id = ?', ("Private Healthcare", user_id))
+            cursor.execute('UPDATE user_info SET hospital_policy = ? WHERE user_id = ?',
+                           ("Private Healthcare", user_id))
             conn.commit()
 
             cursor.execute('UPDATE user_info SET happiness = happiness - 15 WHERE name = ?', (name,))
             conn.commit()
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
-                                description="You have successfully set **Private Healthcare** as your healthcare policy.", color=discord.Color.dark_blue())
+                                  description="You have successfully set **Private Healthcare** as your healthcare policy.",
+                                  color=0x8839EF)
             await ctx.send(embed=embed)
 
         else:

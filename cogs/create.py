@@ -15,7 +15,6 @@ class Create(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
     @commands.command()
     async def create(self, ctx):
         user_id = ctx.author.id
@@ -71,7 +70,7 @@ class Create(commands.Cog):
 
         # insert data into the table
         cursor.execute('INSERT INTO user_info (user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        (user_id, nat_name, 1, 'Democracy', 12.5, 'Volunteer', 'Moderate Freedom', 'Normal Police', 'Normal Firefighers', 'Normal Healthcare', "In Peace", 50, 0))
+                       (user_id, nat_name, 1, 'Democracy', 12.5, 'Volunteer', 'Moderate Freedom', 'Normal Police', 'Normal Firefighers', 'Normal Healthcare', "In Peace", 50, 0))
         conn.commit()
 
         print(f"Successfully added {user_id}({nat_name})")
@@ -98,12 +97,18 @@ class Create(commands.Cog):
         # Add base infra stats to the user
         cursor.execute(
             'INSERT INTO infra (name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-            (nat_name, 12500, 1000, 834, 0, 10, 100, 10, 10, 10, 10, 0, 2500, 0, 0, 0, 0,
-             0,0,0))  # the values came from ice cube's game sheet so just use that as a reference
+            (nat_name, 12500, 1000, 834, 0, 10, 100, 10, 10, 10, 10, 0, 2500, 0, 0, 0, 0, 0, 0, 0))  # the values came from ice cube's game sheet so just use that as a reference
         conn.commit()
 
         print(f"Successfully added infra to {user_id}({nat_name})")
 
+        cursor.execute(
+            'INSERT INTO user_custom (name) VALUES (?)',
+            (nat_name, )
+        )
+        conn.commit()
+
+        print(f"Successfully added custom to {user_id}({nat_name})")
 
 async def setup(bot):
     await bot.add_cog(Create(bot))

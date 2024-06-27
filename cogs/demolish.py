@@ -27,7 +27,7 @@ class Demolish(commands.Cog):
 
         if amount <= 0:
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
-                                  description=f"Amount must be a value that is greater than 0!")
+                                  description=f"Amount must be positive.")
             await ctx.send(embed=embed)
             return
 
@@ -50,8 +50,8 @@ class Demolish(commands.Cog):
 
             if buildings and barracks:
                 buildings.append(barracks[0])
-                building_list = ["Basic House", "Small Flat", "Apartment Complex", "Skyscraper", "Lumbermill", "Coal Mine", "Iron Mine", "Lead Mine", "Bauxite Mine", "Oil Derrick", "Uranium Mine", "Farm", "Aluminium Factory", "Steel Factory", "Oil Refinery", "Munitions Factory", "Concrete Factory", "Military Factory", "Corporation", "Barrack"]
-                build_list_code = ["basic_house", "small_flat", "apt_complex", "skyscraper", "lumber_mill", "coal_mine", "iron_mine", "lead_mine", "bauxite_mine", "oil_derrick", "uranium_mine", "farm", "aluminium_factory", "steel_factory", "oil_refinery", "ammo_factory", "concrete_factory", "militaryfactory", "corp", "barracks"]
+                building_list = ["Basic House", "Small Flat", "Apartment Complex", "Skyscraper", "Lumbermill", "Coal Mine", "Iron Mine", "Lead Mine", "Bauxite Mine", "Oil Derrick", "Uranium Mine", "Farm", "Aluminium Factory", "Steel Factory", "Oil Refinery", "Munitions Factory", "Concrete Factory", "Military Factory", "Barrack"]
+                build_list_code = ["basic_house", "small_flat", "apt_complex", "skyscraper", "lumber_mill", "coal_mine", "iron_mine", "lead_mine", "bauxite_mine", "oil_derrick", "uranium_mine", "farm", "aluminium_factory", "steel_factory", "oil_refinery", "ammo_factory", "concrete_factory", "militaryfactory", "barracks"]
                 match building:
                     case "basichouse" | "basic_house":
                         build_id = 0
@@ -89,11 +89,8 @@ class Demolish(commands.Cog):
                         build_id = 16
                     case "militaryfactory" | "mil":
                         build_id = 17
-                    case "corp" | "corporation":
-                        # CT leaving this empty because I'm unsure of how you want to deal with corporations, but if you intend for it to be similar to buildings, the build_id is 18
-                        return
                     case "barrack" | "barracks":
-                        build_id = 19
+                        build_id = 18
                     case _:
                         embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                               description=f'Building not found.')
@@ -106,7 +103,7 @@ class Demolish(commands.Cog):
                     demolish_emb = await ctx.send(embed=embed)
 
                     # Remove the buildings from user's infra.
-                    if build_id != 19:
+                    if build_id != 18:
                         query = '''UPDATE infra SET {0} = {0} - {1} WHERE name = "{2}"'''.format(build_list_code[build_id], amount, name)
                     else:
                         query = '''UPDATE user_mil SET {0} = {0} - {1} WHERE name = "{2}"'''.format(build_list_code[build_id], amount, name)

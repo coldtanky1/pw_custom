@@ -27,16 +27,16 @@ produce_structures = [
 
 # Structure: name, wood cost, concrete cost, steel cost, size, what lives in it
 housing_structures = [
-    ("Basic House",       2, 0.6, 0,   4,   "People"),
-    ("Small Flat",        1, 6,   0.5, 25,  "People"),
-    ("Apartment Complex", 1, 7,   0.6, 30,  "People"),
-    ("Skyscraper",        0, 10,  2,   100, "People"),
-    ("Barrack",           0, 2,   3,   25,  "Military Units")
+    ("Basic House",       2,   0.6, 0,   4,   "People"),
+    ("Small Flat",        1,   6,   0.5, 25,  "People"),
+    ("Apartment Complex", 1,   7,   0.6, 30,  "People"),
+    ("Skyscraper",        0,   10,  2,   100, "People"),
+    ("Barrack",           0,   2,   3,   25,  "Military Units")
 ]
 
 # Structure: name, wood cost, concrete cost, steel cost
 other_structures = [
-    ("Military Factory", 0, 5, 2.75),
+    ("Military Factory",  0,   5,   2.75),
 ]
 
 

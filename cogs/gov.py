@@ -667,11 +667,6 @@ class Politics(commands.Cog):
             user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Tax Policy", type='rich',
-<<<<<<< HEAD
-                                  description="Displays your tax policy.", color=0x40A02B)
-            embed.add_field(name="Income Tax", value=f"-1 Happiness per 1 percent over 12.5%.", inline=False)
-            embed.add_field(name="Corporate Tax", value=f"", inline=False)
-=======
                                   description="Displays your tax policy.", color=discord.Color.brand_green())
             embed.add_field(name="Income Tax", value=f"-1 Happiness per 1 percent over 25%.", inline=False)
             embed.add_field(name="Corporate Tax", value=f"1% chance of corporations leaving per 1% over 15%.", inline=False)
@@ -753,7 +748,6 @@ class Politics(commands.Cog):
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                         description=f'You do not have a nation.{new_line}'
                                                     f'To create one, type `$create`.')
->>>>>>> 16ae736 (Ready for merge)
             await ctx.send(embed=embed)
 
     @commands.command(name='gov-fir')

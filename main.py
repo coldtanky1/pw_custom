@@ -16,7 +16,7 @@ bot = commands.Bot(command_prefix="$", intents=intents, case_insensitive=True)
 
 load_dotenv()
 
-token = "BOT TOKEN"
+token = os.getenv('DISCORD_TOKEN')
 
 async def load():
     for filename in os.listdir('./cogs'):
@@ -38,7 +38,7 @@ cursor.execute('''
         name TEXT,
         turns_accumulated INTEGER,
         gov_type TEXT,
-        tax_rate INTEGER,
+        tax_rate REAL,
         conscription TEXT,
         freedom TEXT,
         police_policy TEXT,
@@ -98,7 +98,11 @@ cursor.execute('''
         ammo_factory INTEGER,
         concrete_factory INTEGER,
         militaryfactory INTEGER,
-        corps INTEGER
+        corps INTEGER,
+        hospital INTEGER,
+        police_station INTEGER,
+        fire_station INTEGER,
+        schools INTEGER
         )
     ''')
 

@@ -5,7 +5,8 @@ import globals
 logging_folder = globals.logging_folder + 'sim_logs.log'
 
 logging.basicConfig(filename=logging_folder, level=logging.INFO,
-                    format='%(asctime)s %(message)s')
+                    format='%(asctime)s %(message)s',
+                    force=True)
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +45,9 @@ def NAI_Determiner(user_id):
             nation_score, gdp, adult, balance = pop_result
 
             # Constants
-            MINER_SALARY = 49000
-            FACTORY_WORKER_SALARY = 54000
+            MINER_SALARY = 1200
+            FACTORY_WORKER_SALARY = 1000
+            CORP_WORKER_SALARY = 2300
 
             # Calculate income from mines and mills
             mines_income = (coal_mine + lead_mine + iron_mine + uranium_mine + bauxite_mine) * MINER_SALARY
@@ -54,8 +56,11 @@ def NAI_Determiner(user_id):
             # Calculate income from factories
             factories_income = (steel_factory + ammo_factory + aluminium_factory + concrete_factory) * FACTORY_WORKER_SALARY
 
+            # Calculate income from corps
+            corp_income = corps * CORP_WORKER_SALARY
+
             # Calculate National Average Income (NAI)
-            total_income = mines_income + mills_income + factories_income
+            total_income = mines_income + mills_income + factories_income + corp_income
 
             # For NAI, divide by the number of workers.
             num_miners = round(coal_mine + lead_mine + iron_mine + uranium_mine + bauxite_mine // 5)
@@ -65,13 +70,12 @@ def NAI_Determiner(user_id):
             gas_workers = round(oil_refinery // 4)
             ammo_workers = round(ammo_factory // 10)
             concrete_workers = round(concrete_factory // 5)
+            corp_workers = round(corps // 5500)
             
             total_workers = (num_miners + num_mill_workers + steel_workers + aluminium_workers + gas_workers + ammo_workers
-                             + concrete_workers)
+                             + concrete_workers + corp_workers)
 
-            NAI = round(total_income // total_workers)
-
-            return NAI
+            NAI_Determiner.NAI = round(total_income // total_workers)
 
         else:
             logger.info(f"NAI_Determiner ERROR: COULD NOT FIND STATS FOR {name}.\n")

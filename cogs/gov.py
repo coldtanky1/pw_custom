@@ -667,9 +667,93 @@ class Politics(commands.Cog):
             user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Tax Policy", type='rich',
+<<<<<<< HEAD
                                   description="Displays your tax policy.", color=0x40A02B)
             embed.add_field(name="Income Tax", value=f"-1 Happiness per 1 percent over 12.5%.", inline=False)
             embed.add_field(name="Corporate Tax", value=f"", inline=False)
+=======
+                                  description="Displays your tax policy.", color=discord.Color.brand_green())
+            embed.add_field(name="Income Tax", value=f"-1 Happiness per 1 percent over 25%.", inline=False)
+            embed.add_field(name="Corporate Tax", value=f"1% chance of corporations leaving per 1% over 15%.", inline=False)
+            embed.add_field(name='Command Usage', value=f'`tax-X`{new_line}'
+                                                        f"X = first 3 letters of the policy.", inline=False)
+            await ctx.send(embed=embed)
+
+        else:
+            embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                      description=f'You do not have a nation.{new_line}'
+                                                  f'To create one, type `$create`.')
+            await ctx.send(embed=embed)
+
+    @commands.command(name='tax-inc')
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def tax_inc(self, ctx, amount: int):
+        user_id = ctx.author.id
+        percentage = round(amount // 100, 4)
+
+        # fetch user name
+        cursor.execute('SELECT tax_rate FROM user_info WHERE user_id = ?', (user_id,))
+        result = cursor.fetchone()
+
+        if result:
+            tax_rate = result
+
+            if percentage > 1:
+                embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                    description=f"Your tax cannot exceed 100%.{new_line}"
+                                                "Please try again.")
+                await ctx.send(embed=embed)
+                return
+
+            else:
+                cursor.execute('UPDATE user_info SET tax_rate = ? WHERE user_id = ?', (percentage, user_id))
+                conn.commit()
+
+                embed = discord.Embed(title="Income Tax", type='rich',
+                                    description=f"You have successfully updated your income tax rate to {amount}%",
+                                    color=discord.Color.green())
+                await ctx.send(embed=embed)
+
+        else:
+            embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                        description=f'You do not have a nation.{new_line}'
+                                                    f'To create one, type `$create`.')
+            await ctx.send(embed=embed)
+
+    @commands.command(name='tax-cor')
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def tax_cor(self, ctx, amount: int):
+        user_id = ctx.author.id
+        percentage = round(amount // 100, 4)
+
+        # fetch user name
+        cursor.execute('SELECT corp_tax FROM user_info WHERE user_id = ?', (user_id,))
+        result = cursor.fetchone()
+
+        if result:
+            corp_tax = result
+
+            if percentage > 1:
+                embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                        description=f"Your tax cannot exceed 100%.{new_line}"
+                                                    "Please try again.")
+                await ctx.send(embed=embed)
+                return
+            
+            else:
+                cursor.execute('UPDATE user_info SET corp_tax = ? WHERE user_id = ?', (percentage, user_id))
+                conn.commit()
+
+                embed = discord.Embed(title="Income Tax", type='rich',
+                                    description=f"You have successfully updated your corporate tax rate to {amount}%",
+                                    color=discord.Color.green())
+                await ctx.send(embed=embed)
+
+        else:
+            embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                        description=f'You do not have a nation.{new_line}'
+                                                    f'To create one, type `$create`.')
+>>>>>>> 16ae736 (Ready for merge)
             await ctx.send(embed=embed)
 
     @commands.command(name='gov-fir')

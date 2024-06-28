@@ -132,10 +132,6 @@ async def UpdateEconomy():
         for row in cursor.fetchall():
             user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = row
 
-            NAI_Determiner(user_id)
-            Corp_spawn(user_id)
-            Corp_remove(user_id)
-
             # fetch user's resources
             cursor.execute(
                 'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
@@ -370,7 +366,11 @@ async def UpdateEconomy():
                 oil_derrick_upkeep = oil_derrick * 400
                 uranium_mine_upkeep = uranium_mine * 600
 
+<<<<<<< HEAD
                 farm_upkeep = farm * 100 * upkeep_bonus
+=======
+                farm_upkeep = farm * 100 * 1
+>>>>>>> 16ae736 (Ready for merge)
 
                 aluminium_factory_upkeep = aluminium_factory * 400
                 steel_factory_upkeep = steel_factory * 500
@@ -688,6 +688,20 @@ async def SpawnCorps():
     for row in cursor.fetchall():
         Corp_spawn(row[0])
 
+@tasks.loop(seconds=3600)
+async def RemoveCorps():
+    cursor.execute('SELECT user_id FROM user_info')
+    for row in cursor.fetchall():
+        Corp_remove(row[0])
+
+@tasks.loop(seconds=3600)
+async def NAICalculator():
+    cursor.execute('SELECT user_id FROM user_info')
+    for row in cursor.fetchall():
+        NAI_Determiner(row[0])
+
+NAICalculator.start()
+RemoveCorps.start()
 SpawnCorps.start()
 UpdateMilitaryTask.start()
 FoodCheckTask.start()

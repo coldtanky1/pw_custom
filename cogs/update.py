@@ -366,11 +366,7 @@ async def UpdateEconomy():
                 oil_derrick_upkeep = oil_derrick * 400
                 uranium_mine_upkeep = uranium_mine * 600
 
-<<<<<<< HEAD
                 farm_upkeep = farm * 100 * upkeep_bonus
-=======
-                farm_upkeep = farm * 100 * 1
->>>>>>> 16ae736 (Ready for merge)
 
                 aluminium_factory_upkeep = aluminium_factory * 400
                 steel_factory_upkeep = steel_factory * 500

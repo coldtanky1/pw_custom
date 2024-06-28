@@ -100,7 +100,6 @@ class Info(commands.Cog):
                 build_type = 0
                 build_id = 12
             case "basichouse" | "basic":
-<<<<<<< HEAD
                 build_type = 1
                 build_id = 0
             case "smallflat" | "flat":
@@ -120,31 +119,6 @@ class Info(commands.Cog):
                 build_id = 0
                 description = "Used for military production. Use the commands `$allocate` and `$deallocate` to use them after construction."
                 footer = "Check `$help allocate` and `$help deallocate` to learn how to use the commands."
-=======
-                embed = discord.Embed(title="Info (basichouse)", type='rich',
-                                      description="View info about buildings", color=discord.Color.blue())
-                embed.add_field(name="Housing", value=f"Houses 4 people.", inline=False)
-                await ctx.send(embed=embed)
-
-            case "smallflat" | "flat":
-                embed = discord.Embed(title="Info (smallflat)", type='rich',
-                                      description="View info about buildings", color=discord.Color.blue())
-                embed.add_field(name="Housing", value=f"Houses 25 people.", inline=False)
-                await ctx.send(embed=embed)
-
-            case "aptcomplex" | "complex":
-                embed = discord.Embed(title="Info (aptcomplex)", type='rich',
-                                      description="View info about buildings", color=discord.Color.blue())
-                embed.add_field(name="Housing", value=f"Houses 30 people.", inline=False)
-                await ctx.send(embed=embed)
-
-            case "skyscraper":
-                embed = discord.Embed(title="Info (skyscraper)", type='rich',
-                                      description="View info about buildings", color=discord.Color.blue())
-                embed.add_field(name="Housing", value=f"Houses 100 people.", inline=False)
-                await ctx.send(embed=embed)
-
->>>>>>> 16ae736 (Ready for merge)
             case _:
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                       description=f'Specified building doesn\'t exist.')

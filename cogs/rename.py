@@ -11,7 +11,7 @@ conn = globals.conn
 cursor = globals.cursor
 
 
-class Rename(commands.Cog):
+class Custom(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -77,5 +77,78 @@ class Rename(commands.Cog):
                                               f'To create one, type `$create`.')
             await ctx.send(embed=embed)
 
+    @commands.command()
+    async def flag(self, ctx, img: str = None):
+
+        # Gets username
+        cursor.execute("SELECT name FROM user_info WHERE user_id = ?", (ctx.author.id, ))
+        info_result = cursor.fetchone()
+
+        # Checks if nation exists
+        if info_result:
+
+            name = info_result[0]
+
+            # Checks the value of img
+            if img is None:
+
+                cursor.execute("SELECT flag FROM user_custom WHERE name = ?", (name,))
+                cus_result = cursor.fetchone()
+                flag = cus_result[0]
+
+                if flag:
+                    embed = discord.Embed(
+                        title='National Flag',
+                        description=f'Would you like to remove your flag? Y/N',
+                        color=0x8839EF
+                    )
+                    emb = await ctx.send(embed=embed)
+
+                    def check(message):
+                        return message.author == ctx.author and message.channel == ctx.channel and message.content.lower() in ['y', 'n', 'yes', 'no', 'yay', 'nay']
+
+                    response = await self.bot.wait_for('message', timeout=30, check=check)
+
+                    # Checks response
+                    if response.content.lower() in ['y', 'yes', 'yay']:
+
+                        # Deletes flag from user_custom table
+                        cursor.execute("UPDATE user_custom SET flag = NULL WHERE name = ?", (name, ))
+                        conn.commit()
+
+                        embed = discord.Embed(colour=0x5BF9A0, title='National Flag', type='rich',
+                                              description='Flag has been removed successfully!')
+                        await emb.edit(embed=embed)
+
+                    else:
+                        embed = discord.Embed(
+                            title='National Flag',
+                            description=f'Aborting.',
+                            color=0x8839EF
+                        )
+                        await emb.edit(embed=embed)
+                else:
+                    embed = discord.Embed(
+                        title='National Flag',
+                        description=f'Cannot remove flag because nation does not have a flag.',
+                        color=0xEF2F73
+                    )
+                    embed.set_footer(text="To add one, insert the URL of an image after the command")
+                    await ctx.send(embed=embed)
+
+            else:
+                # Updates value of flag in user_custom table
+                cursor.execute("UPDATE user_custom SET flag = ? WHERE name = ?", (img, name))
+                conn.commit()
+
+                embed = discord.Embed(
+                    title='National Flag',
+                    description=f'Flag has been updated successfully!',
+                    color=0x5BF9A0
+                )
+                embed.set_image(url=img)
+                embed.set_footer(text="If nothing is shown, check if you entered the url correctly or change the url")
+                await ctx.send(embed=embed)
+
 async def setup(bot):
-    await bot.add_cog(Rename(bot))
+    await bot.add_cog(Custom(bot))

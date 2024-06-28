@@ -122,6 +122,13 @@ cursor.execute('''
         )
     ''')
 
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_custom(
+        name TEXT PRIMARY KEY,
+        flag TEXT
+    )
+''')
+
 globals.init()
 
 @bot.event

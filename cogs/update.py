@@ -370,12 +370,12 @@ async def UpdateEconomy():
                 oil_derrick_upkeep = oil_derrick * 400
                 uranium_mine_upkeep = uranium_mine * 600
 
-                farm_upkeep = farm * 100 * 1 * upkeep_bonus
+                farm_upkeep = farm * 100 * upkeep_bonus
 
                 aluminium_factory_upkeep = aluminium_factory * 400
-                steel_factory_upkeep = steel_factory * 500 * 1
-                oil_refinery_upkeep = oil_refinery * 600 * 1
-                ammo_factory_upkeep = ammo_factory * 700 * 1
+                steel_factory_upkeep = steel_factory * 500
+                oil_refinery_upkeep = oil_refinery * 600
+                ammo_factory_upkeep = ammo_factory * 700
                 concrete_factory_upkeep = concrete_factory * 600
                 militaryfactory_upkeep = militaryfactory * 800
 

@@ -48,6 +48,11 @@ class Stats(commands.Cog):
                 (name,))
             mil_result = cursor.fetchone()
 
+            cursor.execute(
+                'SELECT flag FROM user_custom WHERE name = ?',
+                (name,))
+            cus_result = cursor.fetchone()
+
             if stats_result and mil_result and infra_result:
                 name, nation_score, gdp, adult, balance = stats_result
                 troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
@@ -102,6 +107,14 @@ class Stats(commands.Cog):
                                                                          f"👷‍♂️ Workers: {workers:,}{new_line}"
                                                                          f"💂Manpower: {soldiers:,}{new_line}",
                                     inline=False)
+                # Adds flag to embed
+                cursor.execute(
+                    'SELECT flag FROM user_custom WHERE name = ?',
+                    (name,))
+                cus_result = cursor.fetchone()
+                flag = cus_result[0]
+                if flag:
+                    embed.set_thumbnail(url=flag)
                 await ctx.send(embed=embed)
             else:
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
@@ -157,6 +170,16 @@ class Stats(commands.Cog):
                 embed.add_field(name='🎖 Barracks', value=f'{barracks:,}', inline=False)
                 embed.add_field(name='', value='', inline=False)
                 embed.add_field(name='🛡️ War Status', value=f'{war_status}', inline=False)
+
+                # Adds flag to embed
+                cursor.execute(
+                    'SELECT flag FROM user_custom WHERE name = ?',
+                    (name,))
+                cus_result = cursor.fetchone()
+                flag = cus_result[0]
+                if flag:
+                    embed.set_thumbnail(url=flag)
+
                 await ctx.send(embed=embed)
             else:
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',

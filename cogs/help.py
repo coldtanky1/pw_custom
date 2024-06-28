@@ -149,6 +149,13 @@ class Help(commands.Cog):
                                                   f'Shows an overview of your nation.')
                 await ctx.send(embed=embed)
 
+            case "flag":
+                embed = discord.Embed(colour=0xdd7878, title="Help: Flag", type='rich',
+                                      description=f'Syntax: `$flag <url of image>`{new_line}{new_line}'
+                                                  f'Sets the flag of the user to the URL that was given.{new_line}'
+                                                  f'Don\'t state any URL to remove the flag.')
+                await ctx.send(embed=embed)
+
             case _:   # Actual command list
                 generating = discord.Embed(colour=0xdce0e8, title="Help", type='rich',
                                            description="Generating help pages...")
@@ -179,7 +186,8 @@ class Help(commands.Cog):
                                   inline=False)
 
                 cus_emb = discord.Embed(colour=0x7287fd, title="Help | Customization", type='rich')   # Customization Tab
-                cus_emb.add_field(name="Name Changing", value="Rename - Changes your name to something else.",
+                cus_emb.add_field(name="Name Changing", value="Rename - Changes your name to something else. \n"
+                                                              "Flag - Sets (or removes) your nation's flag.",
                                   inline=False)
 
                 set_emb = discord.Embed(colour=0x7c7f93, title="Help | Settings", type='rich')   # Settings Tab

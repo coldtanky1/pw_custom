@@ -1,13 +1,10 @@
 import sqlite3
 import asyncio
 import os
-import time
 import discord
 from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
-import subprocess
-import re
 import globals
 
 new_line = '\n'
@@ -99,10 +96,10 @@ cursor.execute('''
         concrete_factory INTEGER,
         militaryfactory INTEGER,
         corps INTEGER,
-        hospital INTEGER,
-        police_station INTEGER,
-        fire_station INTEGER,
-        schools INTEGER
+        park INTEGER,
+        cinema INTEGER,
+        museum INTEGER,
+        concert_hall INTEGER
         )
     ''')
 

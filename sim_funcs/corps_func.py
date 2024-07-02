@@ -50,9 +50,9 @@ def Corp_spawn(user_id):
                     cursor.execute('UPDATE user_stats SET adult = adult - ? WHERE name = ?', (spawn_amount * 575, name))
                     conn.commit()
 
-                    logger.info(f"Corp_spawn: {name} has gotten {spawn_amount} corps.")
+                    logger.info(f"Corp_spawn: {name} has gotten {spawn_amount} corps.\n")
                 else:
-                    logger.info(f'Corp_spawn: {name} has NOT gotten any corps.')
+                    logger.info(f'Corp_spawn: {name} has NOT gotten any corps.\n')
 
             elif difference == 0:
                 # Always spawn at least one corporation if the tax rate is exactly 15%
@@ -65,11 +65,11 @@ def Corp_spawn(user_id):
                     cursor.execute('UPDATE user_stats SET adult = adult - ? WHERE name = ?', (spawn_amount * 575, name))
                     conn.commit()
 
-                    logger.info(f"Corp_spawn: {name} has gotten 1 corp as tax rate is at default.")
+                    logger.info(f"Corp_spawn: {name} has gotten 1 corp as tax rate is at default.\n")
                 else:
-                    logger.info(f'Corp_spawn: {name} has NOT gotten any corps.')
+                    logger.info(f'Corp_spawn: {name} has NOT gotten any corps.\n')
             else:
-                logger.info(f"Corp_spawn: Tax rate is above default, no corps will spawn.")
+                logger.info(f"Corp_spawn: Tax rate is above default, no corps will spawn.\n")
 
         else:
             logger.info(f"Corp_spawn ERROR: COULD NOT FIND STATS FOR {name}.\n")
@@ -117,12 +117,12 @@ def Corp_remove(user_id):
                     cursor.execute('UPDATE user_stats SET adult = adult + ? WHERE name = ?', (leave_amount * 575, name))
                     conn.commit()
 
-                    logger.info(f"Corp_remove: {leave_amount} corp(s) have left {name}.")
+                    logger.info(f"Corp_remove: {leave_amount} corp(s) have left {name}.\n")
                 else:
-                    logger.info(f"Corp_remove: No corps have left {name}.")
+                    logger.info(f"Corp_remove: No corps have left {name}.\n")
 
             else:
-                logger.info(f"Corp_remove: Tax rate is at or below default, no corps will leave.")
+                logger.info(f"Corp_remove: Tax rate is at or below default, no corps will leave.\n")
 
         else:
             logger.info(f"Corp_remove ERROR: COULD NOT FIND STATS FOR {name}.\n")

@@ -34,19 +34,20 @@ class Infra(commands.Cog):
 
             # fetch user's infra
             cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
+                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall FROM infra WHERE name = ?',
                 (name,))
             infra_result = cursor.fetchone()
 
             if infra_result and mil_result:
-                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
+                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall = infra_result
                 troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
 
                 main_emb = discord.Embed(title='Infrastructure', type='rich',
                                          description=f'Displays {name}\'s infrastructure.\n'
                                                      f'React with "1️⃣" for Housing infrastructure.\n'
                                                      f'React with "2️⃣" for Production infrastructure.\n'
-                                                     f'React with "3️⃣" for Military infrastructure.',
+                                                     f'React with "3️⃣" for Military infrastructure.\n'
+                                                     f'React with "4️⃣" for Entertainment infrastructure.',
                                          color=0x1E66F5)
 
                 page_one = discord.Embed(title=f"{name}'s Infrastructure.", type='rich',
@@ -84,13 +85,22 @@ class Infra(commands.Cog):
                                                           f"Artillery Factory: {artillery_factory}{new_line}"
                                                           f"Anti-Air Factory: {anti_air_factory}{new_line}", inline=False)
 
+                page_four = discord.Embed(title=f"{name}'s Infrastructure.", type='rich',
+                                           description=f"Displays {name}'s entertainment infrastructure.", color=0x1E66F5)
+                page_four.add_field(name='Page 4', value=f"{new_line}{new_line}"
+                                                          f"Park: {park}{new_line}"
+                                                          f"Cinema: {cinema}{new_line}"
+                                                          f"Museum: {museum}{new_line}"
+                                                          f"Concert Hall: {concert_hall}{new_line}", inline=False)
+
                 infra_emb = await ctx.send(embed=main_emb)
                 await infra_emb.add_reaction('1️⃣')
                 await infra_emb.add_reaction('2️⃣')
                 await infra_emb.add_reaction('3️⃣')
+                await infra_emb.add_reaction('4️⃣')
 
                 def chk(rec, usr):
-                    return usr == ctx.author and str(rec.emoji) in ['1️⃣', '2️⃣', '3️⃣']
+                    return usr == ctx.author and str(rec.emoji) in ['1️⃣', '2️⃣', '3️⃣', '4️⃣']
 
                 while True:
                     try:
@@ -104,6 +114,8 @@ class Infra(commands.Cog):
                             await infra_emb.edit(embed=page_two)
                         case '3️⃣':
                             await infra_emb.edit(embed=page_three)
+                        case '4️⃣':
+                            await infra_emb.edit(embed=page_four)
                         case _:
                             break
                     await infra_emb.remove_reaction(reaction.emoji, user)

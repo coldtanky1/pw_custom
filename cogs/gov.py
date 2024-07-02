@@ -684,7 +684,13 @@ class Politics(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def tax_inc(self, ctx, amount: int):
         user_id = ctx.author.id
-        percentage = round(amount // 100, 4)
+        percentage = round(amount / 100, 4)
+
+        if amount <= 0:
+            embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                  description=f"Amount must be positive.")
+            await ctx.send(embed=embed)
+            return
 
         # fetch user name
         cursor.execute('SELECT tax_rate FROM user_info WHERE user_id = ?', (user_id,))
@@ -701,7 +707,7 @@ class Politics(commands.Cog):
                 return
 
             else:
-                cursor.execute('UPDATE user_info SET tax_rate = ? WHERE user_id = ?', (percentage, user_id))
+                cursor.execute('UPDATE user_info SET tax_rate = ? WHERE user_id = ?', (percentage*100, user_id))
                 conn.commit()
 
                 embed = discord.Embed(title="Income Tax", type='rich',
@@ -719,7 +725,13 @@ class Politics(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def tax_cor(self, ctx, amount: int):
         user_id = ctx.author.id
-        percentage = round(amount // 100, 4)
+        percentage = round(amount / 100, 4)
+
+        if amount <= 0:
+            embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
+                                  description=f"Amount must be positive.")
+            await ctx.send(embed=embed)
+            return
 
         # fetch user name
         cursor.execute('SELECT corp_tax FROM user_info WHERE user_id = ?', (user_id,))
@@ -736,7 +748,7 @@ class Politics(commands.Cog):
                 return
             
             else:
-                cursor.execute('UPDATE user_info SET corp_tax = ? WHERE user_id = ?', (percentage, user_id))
+                cursor.execute('UPDATE user_info SET corp_tax = ? WHERE user_id = ?', (percentage*100, user_id))
                 conn.commit()
 
                 embed = discord.Embed(title="Income Tax", type='rich',

@@ -40,7 +40,7 @@ class Demolish(commands.Cog):
 
             # fetch user's production infra
             cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
+                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall FROM infra WHERE name = ?',
                 (name,))
             buildings = cursor.fetchone()
 
@@ -50,8 +50,8 @@ class Demolish(commands.Cog):
 
             if buildings and barracks:
                 buildings.append(barracks[0])
-                building_list = ["Basic House", "Small Flat", "Apartment Complex", "Skyscraper", "Lumbermill", "Coal Mine", "Iron Mine", "Lead Mine", "Bauxite Mine", "Oil Derrick", "Uranium Mine", "Farm", "Aluminium Factory", "Steel Factory", "Oil Refinery", "Munitions Factory", "Concrete Factory", "Military Factory", "Barrack"]
-                build_list_code = ["basic_house", "small_flat", "apt_complex", "skyscraper", "lumber_mill", "coal_mine", "iron_mine", "lead_mine", "bauxite_mine", "oil_derrick", "uranium_mine", "farm", "aluminium_factory", "steel_factory", "oil_refinery", "ammo_factory", "concrete_factory", "militaryfactory", "barracks"]
+                building_list = ["Basic House", "Small Flat", "Apartment Complex", "Skyscraper", "Lumbermill", "Coal Mine", "Iron Mine", "Lead Mine", "Bauxite Mine", "Oil Derrick", "Uranium Mine", "Farm", "Aluminium Factory", "Steel Factory", "Oil Refinery", "Munitions Factory", "Concrete Factory", "Military Factory", "Barrack", "Park", "Cinema", "Museum", "Concert Hall"]
+                build_list_code = ["basic_house", "small_flat", "apt_complex", "skyscraper", "lumber_mill", "coal_mine", "iron_mine", "lead_mine", "bauxite_mine", "oil_derrick", "uranium_mine", "farm", "aluminium_factory", "steel_factory", "oil_refinery", "ammo_factory", "concrete_factory", "militaryfactory", "barracks", "park", "cinema", "museum", "concert_hall"]
                 match building:
                     case "basichouse" | "basic_house":
                         build_id = 0
@@ -91,6 +91,14 @@ class Demolish(commands.Cog):
                         build_id = 17
                     case "barrack" | "barracks":
                         build_id = 18
+                    case "park":
+                        build_id = 19
+                    case "cinema":
+                        build_id = 20
+                    case "museum":
+                        build_id = 21
+                    case "concerthall" | "concert":
+                        build_id = 22
                     case _:
                         embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                               description=f'Building not found.')

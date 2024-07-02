@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 import globals
+import re
 
 new_line = '\n'
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
@@ -89,6 +90,10 @@ class Custom(commands.Cog):
 
             name = info_result[0]
 
+            # check if the provided img is a url or not.
+            regex_magic = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+            match = regex_magic.match(img)
+
             # Checks the value of img
             if img is None:
 
@@ -137,18 +142,27 @@ class Custom(commands.Cog):
                     await ctx.send(embed=embed)
 
             else:
-                # Updates value of flag in user_custom table
-                cursor.execute("UPDATE user_custom SET flag = ? WHERE name = ?", (img, name))
-                conn.commit()
+                if match:
+                    # Updates value of flag in user_custom table
+                    cursor.execute("UPDATE user_custom SET flag = ? WHERE name = ?", (img, name))
+                    conn.commit()
 
-                embed = discord.Embed(
-                    title='National Flag',
-                    description=f'Flag has been updated successfully!',
-                    color=0x5BF9A0
-                )
-                embed.set_image(url=img)
-                embed.set_footer(text="If nothing is shown, check if you entered the url correctly or change the url")
-                await ctx.send(embed=embed)
+                    embed = discord.Embed(
+                        title='National Flag',
+                        description=f'Flag has been updated successfully!',
+                        color=0x5BF9A0
+                    )
+                    embed.set_image(url=img)
+                    embed.set_footer(text="If nothing is shown, check if you entered the url correctly or change the url")
+                    await ctx.send(embed=embed)
+                else:
+                    embed = discord.Embed(
+                        title='Error',
+                        description=f'Not a valid image url.',
+                        color=discord.Color.red()
+                    )
+                    await ctx.send(embed=embed)
+                    return
 
 async def setup(bot):
     await bot.add_cog(Custom(bot))

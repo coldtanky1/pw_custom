@@ -4,6 +4,7 @@ import discord
 import math
 from discord.ext import commands
 from discord.utils import get
+from sim_funcs.NAI_func import NAI_Determiner
 import globals
 
 new_line = '\n'
@@ -61,11 +62,26 @@ class Stats(commands.Cog):
                 workers = round(adult//1.2)
                 soldiers = round((adult//6) - troops)
 
-                total_pop = adult
+                tax_revenue_bonus = 1
 
-                tax_revenue = round(tax_rate * total_pop)
+                match gov_type:
+                    case "Anarchy":
+                        tax_revenue_bonus *= 0
+                    case "Communism":
+                        tax_revenue_bonus *= 0.5
+                    case "Democracy":
+                        tax_revenue_bonus *= 1.2
+                    case "Fascism":
+                        tax_revenue_bonus *= 0.9
+                    case "Monarchy":
+                        tax_revenue_bonus *= 1.1
+                    case "Socialism":
+                        tax_revenue_bonus *= 0.6
 
-                gdp_per_capita = round(gdp // total_pop)
+                NAI = NAI_Determiner.NAI
+                tax_revenue = round(tax_rate * (NAI * adult) * tax_revenue_bonus)
+
+                gdp_per_capita = round(gdp // adult)
 
                 embed = discord.Embed(
                     title=f"📊 {name}'s Stats",
@@ -77,7 +93,6 @@ class Stats(commands.Cog):
                     embed.add_field(name='`[---NATION---]`', value=f"{new_line}"
                                                                    f"🫅 Ruler: <@{user_id}>{new_line}"
                                                                    f"🏆 Nation Score: {nation_score:,}{new_line}"
-                                                                   f"⏰ Turns: {turns_accumulated:,}{new_line}"
                                                                    f"😊 Happiness: {happiness}{new_line}", inline=False)
                     embed.add_field(name='`[---ECONOMY---]`', value=f'{new_line}'
                                                                     f"📈 Gross Domestic Product: {gdp:,}{new_line}"

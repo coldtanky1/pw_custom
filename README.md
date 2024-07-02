@@ -24,12 +24,9 @@ asyncio ```pip install asyncio```
 # IMPORTANT NEWS 
 - The Ice Cube 2.0 bot developement will be completely abandoned in favor of the more polished PW Custom.
 
-# Changelog VER 04
-- Bug Fixes and general improvements (by Rev).
-- Added Corporations. They spawn randomly.
-- Re-worked how tax revenue works.
-- Added housing to "$info".
-- Added a new "overview" command which shows an overview of your nation.
-- New sim_funcs to calculate NAI (National Average Income) and corporations spawning.
-- Added a new tax policy: "Corporate Tax".
-- Added corporate tax revenue to "$eco".
+# Changelog VER 05
+- More fixes and improvement by Rev.
+- Added auto-complete for construction.
+- Made changes to NAI worker salary values.
+- Added entertainment buildings for happiness gain.
+- Made GDP and GDP per Capita actually function.

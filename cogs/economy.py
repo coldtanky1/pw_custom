@@ -13,7 +13,7 @@ cursor = globals.cursor
 class Economy(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    
+
     @commands.command(name='eco')
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def economy(self, ctx):
@@ -34,7 +34,7 @@ class Economy(commands.Cog):
 
             # fetch user's production infra
             cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
+                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall FROM infra WHERE name = ?',
                 (name,))
             infra_result = cursor.fetchone()
 
@@ -51,7 +51,7 @@ class Economy(commands.Cog):
             pop_result = cursor.fetchone()
 
             if infra_result and res_result:
-                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
+                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall = infra_result
                 wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
                 troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
                 nation_score, gdp, adult, balance = pop_result
@@ -83,10 +83,6 @@ class Economy(commands.Cog):
                         tax_revenue_bonus *= 0.6
                         upkeep_bonus *= 0.9
 
-                    case "Private Healthcare":
-                        req_hospitals = adult // 400
-                        policy_upkeep += round(req_hospitals * 500)
-
                 # The production of each resource
                 prod_wood = lumber_mill * 2 * production_bonus
                 prod_coal = coal_mine * 1.2 * production_bonus
@@ -94,7 +90,7 @@ class Economy(commands.Cog):
                 prod_lead = lead_mine * 0.8 * production_bonus
                 prod_bauxite = bauxite_mine * 0.6 * production_bonus
                 prod_oil = oil_derrick * 1 * production_bonus
-                prod_uranium = uranium_mine * 0.05 * production_bonus
+                Economy.prod_uranium = uranium_mine * 0.05 * production_bonus
                 prod_farm = farm * 10 * production_bonus
                 prod_aluminium = aluminium_factory * 0.4 * production_bonus
                 prod_steel = steel_factory * 0.3 * production_bonus
@@ -121,9 +117,9 @@ class Economy(commands.Cog):
                 usage_iron_oil = prod_oil * 0
                 usage_lead_oil = prod_oil * 0
                 usage_bauxite_oil = prod_oil * 0
-                usage_iron_uranium = prod_uranium * 0
-                usage_lead_uranium = prod_uranium * 0
-                usage_bauxite_uranium = prod_uranium * 0
+                usage_iron_uranium = Economy.prod_uranium * 0
+                usage_lead_uranium = Economy.prod_uranium * 0
+                usage_bauxite_uranium = Economy.prod_uranium * 0
                 usage_iron_food = prod_farm * 0
                 usage_lead_food = prod_farm * 0
                 usage_bauxite_food = prod_farm * 0
@@ -152,13 +148,17 @@ class Economy(commands.Cog):
                 final_prod_bauxite = prod_bauxite - final_usage_bauxite
                 final_prod_oil = prod_oil - usage_oil_gas
 
+                total_resource_prod = prod_wood + prod_coal + prod_ammo + prod_aluminium + prod_concrete \
+                                            + prod_farm + prod_gas + prod_steel + final_prod_bauxite + final_prod_iron \
+                                            + final_prod_lead + final_prod_oil
+
                 wood_income = prod_wood * 10
                 coal_income = prod_coal * 30
                 iron_income = final_prod_iron * 20
                 lead_income = final_prod_lead * 50
                 bauxite_income = final_prod_bauxite * 80
                 oil_income = final_prod_oil * 200
-                uranium_income = prod_uranium * 1000
+                uranium_income = Economy.prod_uranium * 1000
                 food_income = prod_farm * 20
                 aluminium_income = prod_aluminium * 1000
                 steel_income = prod_steel * 1500
@@ -168,8 +168,7 @@ class Economy(commands.Cog):
 
                 resource_revenue = wood_income + coal_income + iron_income + lead_income + bauxite_income + oil_income + uranium_income + food_income + aluminium_income + steel_income + gas_income + ammo_income + concrete_income
 
-                total_pop = adult
-                tax_revenue = (tax_rate * total_pop) * tax_revenue_bonus
+                tax_revenue = round(tax_rate * (NAI_Determiner.NAI * adult) * tax_revenue_bonus)
 
                 basic_house_upkeep = basic_house * 20
                 small_flat_upkeep = small_flat * 40
@@ -193,12 +192,19 @@ class Economy(commands.Cog):
                 concrete_factory_upkeep = concrete_factory * 600
                 militaryfactory_upkeep = militaryfactory * 800
 
+                park_upkeep = park * 30
+                cinema_upkeep = cinema * 60
+                museum_upkeep = museum * 70
+                concert_hall_upkeep = concert_hall * 120
+
                 infra_upkeep = (basic_house_upkeep + small_flat_upkeep + apt_complex_upkeep + skyscraper_upkeep +
                                 lumber_mill_upkeep + coal_mine_upkeep + iron_mine_upkeep + lead_mine_upkeep +
                                 bauxite_mine_upkeep + oil_derrick_upkeep + uranium_mine_upkeep +
                                 farm_upkeep + aluminium_factory_upkeep + steel_factory_upkeep +
                                 oil_refinery_upkeep + ammo_factory_upkeep + concrete_factory_upkeep +
-                                militaryfactory_upkeep) * upkeep_bonus
+                                militaryfactory_upkeep + park_upkeep + cinema_upkeep + museum_upkeep + concert_hall_upkeep) * upkeep_bonus
+
+                corp_income = round(corps * corp_tax)
 
                 policy_upkeep = 0
 
@@ -277,10 +283,12 @@ class Economy(commands.Cog):
 
                     embed = discord.Embed(title="Economy", type='rich',
                                         description=f"Displays {name}'s economy.", color=discord.Color.green())
-                    embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
-                                                        f"Corporate Tax Revenue: {corp_tax*corps:,}{new_line}"
+                    embed.add_field(name="Overview", value=f"**Revenue**{new_line}"
+                                                        f"Tax Revenue: {tax_revenue:,}{new_line}"
+                                                        f"Corporate Tax Revenue: {corp_income:,}{new_line}"
                                                         f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                         f"======================{new_line}"
+                                                        f"**Expenses**{new_line}"
                                                         f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
                                                         f"Military Upkeep: {military_upkeep:,}{new_line}"
                                                         f"Policy Upkeep: {policy_upkeep:,}{new_line}", inline=False)
@@ -301,40 +309,25 @@ class Economy(commands.Cog):
                     anti_air_factory_upkeep = anti_air_factory * 500 * 1.5
 
                     military_upkeep = (troops_upkeep + planes_upkeep + weapon_upkeep + tanks_upkeep +
-                                    artillery_upkeep + anti_air_upkeep + barracks_upkeep +
-                                    tank_factory_upkeep + plane_factory_upkeep +
-                                    artillery_factory_upkeep + anti_air_factory_upkeep)
+                                       artillery_upkeep + anti_air_upkeep + barracks_upkeep +
+                                       tank_factory_upkeep + plane_factory_upkeep +
+                                       artillery_factory_upkeep + anti_air_factory_upkeep) * troops_upkeep_bonus
 
                     net_income = round((tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep))
 
                     embed = discord.Embed(title="Economy", type='rich',
-                                        description=f"Displays {name}'s economy.", color=discord.Color.green())
-                    embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
-                                                        f"Corporate Tax Revenue: {corp_tax*corps:,}{new_line}"
+                                            description=f"Displays {name}'s economy.", color=discord.Color.green())
+                    embed.add_field(name="Overview", value=f"**Revenue**{new_line}"
+                                                        f"Tax Revenue: {tax_revenue:,}{new_line}"
+                                                        f"Corporate Tax Revenue: {corp_income:,}{new_line}"
                                                         f"Resource Revenue: {resource_revenue:,}{new_line}"
                                                         f"======================{new_line}"
+                                                        f"**Expenses**{new_line}"
                                                         f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
                                                         f"Military Upkeep: {military_upkeep:,}{new_line}"
                                                         f"Policy Upkeep: {policy_upkeep:,}{new_line}", inline=False)
                     embed.add_field(name="", value=f"Net Income: {net_income:,}", inline=False)
                     await ctx.send(embed=embed)
-
-                    military_upkeep = (troops_upkeep + planes_upkeep + weapon_upkeep + tanks_upkeep +
-                                       artillery_upkeep + anti_air_upkeep + barracks_upkeep +
-                                       tank_factory_upkeep + plane_factory_upkeep +
-                                       artillery_factory_upkeep + anti_air_factory_upkeep) * troops_upkeep_bonus
-
-                    net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
-
-                embed = discord.Embed(title="Economy", type='rich',
-                                      description=f"Displays {name}'s economy.", color=discord.Color.green())
-                embed.add_field(name="Overview", value=f"Tax Revenue: {tax_revenue:,}{new_line}"
-                                                       f"Resource Revenue: {resource_revenue:,}{new_line}"
-                                                       f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
-                                                       f"Military Upkeep: {military_upkeep:,}{new_line}"
-                                                       f"Policy Upkeep: {policy_upkeep:,}{new_line}", inline=False)
-                embed.add_field(name="", value=f"Net Income: {net_income:,}", inline=False)
-                await ctx.send(embed=embed)
             else:
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                       description=f'Cannot find stats.')

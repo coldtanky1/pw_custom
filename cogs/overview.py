@@ -3,6 +3,7 @@ import asyncio
 import discord
 from discord.ext import commands
 from sim_funcs.NAI_func import NAI_Determiner
+from cogs.update import HappinessCalculator
 import globals
 
 new_line = '\n'
@@ -77,7 +78,9 @@ class Overview(commands.Cog):
                     embed.add_field(name="Food stock", value="The population is fed.\n",
                                                              inline=False)
                     
-                embed.add_field(name="Income", value=f"The national average wage for {name} is ${NAI_Determiner.NAI:,}.")
+                embed.add_field(name="Income", value=f"The national average wage for {name} is ${NAI_Determiner.NAI:,}.", inline=False)
+                embed.add_field(name="Population happiness", value=f"The population happiness from entertainment buildings is: {HappinessCalculator.happiness_bonus}.",
+                                inline=False)
 
                 await ctx.send(embed=embed)
 

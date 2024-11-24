@@ -15,6 +15,7 @@ conn = globals.conn
 cursor = globals.cursor
 
 def NAI_Determiner(user_id):
+    global NAI
     cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
     user_data = cursor.fetchone()
 
@@ -71,11 +72,13 @@ def NAI_Determiner(user_id):
             ammo_workers = round(ammo_factory // 10)
             concrete_workers = round(concrete_factory // 5)
             corp_workers = round(corps // 5500)
-            
+
             total_workers = (num_miners + num_mill_workers + steel_workers + aluminium_workers + gas_workers + ammo_workers
                              + concrete_workers + corp_workers)
 
-            NAI_Determiner.NAI = round(total_income // total_workers)
+            NAI = round(total_income // total_workers)
+
+            return NAI
 
         else:
             logger.info(f"NAI_Determiner ERROR: COULD NOT FIND STATS FOR {name}.\n")

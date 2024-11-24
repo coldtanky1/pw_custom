@@ -13,8 +13,6 @@ bot = commands.Bot(command_prefix="$", intents=intents, case_insensitive=True)
 
 load_dotenv()
 
-token = os.getenv('DISCORD_TOKEN')
-
 async def load():
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
@@ -23,7 +21,7 @@ async def load():
 # Load the bot
 async def main():
     await load()
-    await bot.start(token)
+    await bot.start(os.getenv('DISCORD_TOKEN'))
 
 # Connect to the sqlite DB (it will create a new DB if it doesn't exit)
 conn = sqlite3.connect('player_info.db')

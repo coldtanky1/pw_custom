@@ -1,0 +1,81 @@
+<html x-data="{ theme: localStorage.getItem('theme') || 'light' }"
+  x-init="$watch('theme', value => localStorage.setItem('theme', value))" :data-theme="theme">
+
+<head>
+  <title>Modify Page</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+
+<body>
+  <div x-data="{ data: {} }"
+    x-init="data = await (await fetch('/api/modify?nation_name={{ .nation_name }}&table={{ .table }}')).json()">
+    <button @click="theme = theme === 'light' ? 'dark' : 'light'" style="margin-top: 20px; margin-left: 20px;">
+      <span x-text="theme === 'light' ? '☀️' : '🌜'"></span>
+    </button>
+    <button @click="window.location.href = '/'" style="margin-top: 20px; margin-left: 20px;">🏠</button>
+
+
+    <div style="text-align: center; margin-top: 20px;">
+      <h1>Modify</h1>
+      <p>Nation Name: {{ .nation_name }}</p>
+      <p>Selected Table: {{ .table }}</p>
+
+      <div style="margin-top: 20px;">
+        <template x-for="(value, key) in data" :key="key">
+          <template x-if="typeof value === 'object'">
+            <template x-for="(row, index) in value" :key="index">
+              <li>
+                <span x-text="index"></span>: <span x-text="row"></span>
+              </li>
+            </template>
+          </template>
+        </template>
+      </div>
+    </div>
+
+
+    <div style="margin-top: 20px; margin-left: 20px;" x-data="{ columnToModify: '', operation: '', amount: '' }">
+      <form @submit.prevent="submitForm()">
+        <label for="columnToModify">Column to modify:</label>
+        <input x-model="columnToModify" style="width: 25%;" type="text" id="columnToModify" name="columnToModify"
+          required>
+
+        <label for="operation">Operation:</label>
+        <select x-model="operation" style="width: 25%;" id="operation" name="operation">
+          <option value="add">Add</option>
+          <option value="subtract">Subtract</option>
+        </select>
+
+        <label for="amount">Amount:</label>
+        <input x-model="amount" style="width: 25%;" type="number" id="amount" name="amount" required>
+        <br>
+        <button style="width: 20%;" type="submit">Submit</button>
+      </form>
+    </div>
+
+    <script>
+      function submitForm() {
+        const formData = new FormData(document.querySelector('form'));
+
+        const queryString = new URLSearchParams(formData).toString();
+
+        fetch('/update', {
+          method: 'POST',
+          body: formData,
+        })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Success:', data);
+            window.location.reload();
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
+      }
+    </script>
+  </div>
+</body>
+
+</html>

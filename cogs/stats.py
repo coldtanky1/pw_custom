@@ -18,7 +18,7 @@ def limit_happiness(happiness):
 class Stats(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        
+
     @commands.command()
     async def stats(self, ctx, user: discord.Member = None):
         if user is None:
@@ -78,7 +78,7 @@ class Stats(commands.Cog):
                     case "Socialism":
                         tax_revenue_bonus *= 0.6
 
-                NAI = NAI_Determiner.NAI
+                NAI = NAI_Determiner(user_id=user_id)
                 tax_revenue = round(tax_rate * (NAI * adult) * tax_revenue_bonus)
 
                 gdp_per_capita = round(gdp // adult)

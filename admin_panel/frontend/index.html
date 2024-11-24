@@ -1,0 +1,42 @@
+<html x-data="{ theme: localStorage.getItem('theme') || 'light' }"
+  x-init="$watch('theme', value => localStorage.setItem('theme', value))" :data-theme="theme">
+
+<head>
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body>
+  <button @click="theme = theme === 'light' ? 'dark' : 'light'" style="margin-top: 20px; margin-left: 20px;">
+    <span x-text="theme === 'light' ? '☀️' : '🌜'"></span>
+  </button>
+
+  <div id="index-page">
+    <div style="text-align: center; margin-top: 20px;">
+      <h1>Admin Panel</h1>
+    </div>
+
+    <div x-data="{ nationName: '' }" style="margin-top: 20px; text-align: left; margin-left: 20px;">
+      <label for="nationName">Enter the nation name: </label>
+      <input x-model="nationName" style="width: 25%;" type="text" id="nation_name" name="nationName" required>
+
+      <label for="dropdown">SQL table to modify:</label>
+      <select style="width: 25%;" name="dropdown" id="dropdown">
+        <option selected disabled value="">Select a table</option>
+        <option value="infra">Infra</option>
+        <option value="resources">Resources</option>
+        <option value="user_info">User_info</option>
+        <option value="user_mil">User_mil</option>
+        <option value="user_stats">User_stats</option>
+      </select>
+      <br>
+      <button
+        @click="window.location.href = `/modify?nation_name=${nationName}&table=${document.getElementById('dropdown').value}`"
+        style="width: 20%;">Submit</button>
+    </div>
+  </div>
+
+</body>
+
+</html>

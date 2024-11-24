@@ -12,6 +12,7 @@ Run the command below:
 make setup
 ```
 This will install all the python and golang libraries.
+Make sure to also go to `.env` and add your discord token.
 
 # Running the bot and admin panel.
 Run the command below:

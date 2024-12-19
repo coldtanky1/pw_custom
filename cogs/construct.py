@@ -1,13 +1,9 @@
-import sqlite3
 import asyncio
 import discord
 from discord.ext import commands
-import globals
+from schema import UserMil, UserStats, UserInfo, Resources, Infra
 
 new_line = '\n'
-# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = globals.conn
-cursor = globals.cursor
 
 # Structure: name, wood cost, concrete cost, steel cost
 structures = [
@@ -43,10 +39,10 @@ class Construct(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def construct(self, ctx, building: str = None, amount: int = 0):
+    async def construct(self, ctx, building: str = '', amount: int = 0):
         user_id = ctx.author.id
 
-        if building is None:
+        if building == '':
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                   description=f'Please specify a building.')
             await ctx.send(embed=embed)
@@ -61,29 +57,22 @@ class Construct(commands.Cog):
             return
 
         # fetch username
-        cursor.execute('SELECT name FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            name = result[0]
+            name = result.name
 
             # fetch user's resources
-            cursor.execute(
-                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (name,))
-            res_result = cursor.fetchone()
+            res_result = Resources.select(Resources.concrete, Resources.wood, Resources.steel).where(Resources.name == name).tuples().first()
 
             # fetch user's production infra
-            cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall FROM infra WHERE name = ?',
-                (name,))
-            infra_result = cursor.fetchone()
+            infra_result = Infra.select(Infra.park, Infra.cinema, Infra.museum, Infra.concert_hall).where(Infra.name == name).tuples().first()
 
-            cursor.execute('SELECT balance FROM user_stats WHERE name = ?', (name,))
-            bal = cursor.fetchone()
+            # fetch user's balance
+            bal = UserStats.select().where(UserStats.name == name).first()
 
             if infra_result:
-                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall = infra_result
+                park, cinema, museum, concert_hall = infra_result
                 match building:
                     case "basichouse" | "basic_house":
                         build_id = 0
@@ -189,29 +178,25 @@ class Construct(commands.Cog):
                         construct_msg = await ctx.send(embed=constructing)
 
                         if res_result:
-                            wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
+                            wood, steel, concrete = res_result
 
                             # Check if user has enough resources
                             if (wood >= wood_cost) and (concrete >= concrete_cost) and (steel >= steel_cost):
 
                                 # If user has enough resources then it proceeds normally.
                                 # Update the resources table
-                                cursor.execute('''
-                                                UPDATE resources SET
-                                                wood = wood - ?,
-                                                concrete = concrete - ?,
-                                                steel = steel - ?
-                                                WHERE name = ?
-                                            ''', (wood_cost, concrete_cost, steel_cost, name))
+                                Resources.update(wood=Resources.wood - wood_cost, concrete=Resources.concrete - concrete_cost, steel=Resources.steel - steel_cost).where(
+                                    Resources.name == name).execute()
 
                                 if build_id != 18:
-                                    query = '''UPDATE infra SET {0} = {0} + {1} WHERE name = "{2}"'''.format(
-                                        build_list_code[build_id], amount, name)
+                                    field_name = build_list_code[build_id]
+                                    field = getattr(Infra, field_name)
+                                    Infra.update({field: field + amount}).where(Infra.name == name).execute()
                                 else:
-                                    query = '''UPDATE user_mil SET {0} = {0} + {1} WHERE name = "{2}"'''.format(
-                                        build_list_code[build_id], amount, name)
-                                cursor.execute(query)
-                                conn.commit()
+                                    field_name = build_list_code[build_id]
+                                    field = getattr(UserMil, field_name)
+                                    UserMil.update({field: field + amount}).where(UserMil.name == name).execute()
+
 
                                 cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
                                                           description='Construction complete!')
@@ -250,7 +235,7 @@ class Construct(commands.Cog):
                                         total_price = (wood_req * 12) + (concrete_req * 1000) + (steel_req * 1875)
 
                                         if bal:
-                                            balance = bal[0]
+                                            balance = bal.balance
 
                                             # if the user doesn't have enough money.
                                             if balance < total_price:
@@ -260,17 +245,18 @@ class Construct(commands.Cog):
                                                 return
                                             
                                             else:
-                                                cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (total_price, name))
-                                                conn.commit()
+                                                UserStats.update(balance=UserStats.balance - total_price).where(UserStats.name == name).execute()
 
                                                 if build_id != 18:
-                                                    query = '''UPDATE infra SET {0} = {0} + {1} WHERE name = "{2}"'''.format(
-                                                        build_list_code[build_id], amount, name)
+                                                    field_name = build_list_code[build_id]
+                                                    field = getattr(Infra, field_name)
+                                                    
+                                                    Infra.update({field: field + amount}).where(Infra.name == name).execute()
                                                 else:
-                                                    query = '''UPDATE user_mil SET {0} = {0} + {1} WHERE name = "{2}"'''.format(
-                                                        build_list_code[build_id], amount, name)
-                                                cursor.execute(query)
-                                                conn.commit()
+                                                    field_name = build_list_code[build_id]
+                                                    field = getattr(UserMil, field_name)
+
+                                                    UserMil.update({field: field + amount}).where(UserMil.name == name).execute()
 
                                                 cons_done = discord.Embed(colour=0xdd7878, title='Contruct', type='rich',
                                                           description='Construction complete!')

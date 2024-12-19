@@ -1,16 +1,17 @@
 import logging
-import sqlite3
+import random
 import discord
 from discord.ext import commands, tasks
-import random
+
 from sim_funcs.NAI_func import NAI_Determiner
 from sim_funcs.corps_func import Corp_spawn
 from sim_funcs.corps_func import Corp_remove
+
+import asyncio
 import globals
+from schema import *
 
 new_line = '\n'
-conn = globals.conn
-cursor = globals.cursor
 
 logging_folder = globals.logging_folder + 'update.log'
 
@@ -23,32 +24,24 @@ logger = logging.getLogger(__name__)
 # Check housing.
 async def CheckHousing():
     try:
-        cursor.execute('SELECT * FROM user_info')
-        for row in cursor.fetchall():
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = row
+        for row in UserInfo.select(UserInfo.user_id, UserInfo.name, UserInfo.happiness).tuples():
+            user_id, name, happiness = row
 
             # Fetch user's production infra
-            cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
-                (name,))
-            infra_result = cursor.fetchone()
-
-            # Fetch user's military stats
-            cursor.execute(
-                'SELECT * FROM user_mil WHERE name = ?',
-                (name,))
-            mil_result = cursor.fetchone()
+            infra_result = Infra.select(
+                Infra.basic_house, Infra.small_flat, Infra.apt_complex,
+                Infra.skyscraper, Infra.lumber_mill, Infra.coal_mine,
+                Infra.iron_mine, Infra.lead_mine, Infra.bauxite_mine,
+                Infra.oil_derrick, Infra.uranium_mine, Infra.farm,
+                Infra.aluminium_factory, Infra.steel_factory, Infra.oil_refinery,
+                Infra.ammo_factory, Infra.concrete_factory, Infra.militaryfactory).where(Infra.name == name).tuples().first()
 
             # Fetch user's population stats.
-            cursor.execute(
-                'SELECT nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-                (name,))
-            pop_result = cursor.fetchone()
+            pop_result = UserStats.select().where(UserStats.name == name).first()
 
-            if infra_result and mil_result and pop_result:
-                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
-                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
-                nation_score, gdp, adult, balance = pop_result
+            if infra_result and pop_result:
+                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
+                adult = pop_result.adult
 
                 # Check for housing.
                 # Population Housing
@@ -62,54 +55,53 @@ async def CheckHousing():
                 if adult > total_housing:  # If user does not have enough housing.
                     if happiness <= 0:
                         happiness = 0
-                        cursor.execute('UPDATE user_info SET happiness = 0 WHERE user_id = ?', (user_id,))
-                        conn.commit()
+                        UserInfo.update(happiness=0).where(UserInfo.user_id == user_id).execute()
                         pass
                     else:
-                        cursor.execute('UPDATE user_info SET happiness = happiness - 15 WHERE name = ?', (name,))
-                        conn.commit()
+                        UserInfo.update(happiness=UserInfo.happiness - 15).where(UserInfo.user_id == user_id).execute()
 
                     riot_chance = random.randint(1, 25)
-                    not_housed = adult - total_housing
 
                     if riot_chance == 1:
                         logger.info(f"HOUSING CHECK: Check for housing done. Riot detected for {name}.\n")
 
-                        # Calculates the damages of properties.
-                        basic_house_damage = round(basic_house * 0.02)
-                        small_flat_damage = round(small_flat * 0.02)
-                        apt_complex_damage = round(apt_complex * 0.02)
-                        skyscraper_damage = round(skyscraper * 0.02)
-                        lumber_mill_damage = round(lumber_mill * 0.02)
-                        coal_mine_damage = round(coal_mine * 0.02)
-                        iron_mine_damage = round(iron_mine * 0.02)
-                        lead_mine_damage = round(lead_mine * 0.02)
-                        bauxite_mine_damage = round(bauxite_mine * 0.02)
-                        oil_derrick_damage = round(oil_derrick * 0.02)
-                        uranium_mine_damage = round(uranium_mine * 0.02)
-                        farm_damage = round(farm * 0.02)
-                        aluminium_factory_damage = round(aluminium_factory * 0.02)
-                        steel_factory_damage = round(steel_factory * 0.02)
-                        oil_refinery_damage = round(oil_refinery * 0.02)
-                        ammo_factory_damage = round(ammo_factory * 0.02)
-                        concrete_factory_damage = round(concrete_factory * 0.02)
-                        militaryfactory_damage = round(militaryfactory * 0.02)
+                        # Calculates properties destroyed.
+                        basic_house_damage = round(basic_house * 0.01)
+                        small_flat_damage = round(small_flat * 0.01)
+                        apt_complex_damage = round(apt_complex * 0.01)
+                        skyscraper_damage = round(skyscraper * 0.01)
+                        lumber_mill_damage = round(lumber_mill * 0.01)
+                        coal_mine_damage = round(coal_mine * 0.01)
+                        iron_mine_damage = round(iron_mine * 0.01)
+                        lead_mine_damage = round(lead_mine * 0.01)
+                        bauxite_mine_damage = round(bauxite_mine * 0.01)
+                        oil_derrick_damage = round(oil_derrick * 0.01)
+                        uranium_mine_damage = round(uranium_mine * 0.01)
+                        farm_damage = round(farm * 0.01)
+                        aluminium_factory_damage = round(aluminium_factory * 0.01)
+                        steel_factory_damage = round(steel_factory * 0.01)
+                        oil_refinery_damage = round(oil_refinery * 0.01)
+                        ammo_factory_damage = round(ammo_factory * 0.01)
+                        concrete_factory_damage = round(concrete_factory * 0.01)
+                        militaryfactory_damage = round(militaryfactory * 0.01)
                         pop_death = round(adult//24)
 
                         # Update the population.
-                        cursor.execute('UPDATE user_stats SET adult = adult - ? WHERE name = ?', (pop_death, name))
-                        conn.commit()
+                        UserStats.update(adult=UserStats.adult - pop_death).where(UserStats.name == name).execute()
 
                         # Update the infrastructure.
-                        cursor.execute('''UPDATE infra SET basic_house = basic_house - ?, small_flat = small_flat - ?, apt_complex = apt_complex - ?, skyscraper = skyscraper - ?,
-                                        lumber_mill = lumber_mill - ?, coal_mine = coal_mine - ?, iron_mine = iron_mine - ?, lead_mine = lead_mine - ?, bauxite_mine = bauxite_mine - ?,
-                                        oil_derrick = oil_derrick - ?, uranium_mine = uranium_mine - ?, farm = farm - ?, aluminium_factory = aluminium_factory - ?,
-                                        steel_factory = steel_factory - ?, oil_refinery = oil_refinery - ?, ammo_factory = ammo_factory - ?, concrete_factory = concrete_factory - ?,
-                                        militaryfactory = militaryfactory - ? WHERE name = ?''',
-                                       (basic_house_damage, small_flat_damage, apt_complex_damage, skyscraper_damage, lumber_mill_damage, coal_mine_damage, iron_mine_damage,
-                                        lead_mine_damage, bauxite_mine_damage, oil_derrick_damage, uranium_mine_damage, farm_damage, aluminium_factory_damage,
-                                        steel_factory_damage, oil_refinery_damage, ammo_factory_damage, concrete_factory_damage, militaryfactory_damage, name))
-                        conn.commit()
+                        Infra.update(basic_house=Infra.basic_house - basic_house_damage, small_flat=Infra.small_flat - small_flat_damage,
+                            apt_complex=Infra.apt_complex - apt_complex_damage, skyscraper=Infra.skyscraper - skyscraper_damage,
+                            lumber_mill=Infra.lumber_mill - lumber_mill_damage, coal_mine=Infra.coal_mine - coal_mine_damage,
+                            iron_mine=Infra.iron_mine - iron_mine_damage, lead_mine=Infra.lead_mine - lead_mine_damage,
+                            bauxite_mine=Infra.bauxite_mine - bauxite_mine_damage, oil_derrick=Infra.oil_derrick - oil_derrick_damage,
+                            uranium_mine=Infra.uranium_mine - uranium_mine_damage, farm=Infra.farm - farm_damage,
+                            aluminium_factory=Infra.aluminium_factory - aluminium_factory_damage,
+                            steel_factory=Infra.steel_factory - steel_factory_damage,
+                            oil_refinery=Infra.oil_refinery - oil_refinery_damage,
+                            ammo_factory=Infra.ammo_factory - ammo_factory_damage,
+                            concrete_factory=Infra.concrete_factory - concrete_factory_damage,
+                            militaryfactory=Infra.militaryfactory - militaryfactory_damage).where(Infra.name == name).execute()
 
                         logger.info(f'HOUSING CHECK: Damages caused by riots done for {name}.\n')
                     else:
@@ -125,41 +117,32 @@ async def CheckHousing():
         print(f"HOUSING CHECK ERROR: {e}\n")
 
 
+
 async def UpdateEconomy():
     try:
-        cursor.execute('SELECT * FROM user_info')
-        for row in cursor.fetchall():
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = row
+        for row in UserInfo.select(
+            UserInfo.user_id, UserInfo.name, UserInfo.gov_type,
+            UserInfo.tax_rate, UserInfo.police_policy, UserInfo.fire_policy,
+            UserInfo.hospital_policy, UserInfo.war_status).tuples():
+            user_id, name, gov_type, tax_rate, police_policy, fire_policy, hospital_policy, war_status = row
 
             # fetch user's resources
-            cursor.execute(
-                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (name,))
-            res_result = cursor.fetchone()
-
+            res_result = Resources.select(Resources.iron, Resources.lead, Resources.bauxite, Resources.oil).where(Resources.name == name).tuples().first()
+ 
             # fetch user's production infra
-            cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall FROM infra WHERE name = ?',
-                (name,))
-            infra_result = cursor.fetchone()
+            infra_result = Infra.select().where(Infra.name == name).tuples().first()
 
             # fetch user's military stats
-            cursor.execute(
-                'SELECT * FROM user_mil WHERE name = ?',
-                (name,))
-            mil_result = cursor.fetchone()
+            mil_result = UserMil.select().where(UserMil.name == name).tuples().first()
 
             # fetch user's population stats.
-            cursor.execute(
-                'SELECT nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-                (name,))
-            pop_result = cursor.fetchone()
+            pop_result = UserStats.select().where(UserStats.name == name).first()
 
             if infra_result:
-                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall = infra_result
-                wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
-                nation_score, gdp, adult, balance = pop_result
-                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall = infra_result
+                iron, lead, bauxite, oil = res_result
+                adult = pop_result.adult
+                name, troops, planes, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
 
                 policy_upkeep = 0
                 match police_policy:
@@ -229,12 +212,13 @@ async def UpdateEconomy():
                         else:  # If the user does meet resource demands.
                             logger.info(f"UPDATE RESOURCES: Updating resources done for {name}. DOES MEET DEMANDS.\n")
 
-                        cursor.execute(
-                            'UPDATE resources SET wood = wood + ?, coal = coal + ?, iron = iron + ?, lead = lead + ?, bauxite = bauxite + ?, oil = oil + ?, uranium = uranium + ?, food = food + ?, aluminium = aluminium + ?, steel = steel + ?, gasoline = gasoline + ?, ammo = ammo + ?, concrete = concrete + ? WHERE name = ?',
-                            (prod_wood, prod_coal, final_prod_iron, final_prod_lead, final_prod_bauxite, final_prod_oil,
-                             prod_uranium, prod_farm, prod_aluminium, prod_steel, prod_gas, prod_ammo, prod_concrete,
-                             name))
-                        conn.commit()
+                        Resources.update(wood=Resources.wood + prod_wood, coal=Resources.coal + prod_coal,
+                            iron=Resources.iron + final_prod_iron, lead=Resources.lead + final_prod_lead,
+                            bauxite=Resources.bauxite + final_prod_bauxite, oil=Resources.oil + final_prod_oil,
+                            uranium=Resources.uranium + prod_uranium, food=Resources.food + prod_farm,
+                            steel=Resources.steel + prod_steel, aluminium=Resources.aluminium + prod_aluminium,
+                            gasoline=Resources.gasoline + prod_gas, ammo=Resources.ammo + prod_ammo,
+                            concrete=Resources.concrete + prod_concrete).where(Resources.name == name).execute()
 
                     except Exception as e:
                         logger.info(f"UPDATE RESOURCES ERROR: {e}\n")
@@ -349,7 +333,8 @@ async def UpdateEconomy():
 
                 resource_revenue = wood_income + coal_income + iron_income + lead_income + bauxite_income + oil_income + uranium_income + food_income + aluminium_income + steel_income + gas_income + ammo_income + concrete_income
 
-                tax_revenue = round(tax_rate * (NAI_Determiner.NAI * adult) * tax_revenue_bonus)
+                NAI = NAI_Determiner(user_id)
+                tax_revenue = round((tax_rate/100) * (NAI * adult)) * tax_revenue_bonus
 
                 basic_house_upkeep = basic_house * 20
                 small_flat_upkeep = small_flat * 40
@@ -391,7 +376,6 @@ async def UpdateEconomy():
 
                     troops_upkeep = troops * 5
                     planes_upkeep = planes * 50
-                    weapon_upkeep = weapon * 10
                     tanks_upkeep = tanks * 100
                     artillery_upkeep = artillery * 150
                     anti_air_upkeep = anti_air * 200
@@ -401,21 +385,19 @@ async def UpdateEconomy():
                     artillery_factory_upkeep = artillery_factory * 450
                     anti_air_factory_upkeep = anti_air_factory * 500
 
-                    military_upkeep = (troops_upkeep + planes_upkeep + weapon_upkeep + tanks_upkeep +
+                    military_upkeep = (troops_upkeep + planes_upkeep + tanks_upkeep +
                                        artillery_upkeep + anti_air_upkeep + barracks_upkeep +
                                        tank_factory_upkeep + plane_factory_upkeep +
                                        artillery_factory_upkeep + anti_air_factory_upkeep) * troops_upkeep_bonus
 
                     net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                    cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
-                    conn.commit()
+                    UserStats.update(balance=UserStats.balance + net_income).where(UserStats.name == name).execute()
 
                     logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
                 else:
                     troops_upkeep = troops * 5 * 1.5
                     planes_upkeep = planes * 50 * 1.5
-                    weapon_upkeep = weapon * 10 * 1.5
                     tanks_upkeep = tanks * 100 * 1.5
                     artillery_upkeep = artillery * 150 * 1.5
                     anti_air_upkeep = anti_air * 200 * 1.5
@@ -425,15 +407,14 @@ async def UpdateEconomy():
                     artillery_factory_upkeep = artillery_factory * 450 * 1.5
                     anti_air_factory_upkeep = anti_air_factory * 500 * 1.5
 
-                    military_upkeep = (troops_upkeep + planes_upkeep + weapon_upkeep + tanks_upkeep +
+                    military_upkeep = (troops_upkeep + planes_upkeep + tanks_upkeep +
                                        artillery_upkeep + anti_air_upkeep + barracks_upkeep +
                                        tank_factory_upkeep + plane_factory_upkeep +
                                        artillery_factory_upkeep + anti_air_factory_upkeep) * troops_upkeep_bonus
 
                     net_income = (tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)
 
-                    cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (net_income, name))
-                    conn.commit()
+                    UserStats.update(balance=UserStats.balance + net_income).where(UserStats.name == name).execute()
 
                     logger.info(f"UPDATE ECONOMY: Updating economy done for {name}.\n")
 
@@ -444,41 +425,30 @@ async def UpdateEconomy():
         logger.info(f'UPDATE ECONOMY ERROR: {e}\n')
 
 
+
 async def FoodCheck():
     try:
-        cursor.execute('SELECT * FROM user_info')
-        for row in cursor.fetchall():
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = row
+        for row in UserInfo.select(UserInfo.user_id, UserInfo.name, UserInfo.hospital_policy, UserInfo.happiness).tuples():
+            user_id, name, hospital_policy, happiness = row
 
             # fetch user's resources
-            cursor.execute(
-                'SELECT  wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (name,))
-            res_result = cursor.fetchone()
+            res_result = Resources.select().where(Resources.name == name).first()
 
             # fetch user's production infra
-            cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
-                (name,))
-            infra_result = cursor.fetchone()
-
-            # fetch user's military stats
-            cursor.execute(
-                'SELECT * FROM user_mil WHERE name = ?',
-                (name,))
-            mil_result = cursor.fetchone()
+            infra_result = Infra.select(
+                Infra.lumber_mill, Infra.coal_mine, Infra.iron_mine,
+                Infra.lead_mine, Infra.bauxite_mine, Infra.oil_derrick,
+                Infra.uranium_mine, Infra.farm, Infra.aluminium_factory,
+                Infra.steel_factory, Infra.oil_refinery, Infra.ammo_factory,
+                Infra.concrete_factory, Infra.militaryfactory).where(Infra.name == name).tuples().first()
 
             # fetch user's population stats.
-            cursor.execute(
-                'SELECT nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-                (name,))
-            pop_result = cursor.fetchone()
+            pop_result = UserStats.select().where(UserStats.name == name).first()
 
             if infra_result:
-                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
-                wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
-                nation_score, gdp, adult, balance = pop_result
-                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
+                food = res_result.food
+                adult = pop_result.adult
 
                 pop_food_req = round(adult//50)
                 riot_chance = random.randint(1, 10)
@@ -489,18 +459,14 @@ async def FoodCheck():
                     if riot_chance == 1:
                         if happiness <= 0:
                             happiness = 0
-                            cursor.execute('UPDATE user_info SET happiness = 0 WHERE user_id = ?', (user_id, ))
-                            conn.commit()
+                            UserInfo.update(happiness=0).where(UserInfo.user_id == user_id).execute()
                         else:
-                            cursor.execute('UPDATE user_info SET happiness = happiness - ? WHERE user_id = ?', (15, user_id))
-                            conn.commit()
+                            UserInfo.update(happiness=UserInfo.happiness - 15).where(UserInfo.user_id == user_id).execute()
 
                         adult_deaths = round(adult//24)
 
                         # Update the pop values.
-                        cursor.execute('UPDATE user_stats SET adult = adult - ? WHERE name = ?',
-                                       (adult_deaths, name))
-                        conn.commit()
+                        UserStats.update(adult=UserStats.adult - adult_deaths).where(UserStats.name == name).execute()
 
                         # Calculates the damages for infra.
                         lumber_mill_damage = round(lumber_mill * 0.02)
@@ -519,32 +485,25 @@ async def FoodCheck():
                         militaryfactory_damage = round(militaryfactory * 0.02)
 
                         # Update the infrastructure.
-                        cursor.execute('''UPDATE infra SET lumber_mill = lumber_mill - ?, coal_mine = coal_mine - ?, iron_mine = iron_mine - ?, lead_mine = lead_mine - ?, bauxite_mine = bauxite_mine - ?,
-                                        oil_derrick = oil_derrick - ?, uranium_mine = uranium_mine - ?, farm = farm - ?, aluminium_factory = aluminium_factory - ?,
-                                        steel_factory = steel_factory - ?, oil_refinery = oil_refinery - ?, ammo_factory = ammo_factory - ?, concrete_factory = concrete_factory - ?,
-                                        militaryfactory = militaryfactory - ? WHERE name = ?''',
-                                       (lumber_mill_damage, coal_mine_damage, iron_mine_damage,
-                                        lead_mine_damage, bauxite_mine_damage, oil_derrick_damage, uranium_mine_damage, farm_damage, aluminium_factory_damage,
-                                        steel_factory_damage, oil_refinery_damage, ammo_factory_damage, concrete_factory_damage, militaryfactory_damage, name))
-                        conn.commit()
+                        Infra.update(lumber_mill=lumber_mill - lumber_mill_damage, coal_mine=coal_mine - coal_mine_damage, iron_mine=iron_mine - iron_mine_damage,
+                            lead_mine=lead_mine - lead_mine_damage, bauxite_mine=bauxite_mine - bauxite_mine_damage, oil_derrick=oil_derrick - oil_derrick_damage,
+                            uranium_mine=uranium_mine - uranium_mine_damage, farm=farm - farm_damage, aluminium_factory=aluminium_factory - aluminium_factory_damage,
+                            steel_factory=steel_factory - steel_factory_damage, oil_refinery=oil_refinery - oil_refinery_damage, ammo_factory=ammo_factory - ammo_factory_damage,
+                            concrete_factory=concrete_factory - concrete_factory_damage, militaryfactory=militaryfactory - militaryfactory_damage).where(Infra.name == name).execute()
 
                         logger.info(f"FOOD CHECK: {name} failed the food check. RIOT DETECTED.\n")
 
                     else:
                         if happiness <= 0:
                             happiness = 0
-                            cursor.execute('UPDATE user_info SET happiness = 0 WHERE user_id = ?', (user_id, ))
-                            conn.commit()
+                            UserInfo.update(happiness=0).where(UserInfo.user_id == user_id).execute()
                         else:
-                            cursor.execute('UPDATE user_info SET happiness = happiness - ? WHERE user_id = ?', (15, user_id))
-                            conn.commit()
+                            UserInfo.update(happiness=UserInfo.happiness - 15).where(UserInfo.user_id == user_id).execute()
 
                         adult_deaths = round(adult//24)
 
                         # Update the pop values.
-                        cursor.execute('UPDATE user_stats SET adult = adult - ? WHERE name = ?',
-                                       (adult_deaths, name))
-                        conn.commit()
+                        UserStats.update(adult=UserStats.adult - adult_deaths).where(UserStats.name == name).execute()
 
                         logger.info(f"FOOD CHECK: {name} failed the food check. NO RIOT DETECTED.\n")
 
@@ -557,13 +516,10 @@ async def FoodCheck():
                     new_food = round((food - pop_food_req))
 
                     # Update the pop values.
-                    cursor.execute('UPDATE user_stats SET adult = adult + ? WHERE name = ?',
-                                   (adult_growth, name))
-                    conn.commit()
+                    UserStats.update(adult=UserStats.adult + adult_growth).where(UserStats.name == name).execute()
 
                     # Update food value.
-                    cursor.execute('UPDATE resources SET food = food - ? WHERE name = ?', (new_food, name))
-                    conn.commit()
+                    Resources.update(food=Resources.food - new_food).where(Resources.name == name).execute()
 
                     logger.info(f"FOOD CHECK: {name} passed the food check.\n")
 
@@ -574,53 +530,48 @@ async def FoodCheck():
         logger.info(f'FOOD CHECK ERROR: {e}\n')
 
 
+
 async def UpdateMilitary():
     try:
-        cursor.execute('SELECT * FROM user_info')
-        for row in cursor.fetchall():
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = row
+        for row in UserInfo.select(UserInfo.user_id, UserInfo.name, UserInfo.gov_type).tuples():
+            user_id, name, gov_type = row
 
             # fetch user's resources
-            cursor.execute(
-                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (name,))
-            res_result = cursor.fetchone()
+            res_result = Resources.select(Resources.steel, Resources.gasoline).where(Resources.name == name).tuples().first()
 
             # fetch user's production infra
-            cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
-                (name,))
-            infra_result = cursor.fetchone()
+            infra_result = Infra.select().where(Infra.name == name).first()
 
             # fetch user's military stats
-            cursor.execute(
-                'SELECT * FROM user_mil WHERE name = ?',
-                (name,))
-            mil_result = cursor.fetchone()
-
-            # fetch user's population stats.
-            cursor.execute(
-                'SELECT nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-                (name,))
-            pop_result = cursor.fetchone()
+            mil_result = UserMil.select(
+                UserMil.tank_factory, UserMil.plane_factory, UserMil.artillery_factory, UserMil.anti_air_factory).where(UserMil.name == name).tuples().first()
 
             if infra_result:
-                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
-                wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
-                nation_score, gdp, adult, balance = pop_result
-                name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                militaryfactory = infra_result.militaryfactory
+                steel, gasoline = res_result
+                tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+
+                # production multipliers
+                base_output = 2.50
+                mil_prod_efficiency = 0.5
+                if gov_type == "Communism":
+                    mil_prod_efficiency = 0.75
+                    base_output = 3
+                elif gov_type == "Fascism":
+                    mil_prod_efficiency = 0.60
+                    base_output = 2.75
 
                 # Update Military.
-                prod_aa = anti_air_factory * militaryfactory // 42
+                prod_aa = base_output * anti_air_factory * mil_prod_efficiency
                 usage_aa_steel = anti_air_factory * 4
                 usage_aa_gas = anti_air_factory * 1
-                prod_arty = artillery_factory * militaryfactory // 42
+                prod_arty = base_output * artillery_factory * mil_prod_efficiency
                 usage_arty_steel = artillery_factory * 3
                 usage_arty_gas = artillery_factory * 0.75
-                prod_plane = plane_factory * militaryfactory // 45
+                prod_plane = base_output * plane_factory * mil_prod_efficiency
                 usage_plane_steel = plane_factory * 5.75
                 usage_plane_gas = plane_factory * 2
-                prod_tank = tank_factory * militaryfactory // 42
+                prod_tank = base_output * tank_factory * mil_prod_efficiency
                 usage_tank_steel = tank_factory * 5
                 usage_tank_gas = tank_factory * 1.25
 
@@ -638,26 +589,21 @@ async def UpdateMilitary():
                 
                 else:  # if the user DOES have enough resources.           
                     # Update resources for military.
-                    cursor.execute('UPDATE resources SET steel = steel - ?, gasoline = gasoline - ? WHERE name = ?', (mil_steel_usage, mil_gas_usage, name))
-                    conn.commit()
+                    Resources.update(steel=Resources.steel - mil_steel_usage, gasoline=Resources.gasoline - mil_gas_usage).where(Resources.name == name).execute()
+
+                    # Update tank count.
+                    UserMil.update(tanks=UserMil.tanks + prod_tank).where(UserMil.name == name).execute()
+
+                    # Update plane count.
+                    UserMil.update(planes=UserMil.planes + prod_plane).where(UserMil.name == name).execute()
+
+                    # Update artillery count.
+                    UserMil.update(artillery=UserMil.artillery + prod_arty).where(UserMil.name == name).execute()
+
+                    # Update Anti-Air.
+                    UserMil.update(anti_air=UserMil.anti_air + prod_aa).where(UserMil.name == name).execute()
 
                     logger.info(f"UPDATE MILITARY: {name}'s military has been updated.\n")
-
-                # Update tank count.
-                cursor.execute('UPDATE user_mil SET tanks = tanks + ? WHERE name = ?', (prod_tank, name))
-                conn.commit()
-
-                # Update plane count.
-                cursor.execute('UPDATE user_mil SET planes = planes + ? WHERE name = ?', (prod_plane, name))
-                conn.commit()
-
-                # Update artillery count.
-                cursor.execute('UPDATE user_mil SET artillery = artillery + ? WHERE name = ?', (prod_arty, name))
-                conn.commit()
-
-                # Update Anti-Air.
-                cursor.execute('UPDATE user_mil SET anti_air = anti_air + ? WHERE name = ?', (prod_aa, name))
-                conn.commit()
 
             else:
                 logger.info(f"UPDATE ECONOMY ERROR: Error fetching stats of {user_id}.\n")
@@ -665,17 +611,14 @@ async def UpdateMilitary():
     except Exception as e:
         logger.info(f'UPDATE MILITARY ERROR: {e}\n')
 
+
 async def HappinessCalculator():
     try:
-        cursor.execute('SELECT * FROM user_info')
-        for row in cursor.fetchall():
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = row
+        for row in UserInfo.select(UserInfo.user_id, UserInfo.name, UserInfo.happiness).tuples():
+            user_id, name, happiness = row
 
             # fetch user's production infra
-            cursor.execute(
-                'SELECT park, cinema, museum, concert_hall FROM infra WHERE name = ?',
-                (name,))
-            infra_result = cursor.fetchone()
+            infra_result = Infra.select(Infra.park, Infra.cinema, Infra.museum, Infra.concert_hall).where(Infra.name == name).tuples().first()
 
             if infra_result:
                 park, cinema, museum, concert_hall = infra_result
@@ -684,14 +627,15 @@ async def HappinessCalculator():
                     return
                 else:
                     # Calculate total happiness bonus
-                    HappinessCalculator.happiness_bonus = round(park * 0.07 + cinema * 0.08 + museum * 0.06 + concert_hall * 0.1)
+                    happiness_bonus = round(park * 0.07 + cinema * 0.08 + museum * 0.06 + concert_hall * 0.1)
 
                     # Log the happiness bonus
-                    logger.info(f"HappinessCalculator: {name} has a happiness bonus of {HappinessCalculator.happiness_bonus} per hour from entertainment buildings.\n")
+                    logger.info(f"HappinessCalculator: {name} has a happiness bonus of {happiness_bonus} per hour from entertainment buildings.\n")
 
                     # You can also update the user's happiness in the database if needed
-                    cursor.execute('UPDATE user_info SET happiness = happiness + ? WHERE user_id = ?', (HappinessCalculator.happiness_bonus, user_id))
-                    conn.commit()
+                    UserInfo.update(happiness=UserInfo.happiness + happiness_bonus).where(UserInfo.user_id == user_id).execute()
+
+                    return happiness_bonus
 
             else:
                 logger.info(f'HappinessCalculator ERROR: could not find infra stats for {name}.\n')
@@ -699,41 +643,26 @@ async def HappinessCalculator():
     except Exception as e:
         logger.info(f'HappinessCalculator ERROR: {e}\n')
 
+
 async def GDPCalculator():
     try:
-        cursor.execute('SELECT * FROM user_info')
-        for row in cursor.fetchall():
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = row
-
-            # fetch user's resources
-            cursor.execute(
-                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (name,))
-            res_result = cursor.fetchone()
+        for row in UserInfo.select(
+            UserInfo.user_id, UserInfo.name, UserInfo.gov_type, UserInfo.tax_rate, UserInfo.war_status, UserInfo.corp_tax).tuples():
+            user_id, name, gov_type, tax_rate, war_status, corp_tax = row
 
             # fetch user's production infra
-            cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall FROM infra WHERE name = ?',
-                (name,))
-            infra_result = cursor.fetchone()
+            infra_result = Infra.select().where(Infra.name == name).tuples().first()
 
             # fetch user's military stats
-            cursor.execute(
-                'SELECT troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
-                (name,))
-            mil_result = cursor.fetchone()
+            mil_result = UserMil.select().where(UserMil.name == name).tuples().first()
 
             # fetch user's population stats.
-            cursor.execute(
-                'SELECT nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-                (name,))
-            pop_result = cursor.fetchone()
+            pop_result = UserStats.select().where(UserStats.name == name).first()
 
             if infra_result:
-                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall = infra_result
-                wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
-                troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
-                nation_score, gdp, adult, balance = pop_result
+                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall = infra_result
+                name, troops, planes, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                adult = pop_result.adult
 
                 # Calculating effects for different parts of update
                 tax_revenue_bonus = 1
@@ -831,7 +760,8 @@ async def GDPCalculator():
                                             + prod_farm + prod_gas + prod_steel + final_prod_bauxite + final_prod_iron \
                                             + final_prod_lead + final_prod_oil
 
-                tax_revenue = round(tax_rate * (NAI_Determiner.NAI * adult) * tax_revenue_bonus)
+                NAI = NAI_Determiner(user_id)
+                tax_revenue = round(tax_rate * (NAI * adult) * tax_revenue_bonus)
 
                 basic_house_upkeep = basic_house * 20
                 small_flat_upkeep = small_flat * 40
@@ -872,7 +802,6 @@ async def GDPCalculator():
                 if war_status == "In Peace":
                     troops_upkeep = troops * 5
                     planes_upkeep = planes * 50
-                    weapon_upkeep = weapon * 10
                     tanks_upkeep = tanks * 100
                     artillery_upkeep = artillery * 150
                     anti_air_upkeep = anti_air * 200
@@ -882,7 +811,7 @@ async def GDPCalculator():
                     artillery_factory_upkeep = artillery_factory * 450
                     anti_air_factory_upkeep = anti_air_factory * 500
 
-                    military_upkeep = (troops_upkeep + planes_upkeep + weapon_upkeep + tanks_upkeep +
+                    military_upkeep = (troops_upkeep + planes_upkeep + tanks_upkeep +
                                         artillery_upkeep + anti_air_upkeep + barracks_upkeep +
                                         tank_factory_upkeep + plane_factory_upkeep +
                                         artillery_factory_upkeep + anti_air_factory_upkeep)
@@ -890,7 +819,6 @@ async def GDPCalculator():
                 else:
                     troops_upkeep = troops * 5 * 1.5
                     planes_upkeep = planes * 50 * 1.5
-                    weapon_upkeep = weapon * 10 * 1.5
                     tanks_upkeep = tanks * 100 * 1.5
                     artillery_upkeep = artillery * 150 * 1.5
                     anti_air_upkeep = anti_air * 200 * 1.5
@@ -900,14 +828,13 @@ async def GDPCalculator():
                     artillery_factory_upkeep = artillery_factory * 450 * 1.5
                     anti_air_factory_upkeep = anti_air_factory * 500 * 1.5
 
-                    military_upkeep = (troops_upkeep + planes_upkeep + weapon_upkeep + tanks_upkeep +
+                    military_upkeep = (troops_upkeep + planes_upkeep + tanks_upkeep +
                                        artillery_upkeep + anti_air_upkeep + barracks_upkeep +
                                        tank_factory_upkeep + plane_factory_upkeep +
                                        artillery_factory_upkeep + anti_air_factory_upkeep) * troops_upkeep_bonus
 
                 new_gdp = round((total_resource_prod + tax_revenue + corp_income) - (infra_upkeep + military_upkeep))
-                cursor.execute('UPDATE user_stats SET gdp = ? WHERE name = ?', (new_gdp, name))
-                conn.commit()
+                UserStats.update(gdp=new_gdp).where(UserStats.name == name).execute()
 
                 logger.info(f'GDPCalculator: successfully updated GDP for {name}.\n')
 
@@ -917,6 +844,7 @@ async def GDPCalculator():
 
     except Exception as e:
         logger.info(f'GPDCalulator ERROR: {e}\n')
+
 
 @tasks.loop(seconds=3600)
 async def CheckHousingTask():
@@ -944,21 +872,18 @@ async def GDPCalculatorTask():
 
 @tasks.loop(seconds=3600)
 async def SpawnCorps():
-    cursor.execute('SELECT user_id FROM user_info')
-    for row in cursor.fetchall():
-        Corp_spawn(row[0])
+    for row in UserInfo.select(UserInfo.user_id):
+        Corp_spawn(row.user_id)
 
 @tasks.loop(seconds=3600)
 async def RemoveCorps():
-    cursor.execute('SELECT user_id FROM user_info')
-    for row in cursor.fetchall():
-        Corp_remove(row[0])
+    for row in UserInfo.select(UserInfo.user_id):
+        Corp_remove(row.user_id)
 
 @tasks.loop(seconds=3600)
 async def NAICalculator():
-    cursor.execute('SELECT user_id FROM user_info')
-    for row in cursor.fetchall():
-        NAI_Determiner(row[0])
+    for row in UserInfo.select(UserInfo.user_id):
+        NAI_Determiner(row.user_id)
 
 GDPCalculatorTask.start()
 HappinessCalculatorTask.start()
@@ -969,6 +894,7 @@ UpdateMilitaryTask.start()
 FoodCheckTask.start()
 UpdateEconomyTask.start()
 CheckHousingTask.start()
+
 
 class Update(commands.Cog):
     def __init__(self, bot):

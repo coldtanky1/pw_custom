@@ -1,18 +1,15 @@
-import sqlite3
 import asyncio
 import discord
 import math
 from discord.ext import commands
 from discord.utils import get
+from schema import *
 from sim_funcs.NAI_func import NAI_Determiner
-import globals
 
 new_line = '\n'
-# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = globals.conn
-cursor = globals.cursor
 
 def limit_happiness(happiness):
+    print("line 12")
     return min(120, happiness)
 
 class Stats(commands.Cog):
@@ -27,41 +24,35 @@ class Stats(commands.Cog):
             user_id = user.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).tuples().first()
 
         if result:  # If "user" is provided
             user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             # fetch user stats
-            cursor.execute('SELECT * FROM user_stats WHERE name = ?', (name,))
-            stats_result = cursor.fetchone()
+            stats_result = UserStats.select().where(UserStats.name == name).tuples().first()
 
             # fetch user's production infra
-            cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
-                (name,))
-            infra_result = cursor.fetchone()
+            infra_result = Infra.select(
+                Infra.basic_house, Infra.small_flat, Infra.apt_complex,
+                Infra.skyscraper, Infra.lumber_mill, Infra.coal_mine,
+                Infra.iron_mine, Infra.lead_mine, Infra.bauxite_mine,
+                Infra.oil_derrick, Infra.uranium_mine, Infra.farm,
+                Infra.aluminium_factory, Infra.steel_factory, Infra.oil_refinery,
+                Infra.ammo_factory, Infra.concrete_factory, Infra.militaryfactory,
+                Infra.corps).where(Infra.name == name).tuples().first()
 
             # fetch user's mil stats
-            cursor.execute(
-                'SELECT troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
-                (name,))
-            mil_result = cursor.fetchone()
-
-            cursor.execute(
-                'SELECT flag FROM user_custom WHERE name = ?',
-                (name,))
-            cus_result = cursor.fetchone()
+            mil_result = UserMil.select().where(UserMil.name == name).tuples().first()
 
             if stats_result and mil_result and infra_result:
                 name, nation_score, gdp, adult, balance = stats_result
-                troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                name, troops, planes, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
                 basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
 
                 workers = round(adult//1.2)
                 soldiers = round((adult//6) - troops)
-
+ 
                 tax_revenue_bonus = 1
 
                 match gov_type:
@@ -76,13 +67,12 @@ class Stats(commands.Cog):
                     case "Monarchy":
                         tax_revenue_bonus *= 1.1
                     case "Socialism":
-                        tax_revenue_bonus *= 0.6
+                       tax_revenue_bonus *= 0.6
 
                 NAI = NAI_Determiner(user_id=user_id)
                 tax_revenue = round(tax_rate * (NAI * adult) * tax_revenue_bonus)
-
                 gdp_per_capita = round(gdp // adult)
-
+ 
                 embed = discord.Embed(
                     title=f"📊 {name}'s Stats",
                     description=f'Name: {name}',
@@ -123,11 +113,8 @@ class Stats(commands.Cog):
                                                                          f"💂Manpower: {soldiers:,}{new_line}",
                                     inline=False)
                 # Adds flag to embed
-                cursor.execute(
-                    'SELECT flag FROM user_custom WHERE name = ?',
-                    (name,))
-                cus_result = cursor.fetchone()
-                flag = cus_result[0]
+                cus_result = UserCustom.select().where(UserCustom.name == name).first()
+                flag = cus_result.flag
                 if flag:
                     embed.set_thumbnail(url=flag)
                 await ctx.send(embed=embed)
@@ -152,20 +139,20 @@ class Stats(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).tuples().first()
 
         if result:
             user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             # fetch user's mil stats
-            cursor.execute(
-                'SELECT troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
-                (name,))
-            mil_result = cursor.fetchone()
+            mil_result = UserMil.select(
+                UserMil.troops, UserMil.planes, UserMil.tanks,
+                UserMil.artillery, UserMil.anti_air, UserMil.barracks,
+                UserMil.tank_factory, UserMil.plane_factory, UserMil.artillery_factory,
+                UserMil.anti_air_factory).where(UserMil.name == name).tuples().first()
 
             if mil_result:
-                troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                troops, planes, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
 
                 embed = discord.Embed(
                     title=f"⚔ {name}'s Military Stats",
@@ -187,11 +174,8 @@ class Stats(commands.Cog):
                 embed.add_field(name='🛡️ War Status', value=f'{war_status}', inline=False)
 
                 # Adds flag to embed
-                cursor.execute(
-                    'SELECT flag FROM user_custom WHERE name = ?',
-                    (name,))
-                cus_result = cursor.fetchone()
-                flag = cus_result[0]
+                cus_result = UserCustom.select().where(UserCustom.name == name).first()
+                flag = cus_result.flag
                 if flag:
                     embed.set_thumbnail(url=flag)
 

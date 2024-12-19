@@ -1,14 +1,8 @@
-import sqlite3
-import asyncio
 import discord
 from discord.ext import commands
-from discord.utils import get
-import globals
+from schema import *
 
 new_line = '\n'
-# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = globals.conn
-cursor = globals.cursor
 
 
 class Politics(commands.Cog):
@@ -21,11 +15,12 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.user_id, UserInfo.name, UserInfo.gov_type,
+                                 UserInfo.tax_rate, UserInfo.conscription, UserInfo.freedom,
+                                 UserInfo.police_policy, UserInfo.fire_policy, UserInfo.hospital_policy, UserInfo.corp_tax).where(UserInfo.user_id == user_id).tuples().first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            user_id, name, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, corp_tax = result
 
             gov_emb = discord.Embed(title="Government Overview", type='rich',
                                     description=f'Displays an overview of {name}\'s government.',
@@ -53,11 +48,9 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Government Ideology", type='rich',
                                   description="Displays government ideologies.", color=0x04A5E5)
@@ -93,18 +86,16 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            gov_type = result.gov_type
 
             if gov_type == "Democracy":
                 await ctx.send("You already have Democracy as your ideology.")
                 return
 
-            cursor.execute('UPDATE user_info SET gov_type = ? WHERE user_id = ?', ("Democracy", user_id))
-            conn.commit()
+            UserInfo.update(gov_type="Democracy").where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Government Ideology", type='rich',
                                   description="You have successfully changed your ideology to **Democracy**.",
@@ -123,18 +114,16 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            gov_type = result.gov_type
 
             if gov_type == "Monarchy":
                 await ctx.send("You already have Monarchy as your ideology.")
                 return
 
-            cursor.execute('UPDATE user_info SET gov_type = ? WHERE user_id = ?', ("Monarchy", user_id))
-            conn.commit()
+            UserInfo.update(gov_type="Monarchy").where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Government Ideology", type='rich',
                                   description="You have successfully changed your ideology to **Monarchy**.",
@@ -153,18 +142,16 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            gov_type = result.gov_type
 
             if gov_type == "Communism":
                 await ctx.send("You already have Communism as your ideology.")
                 return
 
-            cursor.execute('UPDATE user_info SET gov_type = ? WHERE user_id = ?', ("Communism", user_id))
-            conn.commit()
+            UserInfo.update(gov_type="Communism").where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Government Ideology", type='rich',
                                   description="You have successfully changed your ideology to **Communism**.",
@@ -183,18 +170,16 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            gov_type = result.gov_type
 
             if gov_type == "Fascism":
                 await ctx.send("You already have Fascism as your ideology.")
                 return
 
-            cursor.execute('UPDATE user_info SET gov_type = ? WHERE user_id = ?', ("Fascism", user_id))
-            conn.commit()
+            UserInfo.update(gov_type="Fascism").where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Government Ideology", type='rich',
                                   description="You have successfully changed your ideology to **Fascism**.",
@@ -213,18 +198,16 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            gov_type = result.gov_type
 
             if gov_type == "Socialism":
                 await ctx.send("You already have Socialism as your ideology.")
                 return
 
-            cursor.execute('UPDATE user_info SET gov_type = ? WHERE user_id = ?', ("Socialism", user_id))
-            conn.commit()
+            UserInfo.update(gov_type="Socialism").where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Government Ideology", type='rich',
                                   description="You have successfully changed your ideology to **Socialism**.",
@@ -243,18 +226,16 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            gov_type = result.gov_type
 
             if gov_type == "Anarchy":
                 await ctx.send("You already have Anarchy as your ideology.")
                 return
 
-            cursor.execute('UPDATE user_info SET gov_type = ? WHERE user_id = ?', ("Anarchy", user_id))
-            conn.commit()
+            UserInfo.update(gov_type="Anarchy").where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Government Ideology", type='rich',
                                   description="You have successfully changed your ideology to **Anarchy**.",
@@ -273,11 +254,9 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Conscription", type='rich',
                                   description="Displays conscription laws.", color=0xD20F39)
@@ -302,21 +281,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.name, UserInfo.conscription).where(UserInfo.user_id == user_id).tuples().first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            name, conscription = result
 
             if conscription == "Volunteer":
                 await ctx.send("You already have Volunteer as your conscription law.")
                 return
 
-            cursor.execute('UPDATE user_info SET conscription = ? WHERE user_id = ?', ("Volunteer", user_id))
-            conn.commit()
+            UserInfo.update(conscription="Volunteer").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 0 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness + 0).where(UserInfo.name == name).execute()
 
             embed = discord.Embed(title="Conscription", type='rich',
                                   description="You have successfully set **Volunteer** as your conscription law.",
@@ -335,21 +311,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.name, UserInfo.conscription).where(UserInfo.user_id == user_id).tuples().first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            name, conscription = result
 
             if conscription == "Conscription":
                 await ctx.send("You already have Conscription as your conscription law.")
                 return
 
-            cursor.execute('UPDATE user_info SET conscription = ? WHERE user_id = ?', ("Conscription", user_id))
-            conn.commit()
+            UserInfo.update(conscription="Conscription").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 15 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness - 15).where(UserInfo.name == name).execute()
 
             embed = discord.Embed(title="Conscription", type='rich',
                                   description="You have successfully set **Conscription** as your conscription law.",
@@ -368,21 +341,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.name, UserInfo.conscription).where(UserInfo.user_id == user_id).tuples().first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            name, conscription = result
 
             if conscription == "Full Conscription":
                 await ctx.send("You already have Full Conscription as your conscription law.")
                 return
 
-            cursor.execute('UPDATE user_info SET conscription = ? WHERE user_id = ?', ("Full Conscription", user_id))
-            conn.commit()
+            UserInfo.update(conscription="Full Conscription").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 40 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness - 40).where(UserInfo.name == name).execute()
 
             embed = discord.Embed(title="Conscription", type='rich',
                                   description="You have successfully set **Full Conscription** as your conscription law.",
@@ -401,11 +371,9 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Freedom", type='rich',
                                   description="Displays your freedom laws.", color=0xA6D189)
@@ -431,21 +399,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.name, UserInfo.freedom).where(UserInfo.user_id == user_id).tuples().first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            name,freedom = result
 
             if freedom == "Free Speech":
                 await ctx.send("You already have Free Speech as your freedom law.")
                 return
 
-            cursor.execute('UPDATE user_info SET freedom = ? WHERE user_id = ?', ("Free Speech", user_id))
-            conn.commit()
+            UserInfo.update(freedom="Free Speech").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 20 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness + 20).where(UserInfo.name == name).execute()
 
             embed = discord.Embed(title="Freedom", type='rich',
                                   description="You have successfully set **Free Speech** as your freedom law.",
@@ -464,21 +429,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.name, UserInfo.freedom).where(UserInfo.user_id == user_id).tuples().first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            name,freedom = result
 
             if freedom == "Moderate Freedom":
                 await ctx.send("You already have Moderate Freedom as your freedom law.")
                 return
 
-            cursor.execute('UPDATE user_info SET freedom = ? WHERE user_id = ?', ("Moderate Freedom", user_id))
-            conn.commit()
+            UserInfo.update(freedom="Moderate Freedom").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 10 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness + 10).where(UserInfo.name == name).execute()
 
             embed = discord.Embed(title="Freedom", type='rich',
                                   description="You have successfully set **Moderate Freedom** as your freedom law.",
@@ -497,21 +459,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.name, UserInfo.freedom).where(UserInfo.user_id == user_id).tuples().first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            name,freedom = result
 
             if freedom == "No Freedom":
                 await ctx.send("You already have No Freedom as your freedom law.")
                 return
 
-            cursor.execute('UPDATE user_info SET freedom = ? WHERE user_id = ?', ("No Freedom", user_id))
-            conn.commit()
+            UserInfo.update(freedom="No Freedom").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 20 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness - 20).where(UserInfo.name == name).execute()
 
             embed = discord.Embed(title="Freedom", type='rich',
                                   description="You have successfully set **No Freedom** as your freedom law.",
@@ -530,11 +489,9 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Police Policy", type='rich',
                                   description="Displays your police policy.", color=0x8839EF)
@@ -561,21 +518,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.name, UserInfo.police_policy).where(UserInfo.user_id == user_id).tuples().first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            name, police_policy = result
 
             if police_policy == "Chill Police":
                 await ctx.send("You already have Chill Police as your police policy.")
                 return
 
-            cursor.execute('UPDATE user_info SET police_policy = ? WHERE user_id = ?', ("Chill Police", user_id))
-            conn.commit()
+            UserInfo.update(police_policy="Chill Police").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 15 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness + 15).where(UserInfo.name == name).execute()
 
             embed = discord.Embed(title="Police Policy", type='rich',
                                   description="You have successfully set **Chill Police** as your police policy.",
@@ -594,21 +548,16 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.name, UserInfo.police_policy).where(UserInfo.user_id == user_id).tuples().first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            name, police_policy = result
 
             if police_policy == "Normal Police":
                 await ctx.send("You already have Normal Police as your police policy.")
                 return
 
-            cursor.execute('UPDATE user_info SET police_policy = ? WHERE user_id = ?', ("Normal Police", user_id))
-            conn.commit()
-
-            cursor.execute('UPDATE user_info SET happiness = happiness + 0 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(police_policy="Normal Police").where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Police Policy", type='rich',
                                   description="You have successfully set **Normal Police** as your police policy.",
@@ -627,21 +576,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.name, UserInfo.police_policy).where(UserInfo.user_id == user_id).tuples().first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            name, police_policy = result
 
             if police_policy == "Serious Police":
                 await ctx.send("You already have Serious Police as your police policy.")
                 return
 
-            cursor.execute('UPDATE user_info SET police_policy = ? WHERE user_id = ?', ("Serious Police", user_id))
-            conn.commit()
+            UserInfo.update(police_policy="Serious Police").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 10 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness - 10).where(UserInfo.name == name).execute()
 
             embed = discord.Embed(title="Police Policy", type='rich',
                                   description="You have successfully set **Serious Police** as your police policy.",
@@ -660,11 +606,9 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Tax Policy", type='rich',
                                   description="Displays your tax policy.", color=discord.Color.brand_green())
@@ -693,11 +637,9 @@ class Politics(commands.Cog):
             return
 
         # fetch user name
-        cursor.execute('SELECT tax_rate FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            tax_rate = result
 
             if percentage > 1:
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
@@ -707,8 +649,7 @@ class Politics(commands.Cog):
                 return
 
             else:
-                cursor.execute('UPDATE user_info SET tax_rate = ? WHERE user_id = ?', (percentage*100, user_id))
-                conn.commit()
+                UserInfo.update(tax_rate=percentage*100).where(UserInfo.user_id == user_id).execute()
 
                 embed = discord.Embed(title="Income Tax", type='rich',
                                     description=f"You have successfully updated your income tax rate to {amount}%",
@@ -734,11 +675,9 @@ class Politics(commands.Cog):
             return
 
         # fetch user name
-        cursor.execute('SELECT corp_tax FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            corp_tax = result
 
             if percentage > 1:
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
@@ -748,8 +687,7 @@ class Politics(commands.Cog):
                 return
             
             else:
-                cursor.execute('UPDATE user_info SET corp_tax = ? WHERE user_id = ?', (percentage*100, user_id))
-                conn.commit()
+                UserInfo.update(corp_tax=percentage*100).where(UserInfo.user_id == user_id).execute()
 
                 embed = discord.Embed(title="Income Tax", type='rich',
                                     description=f"You have successfully updated your corporate tax rate to {amount}%",
@@ -768,11 +706,9 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Firefighter Policy", type='rich',
                                   description="Displays your firefighter policy.", color=0xE64553)
@@ -796,21 +732,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.fire_policy).where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            fire_policy = result.fire_policy
 
             if fire_policy == "Careless Firefighters":
                 await ctx.send("You already have Careless Firefighters as your firefighter policy.")
                 return
 
-            cursor.execute('UPDATE user_info SET fire_policy = ? WHERE user_id = ?', ("Careless Firefighters", user_id))
-            conn.commit()
+            UserInfo.update(fire_policy="Careless Firefighters").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 20 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness - 20).where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Firefigther Policy", type='rich',
                                   description="You have successfully set **Careless Firefighters** as your fire policy.",
@@ -829,21 +762,16 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.fire_policy).where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            fire_policy = result.fire_policy
 
             if fire_policy == "Normal Firefighters":
                 await ctx.send("You already have Normal Firefighters as your firefighter policy.")
                 return
 
-            cursor.execute('UPDATE user_info SET fire_policy = ? WHERE user_id = ?', ("Normal Firefighters", user_id))
-            conn.commit()
-
-            cursor.execute('UPDATE user_info SET happiness = happiness + 0 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(fire_policy="Normal Firefighters").where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Firefigther Policy", type='rich',
                                   description="You have successfully set **Normal Firefighters** as your fire policy.",
@@ -862,21 +790,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.fire_policy).where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            fire_policy = result.fire_policy
 
             if fire_policy == "Speedy Firefighters":
                 await ctx.send("You already have Speedy Firefighters as your firefighter policy.")
                 return
 
-            cursor.execute('UPDATE user_info SET fire_policy = ? WHERE user_id = ?', ("Speedy Firefighters", user_id))
-            conn.commit()
+            UserInfo.update(fire_policy="Speedy Firefighters").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 20 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness + 20).where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Firefigther Policy", type='rich',
                                   description="You have successfully set **Speedy Firefighters** as your fire policy.",
@@ -895,11 +820,9 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
                                   description="Displays your healtcare policy.", color=0xE64553)
@@ -926,22 +849,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.hospital_policy).where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            hospital_policy = result.hospital_policy
 
             if hospital_policy == "Enhanced Healthcare":
                 await ctx.send("You already have Enhanced Healthcare as your healthcare policy.")
                 return
 
-            cursor.execute('UPDATE user_info SET hospital_policy = ? WHERE user_id = ?',
-                           ("Enhanced Healthcare", user_id))
-            conn.commit()
+            UserInfo.update(hospital_policy="Enhanced Healthcare").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 20 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness + 20).where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
                                   description="You have successfully set **Enhanced Healthcare** as your healthcare policy.",
@@ -960,21 +879,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.hospital_policy).where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            hospital_policy = result.hospital_policy
 
             if hospital_policy == "Normal Healthcare":
                 await ctx.send("You already have Normal Healthcare as your healthcare policy.")
                 return
 
-            cursor.execute('UPDATE user_info SET hospital_policy = ? WHERE user_id = ?', ("Normal Healthcare", user_id))
-            conn.commit()
+            UserInfo.update(hospital_policy="Normal Healthcare").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness + 0 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness + 0).where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
                                   description="You have successfully set **Normal Healthcare** as your healthcare policy.",
@@ -993,21 +909,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.hospital_policy).where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            hospital_policy = result.hospital_policy
 
             if hospital_policy == "No Healthcare":
                 await ctx.send("You already have No Healthcare as your healthcare policy.")
                 return
 
-            cursor.execute('UPDATE user_info SET hospital_policy = ? WHERE user_id = ?', ("No Healthcare", user_id))
-            conn.commit()
+            UserInfo.update(hospital_policy="No Healthcare").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 40 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness - 40).where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
                                   description="You have successfully set **No Healthcare** as your healthcare policy.",
@@ -1026,22 +939,18 @@ class Politics(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.hospital_policy).where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            hospital_policy = result.hospital_policy
 
             if hospital_policy == "Private Healthcare":
                 await ctx.send("You already have Private Healthcare as your healthcare policy.")
                 return
 
-            cursor.execute('UPDATE user_info SET hospital_policy = ? WHERE user_id = ?',
-                           ("Private Healthcare", user_id))
-            conn.commit()
+            UserInfo.update(hospital_policy="Private Healthcare").where(UserInfo.user_id == user_id).execute()
 
-            cursor.execute('UPDATE user_info SET happiness = happiness - 15 WHERE name = ?', (name,))
-            conn.commit()
+            UserInfo.update(happiness=UserInfo.happiness - 15).where(UserInfo.user_id == user_id).execute()
 
             embed = discord.Embed(title="Healthcare Policy", type='rich',
                                   description="You have successfully set **Private Healthcare** as your healthcare policy.",

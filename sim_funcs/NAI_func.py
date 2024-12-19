@@ -1,6 +1,7 @@
 import sqlite3
 import logging
 import globals
+from schema import *
 
 logging_folder = globals.logging_folder + 'sim_logs.log'
 
@@ -10,39 +11,33 @@ logging.basicConfig(filename=logging_folder, level=logging.INFO,
 
 logger = logging.getLogger(__name__)
 
-# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = globals.conn
-cursor = globals.cursor
 
 def NAI_Determiner(user_id):
-    global NAI
-    cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-    user_data = cursor.fetchone()
+    user_data = UserInfo.select().where(UserInfo.user_id == user_id).tuples().first()
 
     if user_data:
         user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = user_data
 
         # Fetch user's production infra
-        cursor.execute(
-            'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
-            (name,))
-        infra_result = cursor.fetchone()
+        infra_result = Infra.select(
+            Infra.basic_house, Infra.small_flat, Infra.apt_complex,
+            Infra.skyscraper, Infra.lumber_mill, Infra.coal_mine,
+            Infra.iron_mine, Infra.lead_mine, Infra.bauxite_mine,
+            Infra.oil_derrick, Infra.uranium_mine, Infra.farm,
+            Infra.aluminium_factory, Infra.steel_factory, Infra.oil_refinery,
+            Infra.ammo_factory, Infra.concrete_factory, Infra.militaryfactory,
+            Infra.corps).where(Infra.name == name).tuples().first()
 
         # Fetch user's military stats
-        cursor.execute(
-            'SELECT * FROM user_mil WHERE name = ?',
-            (name,))
-        mil_result = cursor.fetchone()
+        mil_result = UserMil.select().where(UserMil.name == name).tuples().first()
 
         # Fetch user's population stats.
-        cursor.execute(
-            'SELECT nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-            (name,))
-        pop_result = cursor.fetchone()
+        pop_result = UserStats.select(
+            UserStats.nation_score, UserStats.gdp, UserStats.adult, UserStats.balance).where(UserStats.name == name).tuples().first()
 
-        if infra_result:
+        if infra_result and mil_result and pop_result:
             basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
-            name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+            name, troops, planes, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
             nation_score, gdp, adult, balance = pop_result
 
             # Constants

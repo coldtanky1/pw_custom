@@ -1,14 +1,10 @@
-import sqlite3
 import asyncio
 import discord
 from discord.ext import commands
 from discord.utils import get
-import globals
+from schema import init_db, UserInfo, UserStats, UserMil, Resources, Infra, UserCustom
 
 new_line = '\n'
-# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = globals.conn
-cursor = globals.cursor
 
 
 class Create(commands.Cog):
@@ -19,10 +15,9 @@ class Create(commands.Cog):
     async def create(self, ctx):
         user_id = ctx.author.id
 
-        # Check if the user already has an account
-        cursor.execute('SELECT 1 FROM user_info WHERE user_id = ?', (user_id,))
-        existing_record = cursor.fetchone()
+        existing_record = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
+        # Check if the user already has an account
         if existing_record:
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                   description=f'You already created a nation.')
@@ -52,9 +47,8 @@ class Create(commands.Cog):
             return
 
         # Checks if name already exists in database
-        names = cursor.execute('''SELECT name FROM user_info''').fetchall()
-        tuple_name = (nat_name,)
-        if tuple_name in names:
+        name_exists = UserInfo.select().where(UserInfo.name == nat_name).exists()
+        if name_exists:
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                   description=f'That name is already used.')
             await ctx.send(embed=embed)
@@ -68,46 +62,29 @@ class Create(commands.Cog):
         )
         await emb.edit(embed=embed)
 
-        # insert data into the table
-        cursor.execute('INSERT INTO user_info (user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        (user_id, nat_name, 1, 'Democracy', 0.25, 'Volunteer', 'Moderate Freedom', 'Normal Police', 'Normal Firefighers', 'Normal Healthcare', "In Peace", 50, 0.15))
-        conn.commit()
+        # add user to the database
+        UserInfo.create(user_id=user_id, name=nat_name, turns_accumulated=1, gov_type='Democracy', tax_rate=0.25, conscription='Volunteer', freedom='Moderate Freedom', police_policy='Normal Police', fire_policy='Normal Firefighers', hospital_policy='Normal Healthcare', war_status="In Peace", happiness=50, corp_tax=0.15)
 
         print(f"Successfully added {user_id}({nat_name})")
 
         # add base stats to the user
-        cursor.execute('INSERT INTO user_stats (name, nation_score, gdp, adult, balance) VALUES (?, ?, ?, ?, ?)',
-                       (nat_name, 0, 0, 100000, 10000000))
-        conn.commit()
+        UserStats.create(name=nat_name, nation_score=0, gdp=0, adult=100000, balance=10000000)
 
         # add base mil stats to the user
-        cursor.execute(
-            'INSERT INTO user_mil (name, troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            (nat_name, 10000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
-        conn.commit()
+        UserMil.create(name=nat_name, troops=10000, planes=0, weapon=0, tanks=0, artillery=0, anti_air=0, barracks=0, tank_factory=0, plane_factory=0, artillery_factory=0, anti_air_factory=0)
 
         # Add base resources to the user
-        cursor.execute(
-            'INSERT INTO resources (name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            (nat_name, 500, 300, 50, 50, 0, 50, 0, 10000, 50, 50, 100, 1000, 0))
-        conn.commit()
+        Resources.create(name=nat_name, wood=500, coal=300, iron=50, lead=50, bauxite=0, oil=50, uranium=0, food=10000, steel=50, aluminium=50, gasoline=100, ammo=1000, concrete=500)
 
         print(f"Successfully added stats to {user_id}({nat_name})")
 
         # Add base infra stats to the user
-        cursor.execute(
-            'INSERT INTO infra (name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-            (nat_name, 12500, 1000, 834, 0, 10, 10, 10, 10, 10, 10, 0, 2500, 0, 0, 0, 0,
-             0,0,0,0,0,0,0))  # the values came from ice cube's game sheet so just use that as a reference
-        conn.commit()
+        Infra.create(name=nat_name, basic_house=12500, small_flat=1000, apt_complex=835, skyscraper=0, lumber_mill=10, coal_mine=10, iron_mine=10, lead_mine=10, bauxite_mine=10,
+            oil_derrick=10, uranium_mine=0, farm=2500, aluminium_factory=0, steel_factory=0, oil_refinery=0, ammo_factory=0, concrete_factory=0, militaryfactory=0, corps=0, park=0, cinema=0, museum=0, concert_hall=0)
 
         print(f"Successfully added infra to {user_id}({nat_name})")
 
-        cursor.execute(
-            'INSERT INTO user_custom (name, flag) VALUES (?, ?)',
-            (nat_name, "")
-        )
-        conn.commit()
+        UserCustom.create(name=nat_name, flag="")
 
         print(f"Successfully added custom to {user_id}({nat_name})")
 

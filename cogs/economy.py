@@ -1,13 +1,9 @@
-import sqlite3
 import discord
 from discord.ext import commands
 from sim_funcs.NAI_func import NAI_Determiner
-import globals
+from schema import *
 
 new_line = '\n'
-# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = globals.conn
-cursor = globals.cursor
 
 
 class Economy(commands.Cog):
@@ -20,41 +16,26 @@ class Economy(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.user_id, UserInfo.name, UserInfo.gov_type,
+            UserInfo.tax_rate, UserInfo.police_policy, UserInfo.fire_policy,
+            UserInfo.hospital_policy, UserInfo.war_status, UserInfo.corp_tax).where(UserInfo.user_id == user_id).tuples().first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
-
-            # fetch user's resources
-            cursor.execute(
-                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (name,))
-            res_result = cursor.fetchone()
+            user_id, name, gov_type, tax_rate, police_policy, fire_policy, hospital_policy, war_status, corp_tax = result
 
             # fetch user's production infra
-            cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall FROM infra WHERE name = ?',
-                (name,))
-            infra_result = cursor.fetchone()
+            infra_result = Infra.select().where(Infra.name == name).tuples().first()
 
             # fetch user's military stats
-            cursor.execute(
-                'SELECT troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
-                (name,))
-            mil_result = cursor.fetchone()
+            mil_result = UserMil.select().where(UserMil.name == name).tuples().first()
 
             # fetch user's population stats.
-            cursor.execute(
-                'SELECT nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-                (name,))
-            pop_result = cursor.fetchone()
+            pop_result = UserStats.select().where(UserStats.name == name).first()
 
-            if infra_result and res_result:
-                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall = infra_result
-                wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
-                troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
-                nation_score, gdp, adult, balance = pop_result
+            if infra_result and pop_result:
+                name, basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall = infra_result
+                name, troops, planes, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                adult = pop_result.adult
 
                 # Calculating effects for different parts of update
                 tax_revenue_bonus = 1
@@ -130,8 +111,6 @@ class Economy(commands.Cog):
                 usage_lead_steel = prod_steel * 0.3
                 usage_bauxite_steel = prod_steel * 0.3
                 usage_oil_gas = prod_gas * 0
-                usage_lead_gas = prod_gas * 0
-                usage_bauxite_gas = prod_gas * 0
                 usage_iron_ammo = prod_ammo * 0.2
                 usage_lead_ammo = prod_ammo * 1.1
                 usage_bauxite_ammo = prod_ammo * 0
@@ -147,10 +126,6 @@ class Economy(commands.Cog):
                 final_prod_lead = prod_lead - final_usage_lead
                 final_prod_bauxite = prod_bauxite - final_usage_bauxite
                 final_prod_oil = prod_oil - usage_oil_gas
-
-                total_resource_prod = prod_wood + prod_coal + prod_ammo + prod_aluminium + prod_concrete \
-                                            + prod_farm + prod_gas + prod_steel + final_prod_bauxite + final_prod_iron \
-                                            + final_prod_lead + final_prod_oil
 
                 wood_income = prod_wood * 10
                 coal_income = prod_coal * 30
@@ -168,7 +143,8 @@ class Economy(commands.Cog):
 
                 resource_revenue = wood_income + coal_income + iron_income + lead_income + bauxite_income + oil_income + uranium_income + food_income + aluminium_income + steel_income + gas_income + ammo_income + concrete_income
 
-                tax_revenue = round(tax_rate * (NAI_Determiner.NAI * adult) * tax_revenue_bonus)
+                NAI = NAI_Determiner(user_id)
+                tax_revenue = round((tax_rate/100) * (NAI * adult)) * tax_revenue_bonus
 
                 basic_house_upkeep = basic_house * 20
                 small_flat_upkeep = small_flat * 40
@@ -264,7 +240,6 @@ class Economy(commands.Cog):
                 if war_status == "In Peace":
                     troops_upkeep = troops * 5
                     planes_upkeep = planes * 50
-                    weapon_upkeep = weapon * 10
                     tanks_upkeep = tanks * 100
                     artillery_upkeep = artillery * 150
                     anti_air_upkeep = anti_air * 200
@@ -274,13 +249,14 @@ class Economy(commands.Cog):
                     artillery_factory_upkeep = artillery_factory * 450
                     anti_air_factory_upkeep = anti_air_factory * 500
 
-                    military_upkeep = (troops_upkeep + planes_upkeep + weapon_upkeep + tanks_upkeep +
+                    military_upkeep = (troops_upkeep + planes_upkeep + tanks_upkeep +
                                         artillery_upkeep + anti_air_upkeep + barracks_upkeep +
                                         tank_factory_upkeep + plane_factory_upkeep +
                                         artillery_factory_upkeep + anti_air_factory_upkeep)
 
-                    net_income = round((tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep))
+                    net_income = round(int((tax_revenue + resource_revenue) - (infra_upkeep + military_upkeep + policy_upkeep)))
 
+                    
                     embed = discord.Embed(title="Economy", type='rich',
                                         description=f"Displays {name}'s economy.", color=discord.Color.green())
                     embed.add_field(name="Overview", value=f"**Revenue**{new_line}"
@@ -292,13 +268,12 @@ class Economy(commands.Cog):
                                                         f"Infrastructure Upkeep: {infra_upkeep:,}{new_line}"
                                                         f"Military Upkeep: {military_upkeep:,}{new_line}"
                                                         f"Policy Upkeep: {policy_upkeep:,}{new_line}", inline=False)
-                    embed.add_field(name="", value=f"Net Income: {net_income:,}", inline=False)
+                    embed.add_field(name="Net Income", value=f"{net_income:,}", inline=False)
                     await ctx.send(embed=embed)
 
                 else:
                     troops_upkeep = troops * 5 * 1.5
                     planes_upkeep = planes * 50 * 1.5
-                    weapon_upkeep = weapon * 10 * 1.5
                     tanks_upkeep = tanks * 100 * 1.5
                     artillery_upkeep = artillery * 150 * 1.5
                     anti_air_upkeep = anti_air * 200 * 1.5
@@ -308,7 +283,7 @@ class Economy(commands.Cog):
                     artillery_factory_upkeep = artillery_factory * 450 * 1.5
                     anti_air_factory_upkeep = anti_air_factory * 500 * 1.5
 
-                    military_upkeep = (troops_upkeep + planes_upkeep + weapon_upkeep + tanks_upkeep +
+                    military_upkeep = (troops_upkeep + planes_upkeep + tanks_upkeep +
                                        artillery_upkeep + anti_air_upkeep + barracks_upkeep +
                                        tank_factory_upkeep + plane_factory_upkeep +
                                        artillery_factory_upkeep + anti_air_factory_upkeep) * troops_upkeep_bonus

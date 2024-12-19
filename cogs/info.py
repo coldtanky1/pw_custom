@@ -1,12 +1,8 @@
-import sqlite3
 import discord
 from discord.ext import commands
 import globals
 
 new_line = '\n'
-# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = globals.conn
-cursor = globals.cursor
 
 # Structure: name, wood cost, concrete cost, steel cost, oil consumption, iron consumption, lead consumption, bauxite consumption, money consumption, production, resource produced, value of produce
 produce_structures = [
@@ -46,10 +42,10 @@ class Info(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def info(self, ctx, building: str = None):
+    async def info(self, ctx, building: str = ''):
 
         # Checks if user specified a material
-        if building is None:
+        if building == '':
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                   description=f'Please specify a building.')
             await ctx.send(embed=embed)
@@ -152,8 +148,8 @@ class Info(commands.Cog):
                                                                 f"Concrete: {other_structures[build_id][2]:,}{new_line}"
                                                                 f"Steel: {other_structures[build_id][3]:,}")
                 embed.add_field(name="Function",
-                                value=description, inline=False)
-                embed.set_footer(text=footer)
+                                value='', inline=False)
+                embed.set_footer(text='')
             case _:
                 embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                       description=f'Building category not found.')

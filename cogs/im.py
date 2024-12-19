@@ -1,13 +1,11 @@
-import sqlite3
 import asyncio
 import discord
 from discord.ext import commands
+from discord.ext.commands.hybrid import required_pos_arguments
 import globals
+from schema import *
 
 new_line = '\n'
-# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = globals.conn
-cursor = globals.cursor
 
 resources_prices = [
     ("Wood", 12, 8),
@@ -26,6 +24,7 @@ resources_prices = [
 ]
 
 resource_list = ["Wood", "Coal", "Iron", "Lead", "Bauxite", "Oil", "Uranium", "Food", "Steel", "Aluminium", "Gasoline", "Ammo", "Concrete"]
+resource_list_code = ["wood", "coal", "iron", "lead", "bauxite", "oil", "uranium", "food", "steel", "aluminium", "gasoline", "ammo", "concrete"]
 
 class IM(commands.Cog):
     def __init__(self, bot):
@@ -53,25 +52,16 @@ class IM(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.name).where(UserInfo.user_id == user_id).first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            name = result.name
 
-            # fetch user's resources
-            cursor.execute(
-                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (name,))
-            res_result = cursor.fetchone()
+            # fetch user's resources. NOTE: This isn't actually needed for anything it's merely just a check to see if the user
+            # has stats.
+            res_result = Resources.select().where(Resources.name == name).first()
 
-            # fetch user stats
-            cursor.execute('SELECT * FROM user_stats WHERE name = ?', (name,))
-            stats_result = cursor.fetchone()
-
-            if res_result and stats_result:
-                name, nation_score, gdp, adult, balance = stats_result
-                wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
+            if res_result:
 
                 embed = discord.Embed(title="International Market", type='rich',
                                       description="Displays the International Market", color=discord.Color.green())
@@ -108,10 +98,10 @@ class IM(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def order(self, ctx, material: str = None, amount: int = 0):
+    async def order(self, ctx, material: str = '', amount: int = 0):
 
         # Checks if user specified a material
-        if material is None:
+        if material == '':
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                   description=f'Please specify a material to order.')
             await ctx.send(embed=embed)
@@ -121,8 +111,7 @@ class IM(commands.Cog):
         material = material.lower()
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if amount <= 0:
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
@@ -131,20 +120,13 @@ class IM(commands.Cog):
             return
 
         if result:
-            name = result[1]
+            name = result.name
 
-            # fetch user's resources
-            cursor.execute(
-                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (name,))
-            res_result = cursor.fetchone()
+            # fetch user stats. NOTE: check note above.
+            stats_result = UserStats.select().where(UserStats.name == name).first()
 
-            # fetch user stats
-            cursor.execute('SELECT * FROM user_stats WHERE name = ?', (name,))
-            stats_result = cursor.fetchone()
-
-            if res_result and stats_result:
-                balance = stats_result[4]
+            if stats_result:
+                balance = stats_result.balance
 
                 match material:
                     case "wood":
@@ -210,13 +192,13 @@ class IM(commands.Cog):
                         order_msg = await ctx.send(embed=ordering)
 
                         # Update user's balance
-                        cursor.execute('UPDATE user_stats SET balance = balance - ? WHERE name = ?', (price, name))
-                        conn.commit()
+                        UserStats.update(balance=UserStats.balance - price).where(UserStats.name == name).execute()
 
                         # Update user's resource
-                        query = '''UPDATE resources SET {0} = {0} + {1} WHERE name = "{2}"'''.format(resource_list[res_id], amount, name)
-                        cursor.execute(query)
-                        conn.commit()
+                        field_name = resource_list_code[res_id]
+                        field = getattr(Resources, field_name)
+                        Resources.update({field: field + amount}).where(
+                            Resources.name == name).execute()
 
                         order_done = discord.Embed(title="Market Order", type='rich', description="Order fulfilled!",
                                                    color=0x5BF9A0)
@@ -238,10 +220,10 @@ class IM(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def sell(self, ctx, material: str = None, amount: int = 0):
+    async def sell(self, ctx, material: str = '', amount: int = 0):
 
         # Checks if user specified a material
-        if material is None:
+        if material == '':
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                   description=f'Please specify a material to sell.')
             await ctx.send(embed=embed)
@@ -251,8 +233,7 @@ class IM(commands.Cog):
         material = material.lower()
 
         # fetch username
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if amount <= 0:
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
@@ -261,17 +242,18 @@ class IM(commands.Cog):
             return
 
         if result:
-            name = result[1]
+            name = result.name
 
             # fetch user's resources
-            cursor.execute(
-                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (name,))
-            res_result = cursor.fetchone()
+            res_result = Resources.select(
+                Resources.wood, Resources.coal, Resources.iron,
+                Resources.lead, Resources.bauxite, Resources.oil,
+                Resources.uranium, Resources.food, Resources.steel,
+                Resources.aluminium, Resources.gasoline, Resources.ammo,
+                Resources.concrete).where(Resources.name == name).tuples().first()
 
             # fetch user stats
-            cursor.execute('SELECT * FROM user_stats WHERE name = ?', (name,))
-            stats_result = cursor.fetchone()
+            stats_result = UserStats.select().where(UserStats.name == name).first()
 
             if res_result and stats_result:
 
@@ -339,13 +321,13 @@ class IM(commands.Cog):
                         sell_msg = await ctx.send(embed=selling)
 
                         # Update user's balance
-                        cursor.execute('UPDATE user_stats SET balance = balance + ? WHERE name = ?', (price, name))
-                        conn.commit()
+                        UserStats.update(balance=UserStats.balance + price).where(UserStats.name == name).execute()
 
                         # Update user's resource
-                        query = '''UPDATE resources SET {0} = {0} - {1} WHERE name = "{2}"'''.format(resource_list[res_id], amount, name)
-                        cursor.execute(query)
-                        conn.commit()
+                        field_name = resource_list_code[res_id]
+                        field = getattr(Resources, field_name)
+                        Resources.update({field: field - amount}).where(
+                            Resources.name == name).execute()
 
                         order_done = discord.Embed(title="Market Sell", type='rich', description="Sale fulfilled!",
                                                    color=0x5BF9A0)

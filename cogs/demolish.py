@@ -1,23 +1,18 @@
-import sqlite3
 import discord
 from discord.ext import commands
-import globals
+from schema import *
 
 new_line = '\n'
-# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = globals.conn
-cursor = globals.cursor
-
 
 class Demolish(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
-    async def demolish(self, ctx, building: str = None, amount: int = 0):
+    async def demolish(self, ctx, building: str = '', amount: int = 0):
         user_id = ctx.author.id
 
-        if building is None:
+        if building == '':
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                   description=f'Please specify a building.')
             await ctx.send(embed=embed)
@@ -32,24 +27,27 @@ class Demolish(commands.Cog):
             return
 
         # fetch username
-        cursor.execute('SELECT name FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            name = result[0]
+            name = result.name
 
             # fetch user's production infra
-            cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps, park, cinema, museum, concert_hall FROM infra WHERE name = ?',
-                (name,))
-            buildings = cursor.fetchone()
+            buildings = Infra.select(
+                Infra.basic_house, Infra.small_flat, Infra.apt_complex, 
+                Infra.skyscraper, Infra.lumber_mill, Infra.coal_mine, 
+                Infra.iron_mine, Infra.lead_mine, Infra.bauxite_mine, 
+                Infra.oil_derrick, Infra.uranium_mine, Infra.farm, 
+                Infra.aluminium_factory, Infra.steel_factory, Infra.oil_refinery, 
+                Infra.ammo_factory, Infra.concrete_factory, Infra.militaryfactory, 
+                Infra.corps, Infra.park, Infra.cinema, Infra.museum, Infra.concert_hall).where(Infra.name == name).tuples().first()
 
-            cursor.execute('SELECT barracks FROM user_mil WHERE name = ?', (name, ))
-            barracks = cursor.fetchone()
-            buildings = list(buildings)
+            mil_barracks = UserMil.select().where(UserMil.name == name).first()
 
-            if buildings and barracks:
-                buildings.append(barracks[0])
+            if buildings and mil_barracks:
+                barracks = mil_barracks.barracks
+                buildings = list(buildings)
+
                 building_list = ["Basic House", "Small Flat", "Apartment Complex", "Skyscraper", "Lumbermill", "Coal Mine", "Iron Mine", "Lead Mine", "Bauxite Mine", "Oil Derrick", "Uranium Mine", "Farm", "Aluminium Factory", "Steel Factory", "Oil Refinery", "Munitions Factory", "Concrete Factory", "Military Factory", "Barrack", "Park", "Cinema", "Museum", "Concert Hall"]
                 build_list_code = ["basic_house", "small_flat", "apt_complex", "skyscraper", "lumber_mill", "coal_mine", "iron_mine", "lead_mine", "bauxite_mine", "oil_derrick", "uranium_mine", "farm", "aluminium_factory", "steel_factory", "oil_refinery", "ammo_factory", "concrete_factory", "militaryfactory", "barracks", "park", "cinema", "museum", "concert_hall"]
                 match building:
@@ -104,6 +102,7 @@ class Demolish(commands.Cog):
                                               description=f'Building not found.')
                         await ctx.send(embed=embed)
                         return
+
                 if buildings[build_id] >= amount:
                     embed = discord.Embed(title="Demolish", type='rich',
                                           description=f"{amount:,} {building_list[build_id].lower()} will be demolished.",
@@ -112,11 +111,13 @@ class Demolish(commands.Cog):
 
                     # Remove the buildings from user's infra.
                     if build_id != 18:
-                        query = '''UPDATE infra SET {0} = {0} - {1} WHERE name = "{2}"'''.format(build_list_code[build_id], amount, name)
+                        field_name = build_list_code[build_id]
+                        field = getattr(Infra, field_name)
+                        Infra.update({field: field - amount}).where(Infra.name == name).execute()
                     else:
-                        query = '''UPDATE user_mil SET {0} = {0} - {1} WHERE name = "{2}"'''.format(build_list_code[build_id], amount, name)
-                    cursor.execute(query)
-                    conn.commit()
+                        field_name = build_list_code[build_id]
+                        field = getattr(UserMil, field_name)
+                        UserMil.update({field: field - amount}).where(UserMil.name == name).execute()
 
                     if amount == 1:
                         description = f"One {building_list[build_id].lower()} has been demolished."

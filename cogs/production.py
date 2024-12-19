@@ -1,14 +1,12 @@
-import sqlite3
 import asyncio
+from typing import get_overloads
 import discord
 from discord.ext import commands
 from discord.utils import get
-import globals
+
+from schema import *
 
 new_line = '\n'
-# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = globals.conn
-cursor = globals.cursor
 
 
 class Production(commands.Cog):
@@ -20,52 +18,52 @@ class Production(commands.Cog):
         user_id = ctx.author.id
 
         # fetch user name
-        cursor.execute('SELECT * FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select(UserInfo.user_id, UserInfo.name, UserInfo.gov_type).where(UserInfo.user_id == user_id).tuples().first()
 
         if result:
-            user_id, name, turns_accumulated, gov_type, tax_rate, conscription, freedom, police_policy, fire_policy, hospital_policy, war_status, happiness, corp_tax = result
+            user_id, name, gov_type = result
 
             # fetch user's resources
-            cursor.execute(
-                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (name,))
-            res_result = cursor.fetchone()
+            res_result = Resources.select(Resources.iron, Resources.lead, Resources.bauxite, Resources.oil).where(Resources.name == name).tuples().first()
 
             # fetch user's production infra
-            cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
-                (name,))
-            infra_result = cursor.fetchone()
+            infra_result = Infra.select(
+                Infra.lumber_mill, Infra.coal_mine, Infra.iron_mine,
+                Infra.lead_mine, Infra.bauxite_mine, Infra.oil_derrick,
+                Infra.uranium_mine, Infra.farm, Infra.aluminium_factory,
+                Infra.steel_factory, Infra.oil_refinery, Infra.ammo_factory,
+                Infra.concrete_factory, Infra.militaryfactory).where(Infra.name == name).tuples().first()
 
             # fetch user's military stats
-            cursor.execute(
-                'SELECT troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory FROM user_mil WHERE name = ?',
-                (name,))
-            mil_result = cursor.fetchone()
+            mil_result = UserMil.select(UserMil.tank_factory, UserMil.plane_factory, UserMil.artillery_factory, UserMil.anti_air_factory).where(UserMil.name == name).tuples().first()
 
             # fetch user's population stats.
-            cursor.execute(
-                'SELECT nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-                (name,))
-            pop_result = cursor.fetchone()
+            pop_result = UserStats.select().where(UserStats.name == name).first()
 
             if infra_result and res_result:
-                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
-                wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
-                troops, planes, weapon, tanks, artillery, anti_air, barracks, tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
-                nation_score, gdp, adult, balance = pop_result
+                lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory = infra_result
+                iron, lead, bauxite, oil = res_result
+                tank_factory, plane_factory, artillery_factory, anti_air_factory = mil_result
+                adult = pop_result.adult
 
                 # production multipliers
+                base_output = 2.50
+                mil_prod_efficiency = 0.5
                 res_prod_multiplier = 1.0
                 if gov_type == "Communism":
                     res_prod_multiplier *= 2
+                    mil_prod_efficiency = 0.75
+                    base_output = 3
+                elif gov_type == "Fascism":
+                    mil_prod_efficiency = 0.60
+                    base_output = 2.75
+
 
                 # the production of military equipment.
-                prod_aa = anti_air_factory * militaryfactory // 40
-                prod_arty = artillery_factory * militaryfactory // 40
-                prod_plane = plane_factory * militaryfactory // 45
-                prod_tank = tank_factory * militaryfactory // 42 
+                prod_aa = base_output * anti_air_factory * mil_prod_efficiency
+                prod_arty = base_output * artillery_factory * mil_prod_efficiency
+                prod_plane = base_output * plane_factory * mil_prod_efficiency
+                prod_tank = base_output * tank_factory * mil_prod_efficiency
 
                 # The production of each resource
                 prod_wood = lumber_mill * 2 * res_prod_multiplier
@@ -156,33 +154,33 @@ class Production(commands.Cog):
                                         description=f'Displays {name}\'s Mined Resources Production.',
                                         color=discord.Color.blurple()
                                         )
-                mined_emb.add_field(name='Wood', value=f'{int(round(prod_wood)):,}', inline=False)
-                mined_emb.add_field(name='Coal', value=f'{int(round(prod_coal)):,}', inline=False)
-                mined_emb.add_field(name='Iron', value=f'{int(round(final_prod_iron)):,}', inline=False)
-                mined_emb.add_field(name='Lead', value=f'{int(round(final_prod_lead)):,}', inline=False)
-                mined_emb.add_field(name='Bauxite', value=f'{int(round(final_prod_bauxite)):,}', inline=False)
-                mined_emb.add_field(name='Oil', value=f'{int(round(final_prod_oil)):,}', inline=False)
-                mined_emb.add_field(name='Uranium', value=f'{int(round(prod_uranium)):,}', inline=False)
-                mined_emb.add_field(name='Food', value=f'{int(round(final_prod_food)):,}', inline=False)
+                mined_emb.add_field(name='Wood', value=f'{round(int(prod_wood), 3):,}', inline=False)
+                mined_emb.add_field(name='Coal', value=f'{round(int(prod_coal), 3):,}', inline=False)
+                mined_emb.add_field(name='Iron', value=f'{round(int(final_prod_iron), 3):,}', inline=False)
+                mined_emb.add_field(name='Lead', value=f'{round(int(final_prod_lead), 3):,}', inline=False)
+                mined_emb.add_field(name='Bauxite', value=f'{round(int(final_prod_bauxite), 3):,}', inline=False)
+                mined_emb.add_field(name='Oil', value=f'{round(int(final_prod_oil), 3):,}', inline=False)
+                mined_emb.add_field(name='Uranium', value=f'{round(int(prod_uranium), 3):,}', inline=False)
+                mined_emb.add_field(name='Food', value=f'{round(int(final_prod_food), 3):,}', inline=False)
 
                 manu_emb = discord.Embed(title='Manufactured Resources', type='rich',
                                          description=f'Displays {name}\'s Mined Resources Production.',
                                          color=discord.Color.blue()
                                          )
-                manu_emb.add_field(name='Aluminium', value=f'{int(round(prod_aluminium)):,}', inline=False)
-                manu_emb.add_field(name='Steel', value=f'{int(round(prod_steel)):,}', inline=False)
-                manu_emb.add_field(name='Gasoline', value=f'{int(round(prod_gas)):,}', inline=False)
-                manu_emb.add_field(name='Ammo', value=f'{int(round(prod_ammo)):,}', inline=False)
-                manu_emb.add_field(name='Concrete', value=f'{int(round(prod_concrete)):,}', inline=False)
+                manu_emb.add_field(name='Aluminium', value=f'{round(int(prod_aluminium), 3):,}', inline=False)
+                manu_emb.add_field(name='Steel', value=f'{round(int(prod_steel), 3):,}', inline=False)
+                manu_emb.add_field(name='Gasoline', value=f'{round(int(prod_gas), 3):,}', inline=False)
+                manu_emb.add_field(name='Ammo', value=f'{round(int(prod_ammo), 3):,}', inline=False)
+                manu_emb.add_field(name='Concrete', value=f'{round(int(prod_concrete), 3):,}', inline=False)
 
                 mil_emb = discord.Embed(title='Military Equipment', type='rich',
                                         description=f'Displays {name}\'s Military Equipment Production.',
                                         color=discord.Color.blue()
                                         )
-                mil_emb.add_field(name='Tanks', value=f'{int(round(prod_tank)):,}', inline=False)
-                mil_emb.add_field(name='Plane', value=f'{int(round(prod_plane)):,}', inline=False)
-                mil_emb.add_field(name='Artillery', value=f'{int(round(prod_arty)):,}', inline=False)
-                mil_emb.add_field(name='Anti-Air', value=f'{int(round(prod_aa)):,}', inline=False)
+                mil_emb.add_field(name='Tanks', value=f'{round(int(prod_tank), 3):,}', inline=False)
+                mil_emb.add_field(name='Plane', value=f'{round(int(prod_plane), 3):,}', inline=False)
+                mil_emb.add_field(name='Artillery', value=f'{round(int(prod_arty), 3):,}', inline=False)
+                mil_emb.add_field(name='Anti-Air', value=f'{round(int(prod_aa), 3):,}', inline=False)
 
                 prod_emb = await ctx.send(embed=main_emb)
                 await prod_emb.add_reaction("⛏")
@@ -224,20 +222,16 @@ class Production(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT name FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            name = result[0]
+            name = result.name
 
             # fetch user's resources
-            cursor.execute(
-                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (name,))
-            resource_result = cursor.fetchone()
+            resource_result = Resources.select().where(Resources.name == name).tuples().first()
 
             if resource_result:
-                wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = resource_result
+                name, wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = resource_result
 
                 embed = discord.Embed(
                     title=f'{name}\'s Reserves',

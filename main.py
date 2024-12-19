@@ -1,11 +1,10 @@
-import sqlite3
 import asyncio
 import os
 import discord
 from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
-import globals
+from schema import init_db
 
 new_line = '\n'
 intents = discord.Intents.all()
@@ -23,112 +22,7 @@ async def main():
     await load()
     await bot.start(os.getenv('DISCORD_TOKEN'))
 
-# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = sqlite3.connect('player_info.db')
-cursor = conn.cursor()
-
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS user_info(
-        user_id INTEGER PRIMARY KEY,
-        name TEXT,
-        turns_accumulated INTEGER,
-        gov_type TEXT,
-        tax_rate REAL,
-        conscription TEXT,
-        freedom TEXT,
-        police_policy TEXT,
-        fire_policy TEXT,
-        hospital_policy TEXT,
-        war_status TEXT,
-        happiness INTEGER,
-        corp_tax REAL
-        )
-    ''')
-
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS user_stats(
-        name TEXT PRIMARY KEY,
-        nation_score INTEGER,
-        gdp INTEGER,
-        adult INTEGER,
-        balance INTEGER
-        )
-    ''')
-
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS user_mil(
-        name TEXT PRIMARY KEY,
-        troops INTEGER,
-        planes INTEGER,
-        weapon INTEGER,
-        tanks INTEGER,
-        artillery INTEGER,
-        anti_air INTEGER,
-        barracks INTEGER,
-        tank_factory INTEGER,
-        plane_factory INTEGER,
-        artillery_factory INTEGER,
-        anti_air_factory INTEGER
-        )
-    ''')
-
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS infra(
-        name TEXT PRIMARY KEY,
-        basic_house INTEGER,
-        small_flat INTEGER,
-        apt_complex INTEGER,
-        skyscraper INTEGER,
-        lumber_mill INTEGER,
-        coal_mine INTEGER,
-        iron_mine INTEGER,
-        lead_mine INTEGER,
-        bauxite_mine INTEGER,
-        oil_derrick INTEGER,
-        uranium_mine INTEGER,
-        farm INTEGER,
-        aluminium_factory INTEGER,
-        steel_factory INTEGER,
-        oil_refinery INTEGER,
-        ammo_factory INTEGER,
-        concrete_factory INTEGER,
-        militaryfactory INTEGER,
-        corps INTEGER,
-        park INTEGER,
-        cinema INTEGER,
-        museum INTEGER,
-        concert_hall INTEGER
-        )
-    ''')
-
-
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS resources(
-        name TEXT PRIMARY KEY,
-        wood INTEGER,
-        coal INTEGER,
-        iron INTEGER,
-        lead INTEGER,
-        bauxite INTEGER,
-        oil INTEGER,
-        uranium INTEGER,
-        food INTEGER,
-        steel INTEGER,
-        aluminium INTEGER,
-        gasoline INTEGER,
-        ammo INTEGER,
-        concrete INTEGER
-        )
-    ''')
-
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS user_custom(
-        name TEXT PRIMARY KEY,
-        flag TEXT
-    )
-''')
-
-globals.init()
+init_db()
 
 @bot.event
 async def on_ready():

@@ -59,12 +59,6 @@ class Help(commands.Cog):
                                                   f'Displays your nation\'s national reserves.')
                 await ctx.send(embed=embed)
 
-            case "update":
-                embed = discord.Embed(colour=0xdd7878, title="Help: Update", type='rich',
-                                      description=f'Syntax: `$update`{new_line}{new_line}'
-                                                  f'Updates your nation\'s statistics.')
-                await ctx.send(embed=embed)
-
             case "recruit":
                 embed = discord.Embed(colour=0xdd7878, title="Help: Recruit", type='rich',
                                       description=f'Syntax: `$recruit <amount>`{new_line}{new_line}'
@@ -164,7 +158,6 @@ class Help(commands.Cog):
                 gen_emb.add_field(name="Statistic Visualization", value="Stats - Displays your stats.\n"
                                                                         "Mstats - Displays your military stats.\n"
                                                                         "Infra - Displays your infrastructure.\n"
-                                                                        "Update - Updates your nation's statistics.\n"
                                                                         "Info - View info about buildings.",
                                   inline=False)
                 gen_emb.add_field(name="Other Features", value="Private - Creates a private channel.\n"

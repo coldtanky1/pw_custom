@@ -1,15 +1,12 @@
-import sqlite3
 import asyncio
 import discord
 from discord.ext import commands
 from discord.utils import get
-import globals
 import re
 
+from schema import *
+
 new_line = '\n'
-# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = globals.conn
-cursor = globals.cursor
 
 
 class Custom(commands.Cog):
@@ -33,38 +30,38 @@ class Custom(commands.Cog):
             return
 
         # Checks if name already exists in database
-        names = cursor.execute('''SELECT name FROM user_info''').fetchall()
-        tuple_name = (new_name, )
+        names = UserInfo.select(UserInfo.name).tuples()
+        tuple_name = (new_name,)
         if tuple_name in names:
             embed = discord.Embed(colour=0xEF2F73, title="Error", type='rich',
                                   description=f'That name is already used.')
             await ctx.send(embed=embed)
             return
 
-        cursor.execute('SELECT name FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
-        name = result[0]
+        name = result.name
 
-        cursor.execute('SELECT 1 FROM user_info WHERE user_id = ?', (user_id,))
-        existing_record = cursor.fetchone()
+        existing_record = UserInfo.select().where(UserInfo.name == name).first()
 
         if existing_record:
             # updates the user_info table
-            cursor.execute('UPDATE user_info SET name = ? WHERE user_id = ?', (new_name, user_id))
-            conn.commit()
+            UserInfo.update(name=new_name).where(UserInfo.user_id == user_id).execute()
+ 
             # updates the user_stats table
-            cursor.execute('UPDATE user_stats SET name = ? WHERE name = ?', (new_name, name))
-            conn.commit()
+            UserStats.update(name=new_name).where(UserStats.name == name).execute()
+ 
             # updates the user_mil table
-            cursor.execute('UPDATE user_mil SET name = ? WHERE name = ?', (new_name, name))
-            conn.commit()
+            UserMil.update(name=new_name).where(UserMil.name == name).execute()
+ 
             # updates the infra table
-            cursor.execute('UPDATE infra SET name = ? WHERE name = ?', (new_name, name))
-            conn.commit()
+            Infra.update(name=new_name).where(Infra.name == name).execute()
+ 
             # updates the resources table
-            cursor.execute('UPDATE resources SET name = ? WHERE name = ?', (new_name, name))
-            conn.commit()
+            Resources.update(name=new_name).where(Resources.name==name).execute()
+
+            # update the user_custom table
+            UserCustom.update(name=new_name).where(UserCustom.name == name).execute()
 
             embed = discord.Embed(
                 title='Nation Rename',
@@ -79,27 +76,25 @@ class Custom(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command()
-    async def flag(self, ctx, img: str = None):
+    async def flag(self, ctx, img: str = ''):
 
         # Gets username
-        cursor.execute("SELECT name FROM user_info WHERE user_id = ?", (ctx.author.id, ))
-        info_result = cursor.fetchone()
+        info_result = UserInfo.select().where(UserInfo.user_id == ctx.author.id).first()
 
         # Checks if nation exists
         if info_result:
 
-            name = info_result[0]
+            name = info_result.name
 
             # check if the provided img is a url or not.
             regex_magic = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
             match = regex_magic.match(img)
 
             # Checks the value of img
-            if img is None:
+            if img == '':
 
-                cursor.execute("SELECT flag FROM user_custom WHERE name = ?", (name,))
-                cus_result = cursor.fetchone()
-                flag = cus_result[0]
+                cus_result = UserCustom.select().where(UserCustom.name == name).first()
+                flag = cus_result.flag
 
                 if flag:
                     embed = discord.Embed(
@@ -118,8 +113,7 @@ class Custom(commands.Cog):
                     if response.content.lower() in ['y', 'yes', 'yay']:
 
                         # Deletes flag from user_custom table
-                        cursor.execute("UPDATE user_custom SET flag = NULL WHERE name = ?", (name, ))
-                        conn.commit()
+                        UserCustom.update(flag=None).where(UserCustom.name == name).execute()
 
                         embed = discord.Embed(colour=0x5BF9A0, title='National Flag', type='rich',
                                               description='Flag has been removed successfully!')
@@ -144,8 +138,7 @@ class Custom(commands.Cog):
             else:
                 if match:
                     # Updates value of flag in user_custom table
-                    cursor.execute("UPDATE user_custom SET flag = ? WHERE name = ?", (img, name))
-                    conn.commit()
+                    UserCustom.update(flag=img).where(UserCustom.name == name).execute()
 
                     embed = discord.Embed(
                         title='National Flag',

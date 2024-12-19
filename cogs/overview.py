@@ -1,15 +1,14 @@
-import sqlite3
 import asyncio
 import discord
 from discord.ext import commands
+
 from sim_funcs.NAI_func import NAI_Determiner
 from cogs.update import HappinessCalculator
-import globals
+
+from schema import *
+
 
 new_line = '\n'
-# Connect to the sqlite DB (it will create a new DB if it doesn't exit)
-conn = globals.conn
-cursor = globals.cursor
 
 
 class Overview(commands.Cog):
@@ -21,34 +20,24 @@ class Overview(commands.Cog):
         user_id = ctx.author.id
 
         # fetch username
-        cursor.execute('SELECT name FROM user_info WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = UserInfo.select().where(UserInfo.user_id == user_id).first()
 
         if result:
-            name = result[0]
+            name = result.name
 
             # fetch user's resources
-            cursor.execute(
-                'SELECT wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete FROM resources WHERE name = ?',
-                (name,))
-            res_result = cursor.fetchone()
+            res_result = Resources.select().where(Resources.name == name).first()
 
             # fetch user's production infra
-            cursor.execute(
-                'SELECT basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps FROM infra WHERE name = ?',
-                (name,))
-            infra_result = cursor.fetchone()
+            infra_result = Infra.select(Infra.basic_house, Infra.small_flat, Infra.apt_complex, Infra.skyscraper).where(Infra.name == name).tuples().first()
 
             # fetch user's population stats.
-            cursor.execute(
-                'SELECT nation_score, gdp, adult, balance FROM user_stats WHERE name = ?',
-                (name,))
-            pop_result = cursor.fetchone()
+            pop_result = UserStats.select().where(UserStats.name == name).first()
 
             if infra_result:
-                basic_house, small_flat, apt_complex, skyscraper, lumber_mill, coal_mine, iron_mine, lead_mine, bauxite_mine, oil_derrick, uranium_mine, farm, aluminium_factory, steel_factory, oil_refinery, ammo_factory, concrete_factory, militaryfactory, corps = infra_result
-                wood, coal, iron, lead, bauxite, oil, uranium, food, steel, aluminium, gasoline, ammo, concrete = res_result
-                nation_score, gdp, adult, balance = pop_result
+                basic_house, small_flat, apt_complex, skyscraper = infra_result
+                food = res_result.food
+                adult = pop_result.adult
 
                 # Population Housing
                 basic_house_housing = basic_house * 4
@@ -60,6 +49,11 @@ class Overview(commands.Cog):
 
                 # For food check
                 pop_food_req = round(adult//50)
+
+                # NAI
+                NAI = NAI_Determiner(user_id)
+
+                happiness_bonus = await HappinessCalculator()
 
                 embed = discord.Embed(title=f"Overview of {name}", type='rich', 
                                       description=f"An overview of {name}'s nation.",
@@ -78,9 +72,8 @@ class Overview(commands.Cog):
                     embed.add_field(name="Food stock", value="The population is fed.\n",
                                                              inline=False)
                     
-                embed.add_field(name="Income", value=f"The national average wage for {name} is ${NAI_Determiner.NAI:,}.", inline=False)
-                embed.add_field(name="Population happiness", value=f"The population happiness from entertainment buildings is: {HappinessCalculator.happiness_bonus}.",
-                                inline=False)
+                embed.add_field(name="Income", value=f"The national average wage for {name} is ${NAI:,}.", inline=False)
+                embed.add_field(name="Happiness", value=f"The happiness bonus from entertainment buildings is {happiness_bonus}", inline=False)
 
                 await ctx.send(embed=embed)
 

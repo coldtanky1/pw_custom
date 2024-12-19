@@ -24,7 +24,7 @@ ifeq ($(OS), Darwin)
 	echo "DISCORD_TOKEN=''" > .env
 endif
 
-	# Check the OS and create .env for Windows (Cygwin, MINGW, MSYS)
+	# Check the OS and create .env for Windows
 ifeq ($(OS), CYGWIN)
 	echo "DISCORD_TOKEN=''" > .env
 endif
